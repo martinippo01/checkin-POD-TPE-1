@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package airport;
+
+service AirportAdminService {
+  rpc AddSector(SectorRequest) returns (SectorResponse);
+  rpc AddCounters(CounterRequest) returns (CounterResponse);
+  rpc AddPassengerManifest(ManifestRequest) returns (ManifestResponse);
+}
+
+message SectorRequest {
+  string sectorName = 1;
+}
+
+message SectorResponse {
+  string message = 1;
+}
+
+message CounterRequest {
+  string sectorName = 1;
+  int32 counterCount = 2;
+}
+
+message CounterResponse {
+  string message = 1;
+  int32 firstCounterId = 2;
+  int32 lastCounterId = 3;
+}
+
+message ManifestRequest {
+  string manifestPath = 1;
+}
+
+message ManifestResponse {
+  repeated PassengerStatus passengers = 1;
+}
+
+message PassengerStatus {
+  string bookingCode = 1;
+  string message = 2;
+}
