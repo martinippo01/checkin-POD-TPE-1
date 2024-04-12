@@ -1,4 +1,4 @@
-package ar.edu.itba.pod.tpe1.server;
+package ar.edu.itba.pod.tpe1.servant;
 
 import airport.AirportAdminServiceGrpc;
 import airport.AirportService;
@@ -7,7 +7,7 @@ import io.grpc.stub.StreamObserver;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-class AirportAdminServiceImpl extends AirportAdminServiceGrpc.AirportAdminServiceImplBase {
+public class AirportAdminServant extends AirportAdminServiceGrpc.AirportAdminServiceImplBase {
 
     private final ConcurrentHashMap<String, Integer> sectors = new ConcurrentHashMap<>();
     private final AtomicInteger counterId = new AtomicInteger(1);

@@ -2,16 +2,14 @@ package ar.edu.itba.pod.tpe1.client;
 
 import airport.AirportAdminServiceGrpc;
 import airport.AirportService;
+import io.grpc.Channel;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 
 public class AirportAdminClient {
     private final AirportAdminServiceGrpc.AirportAdminServiceBlockingStub blockingStub;
 
-    public AirportAdminClient(String host, int port) {
-        ManagedChannel channel = ManagedChannelBuilder.forAddress(host, port)
-                .usePlaintext()
-                .build();
+    public AirportAdminClient(Channel channel) {
         blockingStub = AirportAdminServiceGrpc.newBlockingStub(channel);
     }
 

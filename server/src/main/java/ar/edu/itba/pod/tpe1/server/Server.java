@@ -1,5 +1,6 @@
 package ar.edu.itba.pod.tpe1.server;
 
+import ar.edu.itba.pod.tpe1.servant.AirportAdminServant;
 import io.grpc.ServerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,8 +13,9 @@ public class Server {
     public static void main(String[] args) throws InterruptedException, IOException {
         logger.info(" Server Starting ...");
 
-        int port = 50051;
+        int port = 50058;
         io.grpc.Server server = ServerBuilder.forPort(port)
+                .addService(new AirportAdminServant())
                 .build();
         server.start();
         logger.info("Server started, listening on " + port);

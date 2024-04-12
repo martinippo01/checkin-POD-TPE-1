@@ -13,12 +13,16 @@ public class Client {
     public static void main(String[] args) throws InterruptedException {
         logger.info("grpc-com-tpe1 Client Starting ...");
         logger.info("grpc-com-patterns Client Starting ...");
-        ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 50051)
+        ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 50058)
                 .usePlaintext()
                 .build();
 
         try {
+            AirportAdminClient airportAdminClient = new AirportAdminClient(channel);
 
+            airportAdminClient.addCounters("A", 5);
+            airportAdminClient.addSector("A");
+            airportAdminClient.addCounters("A", 5);
         } finally {
             channel.shutdown().awaitTermination(10, TimeUnit.SECONDS);
         }
