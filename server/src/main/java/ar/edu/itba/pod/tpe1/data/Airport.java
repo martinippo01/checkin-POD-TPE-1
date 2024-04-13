@@ -53,7 +53,7 @@ public class Airport {
         int firstId = counterId.getAndIncrement();
         sectors.put(sectorName, sectors.get(sectorName) + count); // Update sector counter count
         for (int i = firstId; i < firstId + count; i++) {
-            CounterServiceOuterClass.CounterInfo counter =  CounterServiceOuterClass.CounterInfo.newBuilder().setSector(sectorName).build();
+            CounterServiceOuterClass.CounterInfo counter =  CounterServiceOuterClass.CounterInfo.newBuilder().setSector(sectorName).setRange(String.valueOf(i)).build();
             counterDetails.get(sectorName).put(i, counter); // Initialize counters with no airline or flight
         }
         return firstId; // Success, returns the first ID of the new counters
@@ -80,8 +80,7 @@ public class Airport {
 
     public List<CounterServiceOuterClass.CounterInfo> queryCounters(String sector) {
 
-
-        if (sector == null || counterDetails.get(sector) == null)
+        if (sector == null)
             return new ArrayList<>();
 
         //it should return all counters if sector is null
