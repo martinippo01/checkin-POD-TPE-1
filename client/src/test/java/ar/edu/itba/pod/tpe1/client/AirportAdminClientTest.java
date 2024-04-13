@@ -21,7 +21,6 @@ public class AirportAdminClientTest {
                 .build();
     }
 
-
     @Test
     public void name() {
         AirportAdminClient airportAdminClient = new AirportAdminClient(channel);
