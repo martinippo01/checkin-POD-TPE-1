@@ -1,6 +1,7 @@
 package ar.edu.itba.pod.tpe1.server;
 
 import ar.edu.itba.pod.tpe1.servant.AirportAdminServant;
+import ar.edu.itba.pod.tpe1.servant.CounterQueryServant;
 import io.grpc.ServerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,8 +15,10 @@ public class Server {
         logger.info(" Server Starting ...");
 
         int port = 50058;
+
         io.grpc.Server server = ServerBuilder.forPort(port)
                 .addService(new AirportAdminServant())
+                .addService(new CounterQueryServant())
                 .build();
         server.start();
         logger.info("Server started, listening on " + port);
@@ -25,4 +28,5 @@ public class Server {
             server.shutdown();
             logger.info("Server shut down");
         }));
-    }}
+    }
+}
