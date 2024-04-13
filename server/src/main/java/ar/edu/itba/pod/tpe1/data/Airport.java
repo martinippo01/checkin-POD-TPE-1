@@ -3,6 +3,7 @@ package ar.edu.itba.pod.tpe1.data;
 import airport.CounterServiceOuterClass;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -78,8 +79,14 @@ public class Airport {
     }
 
     public List<CounterServiceOuterClass.CounterInfo> queryCounters(String sector) {
+
+
         if (sector == null || counterDetails.get(sector) == null)
             return new ArrayList<>();
+
+        //it should return all counters if sector is null
+        if(Objects.equals(sector, ""))
+            return counterDetails.values().stream().flatMap(m -> m.values().stream()).collect(Collectors.toList());
 
         return new ArrayList<>(counterDetails.get(sector).values());
     }

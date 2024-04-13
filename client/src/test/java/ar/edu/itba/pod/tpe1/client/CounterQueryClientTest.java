@@ -6,9 +6,9 @@ import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
-
+/*
+ * DISCLAIMER: These are not UNIT TESTS, they are INTEGRATION TESTS
+ **/
 public class CounterQueryClientTest {
 
     ManagedChannel channel;
@@ -25,8 +25,13 @@ public class CounterQueryClientTest {
     }
     @Test
     public void name() {
+        airportAdminClient.addSector("A");
         airportAdminClient.addCounters("A", 5);
+
+        airportAdminClient.addSector("B");
+        airportAdminClient.addCounters("B", 8);
+
         counterQueryClient.queryCounters("A");
-        counterQueryClient.queryCheckIns("A", "A");
+        counterQueryClient.queryCounters("");
     }
 }
