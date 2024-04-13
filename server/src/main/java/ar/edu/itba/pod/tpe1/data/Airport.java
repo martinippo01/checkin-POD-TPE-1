@@ -22,29 +22,32 @@ public class Airport {
         return instance;
     }
 
-    public boolean containsSector(String sectorName) {
-        return sectors.containsKey(sectorName);
+    // Adds a sector if it does not already exist
+    public boolean addSector(String sectorName) {
+        if (sectors.putIfAbsent(sectorName, 0) == null) {
+            return true; // Success
+        }
+        return false; // Failure, sector already exists
     }
 
-    public void putSector(String sectorName, int value) {
-        sectors.put(sectorName, value);
+    // Attempts to add a set of counters to a sector
+    public Integer addCounters(String sectorName, int count) {
+        if (!sectors.containsKey(sectorName) || count <= 0) {
+            return null; // Failure: sector does not exist or invalid counter count
+        }
+        return counterId.getAndAdd(count); // Success, returns the first ID of the new counters
     }
 
-    public boolean addBookingCode(String bookingCode) {
-        return bookingCodes.putIfAbsent(bookingCode, 1) == null;
-    }
-
-    public void removeBookingCode(String bookingCode) {
-        bookingCodes.remove(bookingCode);
-    }
-
-    public boolean setFlightToAirline(String flightCode, String airlineName) {
-        String existing = flightToAirlineMap.putIfAbsent(flightCode, airlineName);
-        return existing == null || existing.equals(airlineName);
-    }
-
-    public int addCounters(int count) {
-        int firstId = counterId.getAndAdd(count);
-        return firstId;
+    // Attempts to register a passenger with the given booking code and flight
+    public boolean registerPassenger(String bookingCode, String flightCode, String airlineName) {
+        if (!(bookingCodes.putIfAbsent(bookingCode, 1) == null)) {
+            return false; // Failure, booking code already exists
+        }
+        if (!(flightToAirlineMap.putIfAbsent(flightCode, airlineName) == null) &&
+                !flightToAirlineMap.get(flightCode).equals(airlineName)) {
+            bookingCodes.remove(bookingCode); // Roll back the booking code insertion
+            return false; // Failure, flight code mismatch
+        }
+        return true; // Success
     }
 }
