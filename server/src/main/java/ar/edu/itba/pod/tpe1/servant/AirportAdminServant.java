@@ -11,15 +11,14 @@ public class AirportAdminServant extends AirportAdminServiceGrpc.AirportAdminSer
 
     private final ConcurrentHashMap<String, Integer> sectors = new ConcurrentHashMap<>();
     private final AtomicInteger counterId = new AtomicInteger(1);
-
     @Override
     public void addSector(AirportService.SectorRequest req, StreamObserver<AirportService.SectorResponse> responseObserver) {
         String sectorName = req.getSectorName();
         if (sectors.containsKey(sectorName)) {
-            responseObserver.onNext(AirportService.SectorResponse.newBuilder().setMessage("Sector already exists").build());
+            responseObserver.onNext(AirportService.SectorResponse.newBuilder().setStatus(AirportService.ResponseStatus.FAILURE).setSectorName(sectorName).build());
         } else {
             sectors.put(sectorName, 0);
-            responseObserver.onNext(AirportService.SectorResponse.newBuilder().setMessage("Sector " + sectorName + " added successfully").build());
+            responseObserver.onNext(AirportService.SectorResponse.newBuilder().setStatus(AirportService.ResponseStatus.SUCCESS).setSectorName(sectorName).build());
         }
         responseObserver.onCompleted();
     }
@@ -29,20 +28,19 @@ public class AirportAdminServant extends AirportAdminServiceGrpc.AirportAdminSer
         String sectorName = req.getSectorName();
         int count = req.getCounterCount();
         if (!sectors.containsKey(sectorName)) {
-            responseObserver.onNext(AirportService.CounterResponse.newBuilder().setMessage("Sector does not exist").build());
+            responseObserver.onNext(AirportService.CounterResponse.newBuilder().setStatus(AirportService.ResponseStatus.FAILURE).setSectorName(sectorName).build());
         } else {
             int firstId = counterId.getAndAdd(count);
             int lastId = firstId + count - 1;
-            responseObserver.onNext(AirportService.CounterResponse.newBuilder().setMessage(count + " new counters (" + firstId + "-" + lastId + ") in Sector " + sectorName + " added successfully").build());
+            responseObserver.onNext(AirportService.CounterResponse.newBuilder().setStatus(AirportService.ResponseStatus.SUCCESS).setSectorName(sectorName).setFirstCounterId(firstId).setLastCounterId(lastId).build());
         }
         responseObserver.onCompleted();
     }
 
     @Override
     public void addPassengerManifest(AirportService.ManifestRequest req, StreamObserver<AirportService.ManifestResponse> responseObserver) {
-        // Logic to parse CSV and add passengers
         AirportService.ManifestResponse.Builder responseBuilder = AirportService.ManifestResponse.newBuilder();
-        // Parse CSV file and add passenger statuses to responseBuilder
+        responseBuilder.setStatus(AirportService.ResponseStatus.SUCCESS);
         responseObserver.onNext(responseBuilder.build());
         responseObserver.onCompleted();
     }

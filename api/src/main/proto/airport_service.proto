@@ -2,18 +2,27 @@ syntax = "proto3";
 
 package airport;
 
+// Define custom enums for clearer responses
+enum ResponseStatus {
+  SUCCESS = 0;
+  FAILURE = 1;
+}
+
+// Service Definition
 service AirportAdminService {
   rpc AddSector(SectorRequest) returns (SectorResponse);
   rpc AddCounters(CounterRequest) returns (CounterResponse);
   rpc AddPassengerManifest(ManifestRequest) returns (ManifestResponse);
 }
 
+// Message Definitions
 message SectorRequest {
   string sectorName = 1;
 }
 
 message SectorResponse {
-  string message = 1;
+  ResponseStatus status = 1;
+  string sectorName = 2;
 }
 
 message CounterRequest {
@@ -22,9 +31,10 @@ message CounterRequest {
 }
 
 message CounterResponse {
-  string message = 1;
-  int32 firstCounterId = 2;
-  int32 lastCounterId = 3;
+  ResponseStatus status = 1;
+  string sectorName = 2;
+  int32 firstCounterId = 3;
+  int32 lastCounterId = 4;
 }
 
 message ManifestRequest {
@@ -32,10 +42,13 @@ message ManifestRequest {
 }
 
 message ManifestResponse {
-  repeated PassengerStatus passengers = 1;
+  ResponseStatus status = 1;
+  repeated PassengerInfo passengers = 2;
 }
 
-message PassengerStatus {
+message PassengerInfo {
   string bookingCode = 1;
-  string message = 2;
+  string flightCode = 2;
+  string airlineName = 3;
+  ResponseStatus status = 4;
 }
