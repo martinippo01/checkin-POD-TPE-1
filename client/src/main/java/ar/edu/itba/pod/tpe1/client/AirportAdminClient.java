@@ -40,6 +40,7 @@ public class AirportAdminClient {
     public void addPassengerManifest(String filePath) {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
+            reader.readLine();  // This reads the headers like "booking;flight;airline" and does nothing with it
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(";");
                 if (parts.length == 3) {

@@ -20,9 +20,7 @@ public class Client {
         try {
             AirportAdminClient airportAdminClient = new AirportAdminClient(channel);
 
-            airportAdminClient.addCounters("A", 5);
-            airportAdminClient.addSector("A");
-            airportAdminClient.addCounters("A", 5);
+
         } finally {
             channel.shutdown().awaitTermination(10, TimeUnit.SECONDS);
         }
