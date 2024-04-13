@@ -12,7 +12,7 @@ enum ResponseStatus {
 service AirportAdminService {
   rpc AddSector(SectorRequest) returns (SectorResponse);
   rpc AddCounters(CounterRequest) returns (CounterResponse);
-  rpc AddPassengerManifest(ManifestRequest) returns (ManifestResponse);
+  rpc AddPassenger(AddPassengerRequest) returns (AddPassengerResponse);
 }
 
 // Message Definitions
@@ -37,18 +37,13 @@ message CounterResponse {
   int32 lastCounterId = 4;
 }
 
-message ManifestRequest {
-  string manifestPath = 1;
-}
-
-message ManifestResponse {
-  ResponseStatus status = 1;
-  repeated PassengerInfo passengers = 2;
-}
-
-message PassengerInfo {
+message AddPassengerRequest {
   string bookingCode = 1;
   string flightCode = 2;
   string airlineName = 3;
-  ResponseStatus status = 4;
+}
+
+message AddPassengerResponse {
+  string bookingCode = 1;
+  ResponseStatus status = 2;
 }

@@ -38,10 +38,13 @@ public class AirportAdminServant extends AirportAdminServiceGrpc.AirportAdminSer
     }
 
     @Override
-    public void addPassengerManifest(AirportService.ManifestRequest req, StreamObserver<AirportService.ManifestResponse> responseObserver) {
-        AirportService.ManifestResponse.Builder responseBuilder = AirportService.ManifestResponse.newBuilder();
-        responseBuilder.setStatus(AirportService.ResponseStatus.SUCCESS);
-        responseObserver.onNext(responseBuilder.build());
+    public void addPassenger(AirportService.AddPassengerRequest req, StreamObserver<AirportService.AddPassengerResponse> responseObserver) {
+        // Example concurrency handling logic here
+        AirportService.AddPassengerResponse response = AirportService.AddPassengerResponse.newBuilder()
+                .setBookingCode(req.getBookingCode())
+                .setStatus(AirportService.ResponseStatus.SUCCESS) // or FAILURE based on business logic
+                .build();
+        responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
 }

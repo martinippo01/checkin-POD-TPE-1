@@ -6,6 +6,10 @@ import io.grpc.Channel;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
 public class AirportAdminClient {
     private final AirportAdminServiceGrpc.AirportAdminServiceBlockingStub blockingStub;
 
@@ -33,16 +37,29 @@ public class AirportAdminClient {
         }
     }
 
-    public void addPassengerManifest(String manifestPath) {
-        AirportService.ManifestRequest request = AirportService.ManifestRequest.newBuilder().setManifestPath(manifestPath).build();
-        AirportService.ManifestResponse response = blockingStub.addPassengerManifest(request);
-        if (response.getStatus() == AirportService.ResponseStatus.SUCCESS) {
-            for (AirportService.PassengerInfo info : response.getPassengersList()) {
-                System.out.println("Booking " + info.getBookingCode() + " for " + info.getAirlineName() + " " + info.getFlightCode() + " added successfully");
+    public void addPassengerManifest(String filePath) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(";");
+                if (parts.length == 3) {
+                    AirportService.AddPassengerRequest request = AirportService.AddPassengerRequest.newBuilder()
+                            .setBookingCode(parts[0])
+                            .setFlightCode(parts[1])
+                            .setAirlineName(parts[2])
+                            .build();
+                    AirportService.AddPassengerResponse response = blockingStub.addPassenger(request);
+                    if (response.getStatus() == AirportService.ResponseStatus.SUCCESS) {
+                        System.out.println("Booking " + response.getBookingCode() + " added successfully");
+                    } else {
+                        System.out.println("Failed to add booking " + response.getBookingCode());
+                    }
+                }
             }
-        } else {
-            System.out.println("Failed to add manifest from: " + manifestPath);
+        } catch (IOException e) {
+            System.err.println("Error reading the file: " + filePath);
         }
     }
+
 
 }
