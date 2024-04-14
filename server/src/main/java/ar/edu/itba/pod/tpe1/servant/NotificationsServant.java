@@ -19,10 +19,15 @@ public class NotificationsServant extends NotificationsServiceGrpc.Notifications
             StreamObserver<NotificationsServiceOuterClass.RegisterNotificationsResponse> responseObserver
     ){
         Airline airline = new Airline(req.getAirline());
-        // First register the airline
-        notifications.registerAirline(airline);
-        // TODO handle when it fails to register airline
 
+        // First register the airline
+        boolean success = notifications.registerAirline(airline);
+        if (success){
+            // TODO: evaluate cases, it can fail because the airline does not exist or there are no one waiting
+            responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription("Failed").asRuntimeException());
+        }
+
+        // Stream the notification
         Notification notification;
         do{
             notification = notifications.getNotification(airline);
@@ -31,6 +36,7 @@ public class NotificationsServant extends NotificationsServiceGrpc.Notifications
             }
         }while (notification != null); // null is the poison pill
 
+        // Complete
         responseObserver.onCompleted();
 
     }
