@@ -24,6 +24,7 @@ public class NotificationsServant extends NotificationsServiceGrpc.Notifications
         boolean success = notifications.registerAirline(airline);
         if (success){
             // TODO: evaluate cases, it can fail because the airline does not exist or there are no one waiting
+            // Mainly, evaluate the case when the airline exists, but there's no expected passengers
             responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription("Failed").asRuntimeException());
         }
 
@@ -48,11 +49,15 @@ public class NotificationsServant extends NotificationsServiceGrpc.Notifications
     ){
         Airline airline = new Airline(req.getAirline());
 
+        // Unregister the airline
         boolean success = notifications.unregisterAirline(airline);
+
         if(success){
+            // In case the airline was registered, and now is not. Response goes empty
             responseObserver.onNext(NotificationsServiceOuterClass.RemoveNotificationsResponse.newBuilder().build());
             responseObserver.onCompleted();
         } else{
+            // In case the airline was not registered, send the error.
             responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription("Airline is not registered").asRuntimeException());
         }
     }

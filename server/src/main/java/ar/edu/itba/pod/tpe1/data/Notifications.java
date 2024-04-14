@@ -27,6 +27,7 @@ public class Notifications {
     }
 
     public boolean registerAirline(Airline airline){
+        // TODO evaluate if airline exists!!!!
         if(notifications.containsKey(airline))
             return false;
         notifications.put(airline, new LinkedBlockingQueue<>());
