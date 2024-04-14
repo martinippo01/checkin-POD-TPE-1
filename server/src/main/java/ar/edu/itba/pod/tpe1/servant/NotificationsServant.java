@@ -25,7 +25,6 @@ public class NotificationsServant extends NotificationsServiceGrpc.Notifications
             StreamObserver<NotificationsServiceOuterClass.RemoveNotificationsResponse> responseObserver
     ){
 
-
     }
 
 }
