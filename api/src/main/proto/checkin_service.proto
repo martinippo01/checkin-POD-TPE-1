@@ -1,0 +1,106 @@
+syntax = "proto3";
+
+import "service.proto";
+
+package checkin;
+
+// ********** Service Definition **********
+service CheckinService {
+  rpc FetchCounter(FetchCounterRequest) returns (FetchCounterResponse);
+  rpc PassengerCheckin(PassengerCheckinRequest) returns (PassengerCheckinResponse);
+  rpc PassengerStatus(PassengerStatusRequest) returns (PassengerStatusResponse);
+}
+
+// ********** Message Definitions **********
+message BookingInformation {
+  string bookingCode = 1;
+  string flightCode = 2;
+  string airlineName = 3;
+}
+
+// Consigna: "Las aerolíneas cuentan con varios mostradores juntos, llamado rango"
+message CounterRange {
+  uint32 firstCounterNumber = 1;
+  uint32 numberOfConsecutiveCounters = 2;
+}
+
+message CountersInformation {
+  CounterRange counters = 1;
+  string sectorName = 2;
+  uint32 peopleInQueue = 3;
+}
+
+message CounterInformation {
+  uint32 counter = 1;
+  string sectorName = 2;
+}
+
+// ========== FetchCounter ==========
+message FetchCounterRequest {
+  string bookingCode = 1;
+}
+
+enum CounterStatus {
+  COUNTER_STATUS_UNDEFINED = 0;
+  COUNTER_STATUS_BOOKING_CODE_WITHOUT_AWAITING_PASSENGERS = 1;
+  COUNTER_STATUS_COUNTERS_NOT_ASSIGNED = 2;
+  COUNTER_STATUS_COUNTERS_ASSIGNED = 3;
+}
+
+message FetchCounterResponse {
+  CounterStatus status = 1;
+  BookingInformation booking = 2;
+  optional CountersInformation data = 3;
+}
+
+// ========== PassengerCheckin ==========
+message PassengerCheckinRequest {
+  string bookingCode = 1;
+  string sectorName = 2;
+  uint32 counterNumber = 3;
+}
+
+enum CheckinStatus {
+  CHECKIN_STATUS_UNDEFINED = 0;
+  CHECKIN_STATUS_INVALID_BOOKING_CODE = 1;
+  CHECKIN_STATUS_INVALID_SECTOR_ID = 2;
+  CHECKIN_STATUS_INVALID_COUNTER_NUMBER = 3;
+  CHECKIN_STATUS_PASSENGER_ALREADY_IN_QUEUE = 4;
+  CHECKIN_STATUS_CHECKIN_ALREADY_DONE = 5;
+}
+
+message PassengerCheckinResponse {
+  CheckinStatus status = 1;
+  BookingInformation booking = 2;
+  optional CountersInformation data = 3;
+}
+
+// ========== PassengerStatus ==========
+
+message PassengerStatusRequest {
+  string bookingCode = 1;
+  string sectorName = 2;
+  uint32 counterNumber = 3;
+}
+
+enum PassengerStatus {
+  PASSENGER_STATUS_UNDEFINED = 0;
+  PASSENGER_STATUS_BOOKING_CODE_WITHOUT_AWAITING_PASSENGERS = 1;
+  PASSENGER_STATUS_COUNTERS_NOT_ASSIGNED = 2;
+  PASSENGER_STATUS_OUT_OF_QUEUE = 3;
+  PASSENGER_STATUS_WAITING_FOR_CHECKIN = 4;
+  PASSENGER_STATUS_CHECKIN_ALREADY_DONE = 5;
+}
+
+message PassengerStatusResponse {
+  PassengerStatus status = 1;
+  BookingInformation booking = 2;
+  oneof data {
+    // Error / Invalid status
+    commons.Empty empty = 5;
+    // Status PASSENGER_STATUS_CHECKIN_ALREADY_DONE
+    CounterInformation checkedInCounter = 6;
+    // Status PASSENGER_STATUS_OUT_OF_QUEUE and PASSENGER_STATUS_WAITING_FOR_CHECKIN
+    CountersInformation availableCounters = 7;
+  }
+}
