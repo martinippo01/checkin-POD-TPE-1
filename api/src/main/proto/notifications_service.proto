@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package airport;
+
+service NotificationsService {
+  rpc RegisterNotifications(RegisterNotificationsRequest) returns (RegisterNotificationsResponse);
+  rpc RemoveNotifications(RemoveNotificationsRequest) returns (RemoveNotificationsResponse);
+}
+
+message RegisterNotificationsRequest{
+  string airline = 1;
+}
+
+message RegisterNotificationsResponse{
+
+}
+
+message RemoveNotificationsRequest{
+  string airline = 1;
+}
+
+message RemoveNotificationsResponse{
+
+}
