@@ -24,5 +24,11 @@ public class Notifications {
         return instance;
     }
 
+    public boolean notifyAirline(Airline airline){
+        if(!airlinesSubscribed.contains(airline)){
+            return false;
+        }
+        
+    }
 
 }
