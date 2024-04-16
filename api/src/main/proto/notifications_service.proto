@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package airport;
+
+// Define different type of notifications that can be sent
+enum NotificationType{
+    SUCCESSFUL_REGISTER = 0;
+    COUNTERS_ASSIGNED = 1;
+    NEW_BOOKING_IN_QUEUE = 2;
+    CHECK_IN_SUCCESSFUL = 3;
+    COUNTERS_REMOVED = 4;
+    COUNTERS_PENDING = 5;
+    COUNTERS_UPDATE = 6;
+}
+
+service NotificationsService {
+  rpc RegisterNotifications(RegisterNotificationsRequest) returns (stream RegisterNotificationsResponse);
+  rpc RemoveNotifications(RemoveNotificationsRequest) returns (RemoveNotificationsResponse);
+}
+
+message RegisterNotificationsRequest{
+  string airline = 1;
+}
+
+message RegisterNotificationsResponse{
+  NotificationType notificationType = 1;
+  string airline = 2;
+  int32 counterFrom = 3;
+  int32 counterTo = 4;
+  string sector = 5;
+  repeated string flights = 6;
+  string booking = 7;
+  string flight = 8;
+  int32 people_ahead = 9;
+  int32 counter = 10;
+  int32 pending_ahead = 11;
+}
+
+message RemoveNotificationsRequest{
+  string airline = 1;
+}
+
+message RemoveNotificationsResponse{
+
+}

@@ -90,7 +90,7 @@ public class Airport {
         return new ArrayList<>(counterDetails.get(sector).values());
     }
 
-    public List<CounterServiceOuterClass.CheckInRecord> queryCheckIns(String sector, String airline) {
+    public List<CounterServiceOuterClass.CheckInRecord> querygit (String sector, String airline) {
         return checkIns.stream()
                 .filter(c -> (sector == null || c.getSector().equals(sector)) && (airline == null || c.getAirline().equals(airline)))
                 .collect(Collectors.toList());
