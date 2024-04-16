@@ -3,6 +3,7 @@ package ar.edu.itba.pod.tpe1.data.utils;
 import airport.NotificationsServiceOuterClass;
 
 import java.util.List;
+import java.util.Objects;
 
 public class Notification {
 
@@ -76,6 +77,18 @@ public class Notification {
         return pending_ahead;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Notification that = (Notification) o;
+        return counterFrom == that.counterFrom && counterTo == that.counterTo && people_ahead == that.people_ahead && counter == that.counter && pending_ahead == that.pending_ahead && notificationType == that.notificationType && Objects.equals(airline, that.airline) && Objects.equals(sector, that.sector) && Objects.equals(flights, that.flights) && Objects.equals(booking, that.booking) && Objects.equals(flight, that.flight);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(notificationType, airline, counterFrom, counterTo, sector, flights, booking, flight, people_ahead, counter, pending_ahead);
+    }
 
     //-------- BUILDER -----------
 
