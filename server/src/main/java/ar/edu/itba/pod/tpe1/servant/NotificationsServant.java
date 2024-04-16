@@ -23,6 +23,8 @@ public class NotificationsServant extends NotificationsServiceGrpc.Notifications
         // First register the airline
         boolean success = notifications.registerAirline(airline);
         if (success){
+            responseObserver.onNext(NotificationsServiceOuterClass.RegisterNotificationsResponse.newBuilder().setNotificationType(NotificationsServiceOuterClass.NotificationType.SUCCESSFUL_REGISTER).build());
+        }else{
             // TODO: evaluate cases, it can fail because the airline does not exist or there are no one waiting
             // Mainly, evaluate the case when the airline exists, but there's no expected passengers
             responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription("Failed").asRuntimeException());
