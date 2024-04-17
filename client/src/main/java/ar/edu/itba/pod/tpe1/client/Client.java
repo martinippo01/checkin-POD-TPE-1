@@ -18,9 +18,9 @@ public class Client {
                 .build();
 
         try {
-            AirportAdminClient airportAdminClient = new AirportAdminClient(channel);
-
-
+            //AirportAdminClient airportAdminClient = new AirportAdminClient(channel);
+            NotificationsClient notificationsClient = new NotificationsClient(channel);
+            notificationsClient.run();
         } finally {
             channel.shutdown().awaitTermination(10, TimeUnit.SECONDS);
         }
