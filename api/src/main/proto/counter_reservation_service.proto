@@ -1,0 +1,87 @@
+syntax = "proto3";
+
+package counter;
+
+// Basic request and response structures
+message EmptyRequest {}
+
+message BasicResponse {
+  string message = 1;
+}
+
+message SectorRequest {}
+
+message SectorResponse {
+  repeated Sector sectors = 1;
+}
+
+message Sector {
+  string name = 1;
+  repeated Range ranges = 2;
+}
+
+message Range {
+  int32 start = 1;
+  int32 end = 2;
+}
+
+message CounterRangeRequest {
+  string sectorName = 1;
+  int32 fromVal = 2;
+  int32 toVal = 3;
+}
+
+message CounterRangeResponse {
+  repeated CounterRange counters = 1;
+}
+
+message CounterRange {
+  int32 start = 1;
+  int32 end = 2;
+  string airline = 3;
+  repeated string flights = 4;
+  int32 peopleWaiting = 5;
+}
+
+message AssignCounterRequest {
+  string sectorName = 1;
+  int32 counterCount = 2;
+  string airlineName = 3;
+  repeated string flights = 4;
+}
+
+message FreeCounterRequest {
+  string sectorName = 1;
+  int32 fromVal = 2;
+  string airlineName = 3;
+}
+
+message CheckInCounterRequest {
+  string sectorName = 1;
+  int32 fromVal = 2;
+  string airlineName = 3;
+}
+
+message PendingAssignmentsRequest {
+  string sectorName = 1;
+}
+
+message PendingAssignmentsResponse {
+  repeated PendingAssignment assignments = 1;
+}
+
+message PendingAssignment {
+  int32 counterCount = 1;
+  string airlineName = 2;
+  repeated string flights = 3;
+}
+
+// The Counter service definition
+service CounterReservationService {
+  rpc listSectors(SectorRequest) returns (SectorResponse);
+  rpc queryCounterRange(CounterRangeRequest) returns (CounterRangeResponse);
+  rpc assignCounters(AssignCounterRequest) returns (BasicResponse);
+  rpc freeCounters(FreeCounterRequest) returns (BasicResponse);
+  rpc checkInCounters(CheckInCounterRequest) returns (BasicResponse);
+  rpc listPendingAssignments(PendingAssignmentsRequest) returns (PendingAssignmentsResponse);
+}
