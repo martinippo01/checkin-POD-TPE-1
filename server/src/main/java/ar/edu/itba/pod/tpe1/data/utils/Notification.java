@@ -2,6 +2,7 @@ package ar.edu.itba.pod.tpe1.data.utils;
 
 import airport.NotificationsServiceOuterClass;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -107,12 +108,12 @@ public class Notification {
 
         public Builder() {
             // set defaults
-            this.notificationType = null;
-            this.airline = null;
+            this.notificationType = NotificationsServiceOuterClass.NotificationType.SUCCESSFUL_REGISTER;
+            this.airline = new Airline("");
             this.counterFrom = -1;
             this.counterTo = -1;
             this.sector = "";
-            this.flights = null;
+            this.flights = Collections.emptyList();
             this.booking = "";
             this.flight = "";
             this.people_ahead = -1;
@@ -120,44 +121,56 @@ public class Notification {
             this.pending_ahead = -1;
         }
 
-        public void setAirline(Airline airline) {
+        public Builder setNotificationType(NotificationsServiceOuterClass.NotificationType notificationType) {this.notificationType = notificationType; return this;}
+
+        public Builder setAirline(Airline airline) {
             this.airline = airline;
+            return this;
         }
 
-        public void setCounterFrom(int counterFrom) {
+        public Builder setCounterFrom(int counterFrom) {
             this.counterFrom = counterFrom;
+            return this;
         }
 
-        public void setCounterTo(int counterTo){
+        public Builder setCounterTo(int counterTo){
             this.counterTo = counterTo;
+            return this;
         }
 
-        public void setSector(String sector) {
+        public Builder setSector(String sector) {
             this.sector = sector;
+            return this;
         }
 
-        public void setFlights(List<String> flights) {
+        public Builder setFlights(List<String> flights) {
             this.flights = flights;
+            return this;
         }
 
-        public void setBooking(String booking) {
+        public Builder setBooking(String booking) {
             this.booking = booking;
+            return this;
         }
 
-        public void setFlight(String flight) {
+        public Builder setFlight(String flight) {
             this.flight = flight;
+            return this;
         }
 
-        public void setPeopleAhead(int peopleAhead) {
+        public Builder setPeopleAhead(int peopleAhead) {
             this.people_ahead = peopleAhead;
+            return this;
         }
 
-        public void setCounter(int counter) {
+        public Builder setCounter(int counter) {
             this.counter = counter;
+            return this;
         }
 
-        public void setPendingAhead(int pendingAhead) {
+        public Builder setPendingAhead(int pendingAhead) {
             this.pending_ahead = pendingAhead;
+            return this;
         }
 
         public Notification build() {

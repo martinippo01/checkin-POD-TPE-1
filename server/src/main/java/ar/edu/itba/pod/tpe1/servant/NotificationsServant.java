@@ -31,7 +31,8 @@ public class NotificationsServant extends NotificationsServiceGrpc.Notifications
         boolean success = notifications.registerAirline(airline);
         if (success){
             logger.info("Airline: {} successfully registered to notifications service", airline.getName());
-            responseObserver.onNext(NotificationsServiceOuterClass.RegisterNotificationsResponse.newBuilder().setNotificationType(NotificationsServiceOuterClass.NotificationType.SUCCESSFUL_REGISTER).build());
+            //responseObserver.onNext(NotificationsServiceOuterClass.RegisterNotificationsResponse.newBuilder().setNotificationType(NotificationsServiceOuterClass.NotificationType.SUCCESSFUL_REGISTER).build());
+            responseObserver.onNext(buildNotificationProto(new Notification.Builder().setNotificationType(NotificationsServiceOuterClass.NotificationType.SUCCESSFUL_REGISTER).build()));
         }else{
             // TODO: evaluate cases, it can fail because the airline does not exist or there are no one waiting
             // Mainly, evaluate the case when the airline exists, but there's no expected passengers
@@ -41,14 +42,18 @@ public class NotificationsServant extends NotificationsServiceGrpc.Notifications
         }
 
         // Stream the notification
-        Notification notification;
-        do{
-            notification = notifications.getNotification(airline);
-            if(notification != null){
-                responseObserver.onNext(buildNotificationProto(notification));
-                logger.info("Sent notification of type {} to airline: {}", notification.getNotificationType(), airline.getName());
-            }
-        }while (notification != null); // null is the poison pill - For when no more notifications need to be sent to the client
+//        Notification notification;
+//        do{
+//            notification = notifications.getNotification(airline);
+//            if(notification != null){
+//                responseObserver.onNext(buildNotificationProto(notification));
+//                logger.info("Sent notification of type {} to airline: {}", notification.getNotificationType(), airline.getName());
+//            }
+//        }while (notification != null); // null is the poison pill - For when no more notifications need to be sent to the client
+
+        responseObserver.onNext(buildNotificationProto(new Notification.Builder().setNotificationType(NotificationsServiceOuterClass.NotificationType.CHECK_IN_SUCCESSFUL).setBooking("NRAKSW").setFlight("AA912").setCounter(3).setSector("C").build()));
+        responseObserver.onNext(buildNotificationProto(new Notification.Builder().setNotificationType(NotificationsServiceOuterClass.NotificationType.CHECK_IN_SUCCESSFUL).setBooking("XYZ345").setFlight("AA123").setCounter(1).setSector("C").build()));
+        responseObserver.onNext(buildNotificationProto(new Notification.Builder().setNotificationType(NotificationsServiceOuterClass.NotificationType.CHECK_IN_SUCCESSFUL).setBooking("42WSD2").setFlight("AR1812").setCounter(23).setSector("A").build()));
 
         // Complete
         responseObserver.onCompleted();
@@ -80,20 +85,26 @@ public class NotificationsServant extends NotificationsServiceGrpc.Notifications
     }
 
     private NotificationsServiceOuterClass.RegisterNotificationsResponse buildNotificationProto(Notification notification){
-        return
-                NotificationsServiceOuterClass.RegisterNotificationsResponse.newBuilder()
-                        .setNotificationType(notification.getNotificationType())
-                        .setAirline(notification.getAirline().getName())
-                        .setCounterFrom(notification.getCounterFrom())
-                        .setCounterTo(notification.getCounterTo())
-                        .setSector(notification.getSector())
-                        .addAllFlights(notification.getFlights())
-                        .setBooking(notification.getBooking())
-                        .setFlight(notification.getFlight())
-                        .setPeopleAhead(notification.getPeopleAhead())
-                        .setCounter(notification.getCounter())
-                        .setPendingAhead(notification.getPendingAhead())
-                        .build();
+        if(notification == null) return null;
+        // TODO: Check notification type, in order to set the respective arguments of the proto messsage
+        NotificationsServiceOuterClass.RegisterNotificationsResponse.Builder builder = NotificationsServiceOuterClass.RegisterNotificationsResponse.newBuilder();
+
+        System.out.println("Airline name " + notification.getAirline());
+        System.out.println("Flights " + notification.getFlights());
+
+        builder.setNotificationType(notification.getNotificationType())
+                .setAirline(notification.getAirline().getName())
+                .setCounterFrom(notification.getCounterFrom())
+                .setCounterTo(notification.getCounterTo())
+                .setSector(notification.getSector())
+                .addAllFlights(notification.getFlights())
+                .setBooking(notification.getBooking())
+                .setFlight(notification.getFlight())
+                .setPeopleAhead(notification.getPeopleAhead())
+                .setCounter(notification.getCounter())
+                .setPendingAhead(notification.getPendingAhead());
+
+        return builder.build();
 
     }
 

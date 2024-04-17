@@ -24,11 +24,15 @@ public class NotificationsClient {
                         .setAirline(AIRLINE)
                         .build();
         Iterator<NotificationsServiceOuterClass.RegisterNotificationsResponse> response;
+
+        // Make the request
         response = stub.registerNotifications(request);
 
+        // Iterate the stream
         while (response.hasNext()){
             NotificationsServiceOuterClass.RegisterNotificationsResponse registerNotificationsResponse = response.next();
             System.out.println(registerNotificationsResponse.getNotificationType());
+            System.out.println(registerNotificationsResponse);
         }
 
         NotificationsServiceOuterClass.RemoveNotificationsRequest removeNotificationsRequest =
@@ -38,11 +42,11 @@ public class NotificationsClient {
 
         System.out.println(removeNotificationsResponse);
 
-        // Now register twice to see error
-        System.out.println("We'll try to register the same airline twice");
-        stub.registerNotifications(request);
-        stub.registerNotifications(request);
-        stub.removeNotifications(removeNotificationsRequest);
+//        // Now register twice to see error
+//        System.out.println("We'll try to register the same airline twice");
+//        stub.registerNotifications(request);
+//        stub.registerNotifications(request);
+//        stub.removeNotifications(removeNotificationsRequest);
 
         System.out.println("Connection with server closed");
 
