@@ -7,7 +7,8 @@ import io.grpc.ManagedChannelBuilder;
 import org.junit.Before;
 import org.junit.Test;
 /*
- * DISCLAIMER: These are not UNIT TESTS, they are INTEGRATION TESTS
+ * DISCLAIMER: These are not UNIT TESTS, they are INTEGRATION TESTS. They require the server to be running
+ * and ideally re-started before running each test.
  **/
 public class CounterQueryClientTest {
 
@@ -24,7 +25,7 @@ public class CounterQueryClientTest {
         airportAdminClient = new AirportAdminClient(channel);
     }
     @Test
-    public void name() {
+    public void queryCounters() {
         airportAdminClient.addSector("A");
         airportAdminClient.addCounters("A", 5);
 

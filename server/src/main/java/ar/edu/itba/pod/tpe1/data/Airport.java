@@ -97,5 +97,8 @@ public class Airport {
                 .collect(Collectors.toList());
     }
 
+    public List<CounterServiceOuterClass.CheckInRecord> queryCheckIns(String sector, String airline) {
+        return new ArrayList<>();
+    }
 }
 
