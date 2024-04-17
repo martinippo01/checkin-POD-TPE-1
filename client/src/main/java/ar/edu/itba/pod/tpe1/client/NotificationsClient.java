@@ -17,7 +17,7 @@ public class NotificationsClient {
     }
 
     public void run (){
-        final String AIRLINE = "Aerolineas Argentinas";
+        final String AIRLINE = "AerolineasArgentinas";
         NotificationsServiceOuterClass.RegisterNotificationsRequest request =
                 NotificationsServiceOuterClass.RegisterNotificationsRequest
                         .newBuilder()
@@ -37,6 +37,12 @@ public class NotificationsClient {
                 stub.removeNotifications(removeNotificationsRequest);
 
         System.out.println(removeNotificationsResponse);
+
+        // Now register twice to see error
+        System.out.println("We'll try to register the same airline twice");
+        stub.registerNotifications(request);
+        stub.registerNotifications(request);
+        stub.removeNotifications(removeNotificationsRequest);
 
         System.out.println("Connection with server closed");
 

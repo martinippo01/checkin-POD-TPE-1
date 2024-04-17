@@ -55,7 +55,7 @@ public class Notifications {
 
     public Notification getNotification(Airline airline){
         if(!notifications.containsKey(airline))
-            // This can happen if the airline got unregistered or it never was registered
+            // This can happen if the airline got unregistered, or it never was registered
             return null;
         return notifications.get(airline).poll();
     }
