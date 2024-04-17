@@ -17,6 +17,7 @@ public class Airport {
 
     private final ConcurrentHashMap<String, String> flightToAirlineMap = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Integer> bookingCodes = new ConcurrentHashMap<>();
+    // Make the value of the map a sorted set of type <range>. Make the class range of counters
     private final ConcurrentHashMap<String, Integer> sectors = new ConcurrentHashMap<>();
 
     private final List<CounterServiceOuterClass.CheckInRecord> checkIns = Collections.synchronizedList(new ArrayList<>());

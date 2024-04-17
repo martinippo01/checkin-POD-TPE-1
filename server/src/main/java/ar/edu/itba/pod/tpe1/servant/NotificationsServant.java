@@ -31,7 +31,6 @@ public class NotificationsServant extends NotificationsServiceGrpc.Notifications
         boolean success = notifications.registerAirline(airline);
         if (success){
             logger.info("Airline: {} successfully registered to notifications service", airline.getName());
-            //responseObserver.onNext(NotificationsServiceOuterClass.RegisterNotificationsResponse.newBuilder().setNotificationType(NotificationsServiceOuterClass.NotificationType.SUCCESSFUL_REGISTER).build());
             responseObserver.onNext(buildNotificationProto(new Notification.Builder().setNotificationType(NotificationsServiceOuterClass.NotificationType.SUCCESSFUL_REGISTER).build()));
         }else{
             // TODO: evaluate cases, it can fail because the airline does not exist or there are no one waiting
@@ -42,18 +41,14 @@ public class NotificationsServant extends NotificationsServiceGrpc.Notifications
         }
 
         // Stream the notification
-//        Notification notification;
-//        do{
-//            notification = notifications.getNotification(airline);
-//            if(notification != null){
-//                responseObserver.onNext(buildNotificationProto(notification));
-//                logger.info("Sent notification of type {} to airline: {}", notification.getNotificationType(), airline.getName());
-//            }
-//        }while (notification != null); // null is the poison pill - For when no more notifications need to be sent to the client
-
-        responseObserver.onNext(buildNotificationProto(new Notification.Builder().setNotificationType(NotificationsServiceOuterClass.NotificationType.CHECK_IN_SUCCESSFUL).setBooking("NRAKSW").setFlight("AA912").setCounter(3).setSector("C").build()));
-        responseObserver.onNext(buildNotificationProto(new Notification.Builder().setNotificationType(NotificationsServiceOuterClass.NotificationType.CHECK_IN_SUCCESSFUL).setBooking("XYZ345").setFlight("AA123").setCounter(1).setSector("C").build()));
-        responseObserver.onNext(buildNotificationProto(new Notification.Builder().setNotificationType(NotificationsServiceOuterClass.NotificationType.CHECK_IN_SUCCESSFUL).setBooking("42WSD2").setFlight("AR1812").setCounter(23).setSector("A").build()));
+        Notification notification;
+        do{
+            notification = notifications.getNotification(airline);
+            if(notification != null){
+                responseObserver.onNext(buildNotificationProto(notification));
+                logger.info("Sent notification of type {} to airline: {}", notification.getNotificationType(), airline.getName());
+            }
+        }while (notification != null); // null is the poison pill - For when no more notifications need to be sent to the client
 
         // Complete
         responseObserver.onCompleted();
