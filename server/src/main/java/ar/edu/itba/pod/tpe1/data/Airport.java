@@ -1,6 +1,9 @@
 package ar.edu.itba.pod.tpe1.data;
 
+import airport.AirportService;
 import airport.CounterServiceOuterClass;
+import ar.edu.itba.pod.tpe1.servant.CounterReservationService;
+import counter.CounterReservationServiceOuterClass;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -35,6 +38,10 @@ public class Airport {
             instance = new Airport();
         }
         return instance;
+    }
+
+    public List<CounterReservationServiceOuterClass.Sector> listSectors() {
+        return new ArrayList<>();
     }
 
     // Adds a sector if it does not already exist
