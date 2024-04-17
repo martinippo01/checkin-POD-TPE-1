@@ -16,7 +16,6 @@ public class Client {
         ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 50058)
                 .usePlaintext()
                 .build();
-
         try {
             //AirportAdminClient airportAdminClient = new AirportAdminClient(channel);
             NotificationsClient notificationsClient = new NotificationsClient(channel);
