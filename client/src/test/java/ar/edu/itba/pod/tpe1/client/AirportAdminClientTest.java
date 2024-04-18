@@ -57,7 +57,16 @@ public class AirportAdminClientTest {
 
     @Test
     public void testAddPassengerManifest() {
-        airportAdminClient.addPassengerManifest("/Users/marcoscilipoti/Documents/1Q 2024/POD/checkin-POD-TPE-1/client/src/main/resources/manifest.csv");
+        // This csv is correct
+        System.out.println("Case 1: All OK");
+        airportAdminClient.addPassengerManifest("/home/martinippo/Desktop/ITBA/POD/TPE1/grpc-com-tpe1/client/src/test/java/ar/edu/itba/pod/tpe1/client/passengersOk.csv");
+        // Should fail, repeated booking code
+        System.out.println("Case 2: Repeated booking");
+        airportAdminClient.addPassengerManifest("/home/martinippo/Desktop/ITBA/POD/TPE1/grpc-com-tpe1/client/src/test/java/ar/edu/itba/pod/tpe1/client/passengersErrorCase1.csv");
+        // Should fail, same flight different airline
+        System.out.println("Case 3: Same flight different airline");
+        airportAdminClient.addPassengerManifest("/home/martinippo/Desktop/ITBA/POD/TPE1/grpc-com-tpe1/client/src/test/java/ar/edu/itba/pod/tpe1/client/passengersErrorCase2.csv");
+
     }
 
     @After

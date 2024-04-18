@@ -2,26 +2,27 @@ package ar.edu.itba.pod.tpe1.data;
 
 import airport.AirportService;
 import airport.CounterServiceOuterClass;
-import ar.edu.itba.pod.tpe1.data.utils.RangeCounter;
-import ar.edu.itba.pod.tpe1.data.utils.Sector;
+import ar.edu.itba.pod.tpe1.data.utils.*;
 import ar.edu.itba.pod.tpe1.servant.CounterReservationService;
 import counter.CounterReservationServiceOuterClass;
+import org.checkerframework.checker.units.qual.A;
+import org.checkerframework.checker.units.qual.C;
 
-import java.util.Collections;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-
-import java.util.List;
-import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 public class Airport {
 
     private final ConcurrentHashMap<String, String> flightToAirlineMap = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, Integer> bookingCodes = new ConcurrentHashMap<>();
+    //private final ConcurrentHashMap<String, Integer> bookingCodes = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Booking, Boolean> bookingCodes = new ConcurrentHashMap<>();
+
+    private final ConcurrentHashMap<Flight, Airline> flights = new ConcurrentHashMap<>();
 
     // Make the value of the map a sorted set of type <range>. Make the class range of counters
     private final ConcurrentHashMap<Sector, List<RangeCounter>> sectors = new ConcurrentHashMap<>();
@@ -73,15 +74,41 @@ public class Airport {
 
     // Register a passenger, link booking and flight codes
     public boolean registerPassenger(String bookingCode, String flightCode, String airlineName) {
-        if (bookingCodes.putIfAbsent(bookingCode, 1) != null) {
-            return false; // Failure, booking code already exists
+
+        Flight flight = new Flight(flightCode);
+        Airline airline = new Airline(airlineName);
+        Booking booking = new Booking(bookingCode, flight);
+
+        if (bookingCodes.containsKey(booking)){ // In case the booking already exists, it fails
+            return false;
         }
-        if (flightToAirlineMap.putIfAbsent(flightCode, airlineName) != null &&
-                !flightToAirlineMap.get(flightCode).equals(airlineName)) {
-            bookingCodes.remove(bookingCode); // Roll back the booking code insertion
-            return false; // Failure, flight code mismatch
+
+        // In case the flight exists
+        if(flights.containsKey(flight) ){
+            // Check if it belongs to other airline, in that case it fails
+            if(!flights.get(flight).equals(airline))
+                return false;
         }
-        return true; // Success
+
+        // If absent, put the flight
+        flights.putIfAbsent(flight, airline);
+        // Put the new booking code
+        bookingCodes.put(booking, false);
+
+        return true;
+//        if(bookingCodes.putIfAbsent(booking, false) != null) {
+//            return false;
+//        }
+//
+//        if (bookingCodes.putIfAbsent(bookingCode, 1) != null) {
+//            return false; // Failure, booking code already exists
+//        }
+//        if (flightToAirlineMap.putIfAbsent(flightCode, airlineName) != null &&
+//                !flightToAirlineMap.get(flightCode).equals(airlineName)) {
+//            bookingCodes.remove(bookingCode); // Roll back the booking code insertion
+//            return false; // Failure, flight code mismatch
+//        }
+//        return true; // Success
     }
 
     public void logCheckIn(String sector, int counter, String airline, String flight, String booking) {

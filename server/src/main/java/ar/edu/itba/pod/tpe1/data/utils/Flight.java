@@ -1,10 +1,13 @@
 package ar.edu.itba.pod.tpe1.data.utils;
 
+import ar.edu.itba.pod.tpe1.data.Airport;
+
 import java.util.Objects;
 
 public class Flight {
 
     private final String flightCode;
+
 
     public Flight(String flightCode) {
         this.flightCode = flightCode;
@@ -24,6 +27,6 @@ public class Flight {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(flightCode);
+        return Objects.hash(flightCode);
     }
 }
