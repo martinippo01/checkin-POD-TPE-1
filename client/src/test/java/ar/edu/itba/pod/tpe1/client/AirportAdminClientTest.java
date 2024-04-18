@@ -27,10 +27,32 @@ public class AirportAdminClientTest {
     }
 
     @Test
-    public void testAddCounterAndSector() {
-        airportAdminClient.addCounters("A", 5);
+    public void testAddSector(){
         airportAdminClient.addSector("A");
-        airportAdminClient.addCounters("A", 5);
+        // Should fail to add second sector
+        airportAdminClient.addSector("A");
+    }
+
+    @Test
+    public void testAddCounterAndSector() {
+        // Create sector A and add 1 counter
+        airportAdminClient.addSector("A");
+        airportAdminClient.addCounters("A", 1);
+        // Create sector C and add 3 counters
+        airportAdminClient.addSector("C");
+        airportAdminClient.addCounters("C", 3);
+        // Create sector D and add 2 counters
+        airportAdminClient.addSector("D");
+        airportAdminClient.addCounters("D", 2);
+        // Add 2 more counters to C
+        airportAdminClient.addCounters("C", 2);
+        // Create sector Z and leave it empty
+        airportAdminClient.addSector("Z");
+
+        // Should fail: Add 3 counters to F (does not exist)
+        airportAdminClient.addCounters("F", 3);
+        // Should fail: Add a negative amount of counters
+        airportAdminClient.addCounters("A", -3);
     }
 
     @Test

@@ -2,6 +2,8 @@ package ar.edu.itba.pod.tpe1.data;
 
 import airport.AirportService;
 import airport.CounterServiceOuterClass;
+import ar.edu.itba.pod.tpe1.data.utils.RangeCounter;
+import ar.edu.itba.pod.tpe1.data.utils.Sector;
 import ar.edu.itba.pod.tpe1.servant.CounterReservationService;
 import counter.CounterReservationServiceOuterClass;
 
@@ -20,12 +22,11 @@ public class Airport {
 
     private final ConcurrentHashMap<String, String> flightToAirlineMap = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Integer> bookingCodes = new ConcurrentHashMap<>();
+
     // Make the value of the map a sorted set of type <range>. Make the class range of counters
-    private final ConcurrentHashMap<String, Integer> sectors = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Sector, List<RangeCounter>> sectors = new ConcurrentHashMap<>();
 
     private final List<CounterServiceOuterClass.CheckInRecord> checkIns = Collections.synchronizedList(new ArrayList<>());
-
-    private final ConcurrentHashMap<String, ConcurrentHashMap<Integer, CounterServiceOuterClass.CounterInfo>> counterDetails = new ConcurrentHashMap<>();
 //    private final List<CheckIn> checkIns = new ArrayList<>();
     private final AtomicInteger counterId = new AtomicInteger(1);
 
@@ -46,24 +47,27 @@ public class Airport {
 
     // Adds a sector if it does not already exist
     public boolean addSector(String sectorName) {
-        if (sectors.putIfAbsent(sectorName, 0) == null) {
-            counterDetails.putIfAbsent(sectorName, new ConcurrentHashMap<>());
-            return true; // Success
-        }
-        return false; // Failure, sector already exists
+        // Failure if sector already exists
+        return sectors.putIfAbsent(new Sector(sectorName), new ArrayList<>()) == null;
     }
 
     // Adds a set of counters to a sector
     public Integer addCounters(String sectorName, int count) {
-        if (!sectors.containsKey(sectorName) || count <= 0) {
+        Sector sector = Sector.fromName(sectorName);
+        if (count <= 0 || !sectors.containsKey(sector)) {
             return null; // Failure: sector does not exist or invalid counter count
         }
-        int firstId = counterId.getAndIncrement();
-        sectors.put(sectorName, sectors.get(sectorName) + count); // Update sector counter count
-        for (int i = firstId; i < firstId + count; i++) {
-            CounterServiceOuterClass.CounterInfo counter =  CounterServiceOuterClass.CounterInfo.newBuilder().setSector(sectorName).setRange(String.valueOf(i)).build();
-            counterDetails.get(sectorName).put(i, counter); // Initialize counters with no airline or flight
-        }
+        int firstId = counterId.getAndAdd(count);
+
+        // And the range of counters to the sector
+        sectors.get(sector).add(new RangeCounter(firstId, firstId + count - 1));
+
+
+
+//        for (int i = firstId; i < firstId + count; i++) {
+//            CounterServiceOuterClass.CounterInfo counter =  CounterServiceOuterClass.CounterInfo.newBuilder().setSector(sectorName).setRange(String.valueOf(i)).build();
+//            counterDetails.get(sectorName).put(i, counter); // Initialize counters with no airline or flight
+//        }
         return firstId; // Success, returns the first ID of the new counters
     }
 
@@ -87,15 +91,16 @@ public class Airport {
     }
 
     public List<CounterServiceOuterClass.CounterInfo> queryCounters(String sector) {
-
-        if (sector == null)
-            return new ArrayList<>();
-
-        //it should return all counters if sector is null
-        if(Objects.equals(sector, ""))
-            return counterDetails.values().stream().flatMap(m -> m.values().stream()).collect(Collectors.toList());
-
-        return new ArrayList<>(counterDetails.get(sector).values());
+//
+//        if (sector == null)
+//            return new ArrayList<>();
+//
+//        //it should return all counters if sector is null
+//        if(Objects.equals(sector, ""))
+//            return counterDetails.values().stream().flatMap(m -> m.values().stream()).collect(Collectors.toList());
+//
+//        return new ArrayList<>(counterDetails.get(sector).values());
+        return null;
     }
 
     public List<CounterServiceOuterClass.CheckInRecord> querygit (String sector, String airline) {
