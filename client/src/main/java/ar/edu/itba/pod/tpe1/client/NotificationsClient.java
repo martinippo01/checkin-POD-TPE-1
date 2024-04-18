@@ -47,4 +47,43 @@ public class NotificationsClient {
 
     }
 
+    public void registerNotifications(String airlineName){
+        if(airlineName == null)
+            throw new IllegalArgumentException();
+
+        // Request
+        NotificationsServiceOuterClass.RegisterNotificationsRequest request =
+                NotificationsServiceOuterClass.RegisterNotificationsRequest
+                        .newBuilder()
+                        .setAirline(airlineName)
+                        .build();
+
+        // Make the request
+        Iterator<NotificationsServiceOuterClass.RegisterNotificationsResponse> response = stub.registerNotifications(request);
+
+        // Iterate through the notifications
+        while (response.hasNext()){
+            NotificationsServiceOuterClass.RegisterNotificationsResponse registerNotificationsResponse = response.next();
+            // TODO: Will we print from here? Or modularize somewhere else
+            System.out.println(registerNotificationsResponse.getNotificationType());
+            System.out.println(registerNotificationsResponse);
+        }
+    }
+
+    public void unregisterNotifications(String airlineName){
+        if(airlineName == null)
+            throw new IllegalArgumentException();
+
+        // Request
+        NotificationsServiceOuterClass.RemoveNotificationsRequest removeNotificationsRequest =
+                NotificationsServiceOuterClass.RemoveNotificationsRequest.newBuilder().setAirline(airlineName).build();
+
+        // Make the request
+        NotificationsServiceOuterClass.RemoveNotificationsResponse removeNotificationsResponse =
+                stub.removeNotifications(removeNotificationsRequest);
+
+        System.out.println(removeNotificationsResponse);
+    }
+
+
 }

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class Notification {
-
+    private final boolean poissonPill;
     private final NotificationsServiceOuterClass.NotificationType notificationType;
     private final Airline airline;
     private final int counterFrom;
@@ -21,6 +21,7 @@ public class Notification {
     private final int pending_ahead;
 
     public Notification(Builder builder) {
+        this.poissonPill = builder.poisonPill;
         this.notificationType = builder.notificationType;
         this.airline = builder.airline;
         this.counterFrom = builder.counterFrom;
@@ -36,6 +37,10 @@ public class Notification {
 
     public NotificationsServiceOuterClass.NotificationType getNotificationType() {
         return notificationType;
+    }
+
+    public boolean isPoissonPill() {
+        return poissonPill;
     }
 
     public Airline getAirline() {
@@ -94,6 +99,7 @@ public class Notification {
     //-------- BUILDER -----------
 
     public static class Builder {
+        private boolean poisonPill;
         private NotificationsServiceOuterClass.NotificationType notificationType;
         private Airline airline;
         private int counterFrom;
@@ -107,6 +113,7 @@ public class Notification {
         private int pending_ahead;
 
         public Builder() {
+            this.poisonPill = false;
             // set defaults
             this.notificationType = NotificationsServiceOuterClass.NotificationType.SUCCESSFUL_REGISTER;
             this.airline = new Airline("");
@@ -122,6 +129,11 @@ public class Notification {
         }
 
         public Builder setNotificationType(NotificationsServiceOuterClass.NotificationType notificationType) {this.notificationType = notificationType; return this;}
+
+        public Builder setPoisonPill() {
+            poisonPill = true;
+            return this;
+        }
 
         public Builder setAirline(Airline airline) {
             this.airline = airline;

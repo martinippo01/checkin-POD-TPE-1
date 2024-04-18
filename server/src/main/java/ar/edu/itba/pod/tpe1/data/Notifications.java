@@ -37,8 +37,14 @@ public class Notifications {
     public boolean unregisterAirline(Airline airline){
         if(!notifications.containsKey(airline))
             return false;
-        notifications.remove(airline);
+        // TODO: Check if the addition should be .add or .put
+        // Add to the queue a poisson pill, so when producer consumes it, will stop taking form the queue
+        notifications.get(airline).add(new Notification.Builder().setPoisonPill().build());
         return true;
+    }
+
+    public void removeAirline(Airline airline){
+        notifications.remove(airline);
     }
 
     public void notifyAirline(Airline airline, Notification notification){
@@ -53,11 +59,12 @@ public class Notifications {
         }
     }
 
-    public Notification getNotification(Airline airline){
+    public Notification getNotification(Airline airline) throws InterruptedException {
         if(!notifications.containsKey(airline))
             // This can happen if the airline got unregistered, or it never was registered
             return null;
-        return notifications.get(airline).poll();
+        // I'll block if there are no elementes in queue
+        return notifications.get(airline).take();
     }
 
 

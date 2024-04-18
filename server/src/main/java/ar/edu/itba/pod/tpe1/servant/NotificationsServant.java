@@ -6,6 +6,7 @@ import ar.edu.itba.pod.tpe1.data.Airport;
 import ar.edu.itba.pod.tpe1.data.Notifications;
 import ar.edu.itba.pod.tpe1.data.utils.Airline;
 import ar.edu.itba.pod.tpe1.data.utils.Notification;
+import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,34 +25,42 @@ public class NotificationsServant extends NotificationsServiceGrpc.Notifications
             NotificationsServiceOuterClass.RegisterNotificationsRequest req,
             StreamObserver<NotificationsServiceOuterClass.RegisterNotificationsResponse> responseObserver
     ){
-        logger.info("Airline: {} requested register to notifications service", req.getAirline());
-        Airline airline = new Airline(req.getAirline());
+        try {
+            logger.info("Airline: {} requested register to notifications service", req.getAirline());
+            Airline airline = new Airline(req.getAirline());
 
-        // First register the airline
-        boolean success = notifications.registerAirline(airline);
-        if (success){
-            logger.info("Airline: {} successfully registered to notifications service", airline.getName());
-            responseObserver.onNext(buildNotificationProto(new Notification.Builder().setNotificationType(NotificationsServiceOuterClass.NotificationType.SUCCESSFUL_REGISTER).build()));
-        }else{
-            // TODO: evaluate cases, it can fail because the airline does not exist or there are no one waiting
-            // Mainly, evaluate the case when the airline exists, but there's no expected passengers
-            logger.error("Airline: {} failed to register to notifications service", airline.getName());
-            responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription("Failed").asRuntimeException());
-            return;
-        }
-
-        // Stream the notification
-        Notification notification;
-        do{
-            notification = notifications.getNotification(airline);
-            if(notification != null){
-                responseObserver.onNext(buildNotificationProto(notification));
-                logger.info("Sent notification of type {} to airline: {}", notification.getNotificationType(), airline.getName());
+            // First register the airline
+            boolean success = notifications.registerAirline(airline);
+            if (success) {
+                logger.info("Airline: {} successfully registered to notifications service", airline.getName());
+                responseObserver.onNext(buildNotificationProto(new Notification.Builder().setNotificationType(NotificationsServiceOuterClass.NotificationType.SUCCESSFUL_REGISTER).build()));
+            } else {
+                // TODO: evaluate cases, it can fail because the airline does not exist or there are no one waiting
+                // Mainly, evaluate the case when the airline exists, but there's no expected passengers
+                logger.error("Airline: {} failed to register to notifications service", airline.getName());
+                responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription("Failed to register airline " + req.getAirline()).asRuntimeException());
+                return;
             }
-        }while (notification != null); // null is the poison pill - For when no more notifications need to be sent to the client
 
-        // Complete
-        responseObserver.onCompleted();
+            // Stream the notifications
+            Notification notification;
+            do {
+                notification = notifications.getNotification(airline);
+                if (notification != null && !notification.isPoissonPill()) {
+                    responseObserver.onNext(buildNotificationProto(notification));
+                    logger.info("Sent notification of type {} to airline: {}", notification.getNotificationType(), airline.getName());
+                }
+            } while (notification != null && !notification.isPoissonPill()); // null is the poison pill - For when no more notifications need to be sent to the client
+
+            // Once consumed the poisson pill, remove the airline from the airport
+            notifications.removeAirline(airline);
+
+            // Complete
+            responseObserver.onCompleted();
+
+        }catch (InterruptedException e){
+            responseObserver.onError(Status.INTERNAL.asRuntimeException());
+        }
 
     }
 
