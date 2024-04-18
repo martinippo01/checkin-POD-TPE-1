@@ -14,8 +14,8 @@ service CheckinService {
 // ********** Message Definitions **********
 message BookingInformation {
   string bookingCode = 1;
-  string flightCode = 2;
-  string airlineName = 3;
+  optional string flightCode = 2;
+  optional string airlineName = 3;
 }
 
 // Consigna: "Las aerolíneas cuentan con varios mostradores juntos, llamado rango"

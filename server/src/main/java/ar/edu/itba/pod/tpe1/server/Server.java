@@ -1,6 +1,7 @@
 package ar.edu.itba.pod.tpe1.server;
 
 import ar.edu.itba.pod.tpe1.servant.AirportAdminServant;
+import ar.edu.itba.pod.tpe1.servant.CheckInServant;
 import ar.edu.itba.pod.tpe1.servant.CounterQueryServant;
 import ar.edu.itba.pod.tpe1.servant.NotificationsServant;
 import io.grpc.ServerBuilder;
@@ -21,9 +22,10 @@ public class Server {
                 .addService(new AirportAdminServant())
                 .addService(new CounterQueryServant())
                 .addService(new NotificationsServant())
+                .addService(new CheckInServant())
                 .build();
         server.start();
-        logger.info("Server started, listening on " + port);
+        logger.info("Server started, listening on {}", port);
         server.awaitTermination();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             logger.info("Shutting down gRPC server since JVM is shutting down");
