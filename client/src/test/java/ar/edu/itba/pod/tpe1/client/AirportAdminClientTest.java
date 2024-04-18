@@ -11,16 +11,17 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.*;
 
 /*
-* DISCLAIMER: These are not UNIT TESTS, they are INTEGRATION TESTS
-**/
+ * DISCLAIMER: These are not UNIT TESTS, they are INTEGRATION TESTS
+ **/
 public class AirportAdminClientTest {
 
-   ManagedChannel channel;
+    ManagedChannel channel;
 
     AirportAdminClient airportAdminClient;
+
     @Before
     public void setUp() throws Exception {
-         channel = ManagedChannelBuilder.forAddress("localhost", 50058)
+        channel = ManagedChannelBuilder.forAddress("localhost", 50058)
                 .usePlaintext()
                 .build();
         airportAdminClient = new AirportAdminClient(channel);
@@ -35,7 +36,10 @@ public class AirportAdminClientTest {
 
     @Test
     public void testAddPassengerManifest() {
-        airportAdminClient.addPassengerManifest("/Users/marcoscilipoti/Documents/1Q 2024/POD/checkin-POD-TPE-1/client/src/main/resources/manifest.csv");
+        airportAdminClient.addPassengerManifest(
+                "target/test-classes/ar/edu/itba/pod/tpe1/client/" +
+                        "passengers.csv"
+        );
     }
 
     @After
