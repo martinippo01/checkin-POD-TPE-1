@@ -16,13 +16,14 @@ public class Client {
         ManagedChannel channel = ManagedChannelBuilder.forAddress("localhost", 50058)
                 .usePlaintext()
                 .build();
-
         try {
-            AirportAdminClient airportAdminClient = new AirportAdminClient(channel);
-
-
+            //AirportAdminClient airportAdminClient = new AirportAdminClient(channel);
+            NotificationsClient notificationsClient = new NotificationsClient(channel);
+            notificationsClient.registerNotifications("AmericanAirlines");
+            notificationsClient.unregisterNotifications("AmericanAirlines");
         } finally {
             channel.shutdown().awaitTermination(10, TimeUnit.SECONDS);
         }
     }
+
 }

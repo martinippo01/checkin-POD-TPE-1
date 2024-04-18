@@ -1,6 +1,9 @@
 package ar.edu.itba.pod.tpe1.data;
 
+import airport.AirportService;
 import airport.CounterServiceOuterClass;
+import ar.edu.itba.pod.tpe1.servant.CounterReservationService;
+import counter.CounterReservationServiceOuterClass;
 
 import java.util.Collections;
 import java.util.Objects;
@@ -17,6 +20,7 @@ public class Airport {
 
     private final ConcurrentHashMap<String, String> flightToAirlineMap = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, Integer> bookingCodes = new ConcurrentHashMap<>();
+    // Make the value of the map a sorted set of type <range>. Make the class range of counters
     private final ConcurrentHashMap<String, Integer> sectors = new ConcurrentHashMap<>();
 
     private final List<CounterServiceOuterClass.CheckInRecord> checkIns = Collections.synchronizedList(new ArrayList<>());
@@ -34,6 +38,10 @@ public class Airport {
             instance = new Airport();
         }
         return instance;
+    }
+
+    public List<CounterReservationServiceOuterClass.Sector> listSectors() {
+        return new ArrayList<>();
     }
 
     // Adds a sector if it does not already exist
@@ -90,11 +98,14 @@ public class Airport {
         return new ArrayList<>(counterDetails.get(sector).values());
     }
 
-    public List<CounterServiceOuterClass.CheckInRecord> queryCheckIns(String sector, String airline) {
+    public List<CounterServiceOuterClass.CheckInRecord> querygit (String sector, String airline) {
         return checkIns.stream()
                 .filter(c -> (sector == null || c.getSector().equals(sector)) && (airline == null || c.getAirline().equals(airline)))
                 .collect(Collectors.toList());
     }
 
+    public List<CounterServiceOuterClass.CheckInRecord> queryCheckIns(String sector, String airline) {
+        return new ArrayList<>();
+    }
 }
 
