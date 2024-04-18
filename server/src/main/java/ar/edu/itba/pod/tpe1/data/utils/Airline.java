@@ -5,7 +5,6 @@ import java.util.Objects;
 public class Airline {
 
     private final String name;
-    private Flight flight;
 
     public Airline(final String name) {
         this.name = name;
@@ -15,15 +14,7 @@ public class Airline {
         return name;
     }
 
-    public Flight getFlight() {
-        return flight;
-    }
-
-    public void setFlight(Flight flight) {
-        this.flight = flight;
-    }
-
-    public String toString() {
+    public String toString(){
         return name;
     }
 
