@@ -14,8 +14,7 @@ import java.util.stream.Collectors;
 
 public class Airport {
 
-    private final ConcurrentHashMap<String, String> flightToAirlineMap = new ConcurrentHashMap<>();
-    // Key: Booking - Value: a boolean that
+    // Key: Booking - Value: a boolean
     private final ConcurrentHashMap<Booking, Boolean> bookingCodes = new ConcurrentHashMap<>();
 
     private final ConcurrentHashMap<Flight, Airline> flights = new ConcurrentHashMap<>();
@@ -24,6 +23,8 @@ public class Airport {
     private final ConcurrentHashMap<Sector, List<RangeCounter>> sectors = new ConcurrentHashMap<>();
 
 //    private final List<CheckIn> checkIns = new ArrayList<>();
+    private final List<CounterServiceOuterClass.CheckInRecord> checkIns = Collections.synchronizedList(new ArrayList<>());
+
     private final AtomicInteger counterId = new AtomicInteger(1);
 
     private static Airport instance = null;
@@ -52,20 +53,38 @@ public class Airport {
 
     // Adds a set of counters to a sector
     // TODO: sync!!!
-    public Integer addCounters(String sectorName, int count) {
+    public RangeCounter addCounters(String sectorName, int count) {
         Sector sector = Sector.fromName(sectorName);
         if (count <= 0 || !sectors.containsKey(sector)) {
             return null; // Failure: sector does not exist or invalid counter count
         }
         int firstId = counterId.getAndAdd(count);
-        // TODO: Implement condition where if sector has counters (2-4) and first Id is 5, should create a contiguos sector (2-7)
-        // And the range of counters to the sector
-        sectors.get(sector).add(new RangeCounter(firstId, firstId + count - 1));
 
-        // Make sure the elements are in the correct order
-        Collections.sort(sectors.get(sector));
-
-        return firstId; // Success, returns the first ID of the new counters
+        // Se which is the last counter number of the sector, and in that case expand the RangeCounter
+        int lastCounterOfSector = -1;
+        RangeCounter removeRangeCounter = null;
+        for(RangeCounter rangeCounter : sectors.get(sector)){
+            if(rangeCounter.getCounterTo() >= lastCounterOfSector) {
+                lastCounterOfSector = rangeCounter.getCounterTo();
+                removeRangeCounter = rangeCounter;
+            }
+            lastCounterOfSector = Math.max(rangeCounter.getCounterTo(), lastCounterOfSector);
+        }
+        if(lastCounterOfSector == firstId - 1){
+            sectors.get(sector).remove(removeRangeCounter);
+            RangeCounter newRangeCounter = new RangeCounter(removeRangeCounter.getCounterFrom(), firstId + count - 1);
+            sectors.get(sector).add(newRangeCounter);
+            // Make sure the elements are in the correct order
+            Collections.sort(sectors.get(sector));
+            return newRangeCounter;
+        }else{
+            RangeCounter newRangeCounter = new RangeCounter(firstId, firstId + count - 1);
+                    // And the range of counters to the sector, from the last
+            sectors.get(sector).add(newRangeCounter);
+            // Make sure the elements are in the correct order
+            Collections.sort(sectors.get(sector));
+            return newRangeCounter; // Success, returns the first ID of the new counters
+        }
     }
 
     // Register a passenger, link booking and flight codes
