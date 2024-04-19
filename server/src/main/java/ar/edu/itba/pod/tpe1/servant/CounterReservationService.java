@@ -3,9 +3,8 @@ package ar.edu.itba.pod.tpe1.servant;
 import airport.AirportService;
 import airport.CounterServiceOuterClass;
 import ar.edu.itba.pod.tpe1.data.Airport;
-import ar.edu.itba.pod.tpe1.data.utils.RangeCounter;
-import ar.edu.itba.pod.tpe1.data.utils.RequestedRangeCounter;
-import ar.edu.itba.pod.tpe1.data.utils.Sector;
+import ar.edu.itba.pod.tpe1.data.exceptions.CounterReleaseException;
+import ar.edu.itba.pod.tpe1.data.utils.*;
 import counter.CounterReservationServiceGrpc;
 import counter.CounterReservationServiceOuterClass;
 import io.grpc.stub.StreamObserver;
@@ -31,7 +30,6 @@ public class CounterReservationService extends CounterReservationServiceGrpc.Cou
             sectorInfo.get(sector).forEach((ranges) -> {
                 sectorBuilder.addRanges(CounterReservationServiceOuterClass.Range.newBuilder().setStart(ranges.getCounterFrom()).setEnd(ranges.getCounterTo()).build());
             });
-//            response.setSectors(sectorBuilder.build());
             response.addSectors(sectorBuilder.build());
         }
 
@@ -43,15 +41,16 @@ public class CounterReservationService extends CounterReservationServiceGrpc.Cou
     public void queryCounterRange(CounterReservationServiceOuterClass.CounterRangeRequest request, StreamObserver<CounterReservationServiceOuterClass.CounterRangeResponse> responseObserver) {
         CounterReservationServiceOuterClass.CounterRangeResponse.Builder response = CounterReservationServiceOuterClass.CounterRangeResponse.newBuilder();
 
-        List<CounterServiceOuterClass.CounterInfo> counters = airport.queryCounters(request.getSectorName());
-        for (CounterServiceOuterClass.CounterInfo counter : counters) {
-            if (Integer.parseInt(counter.getRange()) >= request.getFromVal() && Integer.parseInt(counter.getRange()) <= request.getToVal()) {
+        List<RequestedRangeCounter> counters = airport.listCounters(request.getSectorName(), request.getFromVal(), request.getToVal());
+
+        for (RequestedRangeCounter counter : counters) {
                 CounterReservationServiceOuterClass.CounterRange.Builder rangeBuilder = CounterReservationServiceOuterClass.CounterRange.newBuilder()
-                        .setStart(Integer.parseInt(counter.getRange()))
-                        .setEnd(Integer.parseInt(counter.getRange()))
-                        .setAirline("Example Airline");  // Placeholder for airline, modify as needed.
+                        .setStart(counter.getCounterFrom())
+                        .setEnd(counter.getCounterTo())
+                        .setAirline(counter.getAirline().getName())
+                        .addAllFlights(counter.getFlights().stream().map(Flight::getFlightCode).collect(Collectors.toList()));
+
                 response.addCounters(rangeBuilder.build());
-            }
         }
 
         responseObserver.onNext(response.build());
@@ -78,7 +77,7 @@ public class CounterReservationService extends CounterReservationServiceGrpc.Cou
     @Override
     public void freeCounters(CounterReservationServiceOuterClass.FreeCounterRequest request, StreamObserver<CounterReservationServiceOuterClass.FreeCounterResponse> responseObserver) {
         try {
-            FreeCounterResult result = Airport.getInstance().freeCounters(request.getSectorName(), request.getFromVal(), request.getAirlineName());
+            FreeCounterResult result = airport.freeCounters(request.getSectorName(), request.getFromVal(), request.getAirlineName());
             CounterReservationServiceOuterClass.FreeCounterResponse response = CounterReservationServiceOuterClass.FreeCounterResponse.newBuilder()
                     .setSuccess(true)
                     .setSectorName(result.getSectorName())
@@ -91,9 +90,8 @@ public class CounterReservationService extends CounterReservationServiceGrpc.Cou
         } catch (CounterReleaseException e) {
             CounterReservationServiceOuterClass.FreeCounterResponse response = CounterReservationServiceOuterClass.FreeCounterResponse.newBuilder()
                     .setSuccess(false)
-                    .setErrorMessage(e.getMessage())
                     .build();
-            responseObserver.onError(response);
+            responseObserver.onError(e);
         }
         responseObserver.onCompleted();
     }

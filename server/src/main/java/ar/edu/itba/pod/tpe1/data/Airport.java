@@ -23,7 +23,6 @@ public class Airport {
     // Key: Sector - Value: A list of range of sectors
     private final ConcurrentHashMap<Sector, List<RangeCounter>> sectors = new ConcurrentHashMap<>();
 
-    private final List<CounterServiceOuterClass.CheckInRecord> checkIns = Collections.synchronizedList(new ArrayList<>());
 //    private final List<CheckIn> checkIns = new ArrayList<>();
     private final AtomicInteger counterId = new AtomicInteger(1);
 
@@ -96,32 +95,11 @@ public class Airport {
 
     }
 
-    public void logCheckIn(String sector, int counter, String airline, String flight, String booking) {
-        synchronized (checkIns) {
-            checkIns.add(CounterServiceOuterClass.CheckInRecord.newBuilder().setAirline(airline).setSector(sector).setCounter(counter).setFlight(flight).setBookingCode(booking).build());
-        }
-    }
-
     public List<CounterServiceOuterClass.CounterInfo> queryCounters(String sector) {
 
-
-
-//        if (sector == null)
-//            return new ArrayList<>();
-//
-//        //it should return all counters if sector is null
-//        if(Objects.equals(sector, ""))
-//            return counterDetails.values().stream().flatMap(m -> m.values().stream()).collect(Collectors.toList());
-//
-//        return new ArrayList<>(counterDetails.get(sector).values());
         return null;
     }
 
-    public List<CounterServiceOuterClass.CheckInRecord> querygit (String sector, String airline) {
-        return checkIns.stream()
-                .filter(c -> (sector == null || c.getSector().equals(sector)) && (airline == null || c.getAirline().equals(airline)))
-                .collect(Collectors.toList());
-    }
 
     public List<CounterServiceOuterClass.CheckInRecord> queryCheckIns(String sector, String airline) {
         return new ArrayList<>();
@@ -152,36 +130,54 @@ public class Airport {
         return null;
     }
 
-    FreeCounterResult freeCounters(String sector, int fromVal, String airlineName) throws CounterReleaseException {
+
+    public List<RequestedRangeCounter> listCounters(String sectorName, int from, int to) {
+        Sector sector = new Sector(sectorName);
+        List<RangeCounter> sectorCounters = sectors.get(sector);
+        List<RequestedRangeCounter> out = new ArrayList<>();
+        for(RangeCounter rangeCounter : sectorCounters) {
+            for (RequestedRangeCounter counter : rangeCounter.getAssignedRangeCounters()) {
+                if (counter.getCounterFrom() <= from && counter.getCounterTo() >= to) {
+                    out.add(counter);
+                }
+            }
+        }
+        return out;
+    }
+
+    public FreeCounterResult freeCounters(String sectorName, int fromVal, String airlineName) throws CounterReleaseException {
+
+        Sector sector = new Sector(sectorName);
+        Airline airline = new Airline(airlineName);
         List<RangeCounter> sectorCounters = sectors.get(sector);
 
         if (sectorCounters == null) {
             throw new CounterReleaseException("Sector '" + sector + "' does not exist.");
         }
 
-        Optional<RangeCounter> range = sectorCounters.stream()
-                .filter(r -> r.getCounterFrom() <= fromVal && r.getCounterTo() >= fromVal)
-                .findFirst();
+        RequestedRangeCounter rangeCounterFound = null;
+        for (RangeCounter rangeCounter : sectorCounters) {
+            if(rangeCounter.getCounterFrom() <= fromVal && rangeCounter.getCounterTo() >= fromVal){
+                RequestedRangeCounter temp = rangeCounter.freeRange(fromVal, airline);
+                if(temp != null) {
+                    rangeCounterFound = temp;
+                    break;
+                }
 
-        if (!range.isPresent()) {
+            }
+        }
+
+        if(rangeCounterFound == null){
             throw new CounterReleaseException("No range starting at counter " + fromVal + " exists in sector '" + sectorName + "'.");
+
         }
 
-        RangeCounter foundRange = range.get();
-        if (!foundRange.get().equals(airlineName)) {
-            throw new CounterReleaseException("Range counters are not assigned to '" + airlineName + "'.");
-        }
+        //TODO: VERIFICAR PERSONAS EN ESPERA
 
-        Queue<RequestedRangeCounter> queue = pendingRequestedCounters.get(sector);
-        if (queue != null && queue.stream().anyMatch(req -> req.getCounterFrom().overlaps(foundRange))) {
-            throw new CounterReleaseException("There are passengers waiting to be attended at the counters.");
-        }
-
-        sectorCounters.remove(foundRange);  // Successfully freeing the range
-        return new FreeCounterResult(sector, foundRange.getCounterFrom(), foundRange.getCounterTo(), airlineName, foundRange.getAssignedRangeCounters().stream().toList().stream().map(requestedRangeCounter -> requestedRangeCounter.getFlights().stream().map(Flight::getFlightCode).collect(Collectors.joining())).collect(Collectors.toList()));
+        return new FreeCounterResult(String.valueOf(rangeCounterFound.getCounterFrom()), rangeCounterFound.getCounterFrom(), rangeCounterFound.getCounterTo(), rangeCounterFound.getAirline().getName(), rangeCounterFound.getFlights().stream().map(Flight::getFlightCode).collect(Collectors.toList()));
     }
 
-    public RequestedRangeCounter assignCounters(String sectorName, int count, String airlineName, List<String> flightsToReserve) throws CounterReleaseException {
+    public RequestedRangeCounter assignCounters(String sectorName, int count, String airlineName, List<String> flightsToReserve) {
         // Get the sector
         Sector sector = Sector.fromName(sectorName);
         if (!sectors.containsKey(sector)) {

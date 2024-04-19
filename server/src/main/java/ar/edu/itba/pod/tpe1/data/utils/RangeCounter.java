@@ -27,6 +27,16 @@ public class RangeCounter implements Comparable<RangeCounter> {
         return counterTo - counterFrom + 1;
     }
 
+    public RequestedRangeCounter freeRange(final int fromVal, final Airline airline) {
+        for(RequestedRangeCounter assignedRangeCounter : assignedRangeCounters) {
+            if (assignedRangeCounter.getCounterFrom() == fromVal && assignedRangeCounter.getAirline().equals(airline)) {
+                assignedRangeCounters.remove(assignedRangeCounter);
+                return assignedRangeCounter;
+            }
+        }
+        return null;
+    }
+
     public RequestedRangeCounter assignRange(final int count, List<Flight> flights, Airline airline) {
         // Cannot assign due to invalid argument or size greater than the whole range
         if (count < 0 || count > getSize()) {
