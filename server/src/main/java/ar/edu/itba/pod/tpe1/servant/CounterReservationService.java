@@ -91,6 +91,7 @@ public class CounterReservationService extends CounterReservationServiceGrpc.Cou
             CounterReservationServiceOuterClass.FreeCounterResponse response = CounterReservationServiceOuterClass.FreeCounterResponse.newBuilder()
                     .setSuccess(false)
                     .build();
+            responseObserver.onNext(response);
             responseObserver.onError(e);
         }
         responseObserver.onCompleted();
