@@ -77,7 +77,7 @@ public class CounterReservationClientTest {
         counterReservationClient.assignCounters("C", flights, "AirCanada", 2);
         counterReservationClient.listSectors();
 
-        counterReservationClient.queryCounterRange("C", 2, 4);
+        counterReservationClient.queryCounterRange("C", 1, 7);
     }
 
     @Test
