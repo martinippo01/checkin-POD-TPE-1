@@ -4,6 +4,7 @@ import airport.AirportService;
 import airport.CounterServiceOuterClass;
 import ar.edu.itba.pod.tpe1.data.Airport;
 import ar.edu.itba.pod.tpe1.data.utils.RangeCounter;
+import ar.edu.itba.pod.tpe1.data.utils.RequestedRangeCounter;
 import ar.edu.itba.pod.tpe1.data.utils.Sector;
 import counter.CounterReservationServiceGrpc;
 import counter.CounterReservationServiceOuterClass;
@@ -58,13 +59,21 @@ public class CounterReservationService extends CounterReservationServiceGrpc.Cou
     }
 
     @Override
-    public void assignCounters(CounterReservationServiceOuterClass.AssignCounterRequest request, StreamObserver<CounterReservationServiceOuterClass.BasicResponse> responseObserver) {
-        CounterReservationServiceOuterClass.BasicResponse.Builder response = CounterReservationServiceOuterClass.BasicResponse.newBuilder();
-        Integer addedCounters = airport.addCounters(request.getSectorName(), request.getCounterCount());
-        if(addedCounters != 0) responseObserver.onNext(response.build());
-        else responseObserver.onError(new RuntimeException("Error assigning counters"));
+    public void assignCounters(CounterReservationServiceOuterClass.AssignCounterRequest request, StreamObserver<CounterReservationServiceOuterClass.AssignCounterResponse> responseObserver) {
+        CounterReservationServiceOuterClass.AssignCounterResponse.Builder response = CounterReservationServiceOuterClass.AssignCounterResponse.newBuilder();
+
+        RequestedRangeCounter addedCounters = airport.assignCounters(request.getSectorName(), request.getCounterCount(), request.getAirlineName(), request.getFlightsList());
+
+        if(addedCounters == null)
+            response.setIsPending(true);
+        else
+            response.setIsPending(false).setCounterFrom(addedCounters.getCounterFrom());
+
+        responseObserver.onNext(response.build());
+
         responseObserver.onCompleted();
     }
+
 
     @Override
     public void freeCounters(CounterReservationServiceOuterClass.FreeCounterRequest request, StreamObserver<CounterReservationServiceOuterClass.BasicResponse> responseObserver) {

@@ -8,7 +8,7 @@ public class RangeCounter implements Comparable<RangeCounter> {
     private final int counterTo;
     // Metadata
     //private final List<AssignedRangeCounter> assignedRangeCounters = new ArrayList<>(); // TODO check thread safety
-    private final Set<AssignedRangeCounter> assignedRangeCounters = new TreeSet<>(); // TODO check thread safety
+    private final Set<RequestedRangeCounter> assignedRangeCounters = new TreeSet<>(); // TODO check thread safety
 
     public RangeCounter(final int counterFrom, final int counterTo) {
         this.counterFrom = counterFrom;
@@ -27,17 +27,17 @@ public class RangeCounter implements Comparable<RangeCounter> {
         return counterTo - counterFrom + 1;
     }
 
-    public AssignedRangeCounter assignRange(final int count, List<Flight> flights, Airline airline) {
+    public RequestedRangeCounter assignRange(final int count, List<Flight> flights, Airline airline) {
         // Cannot assign due to invalid argument or size greater than the whole range
         if (count < 0 || count > getSize()) {
             return null;
         }
 
         int start = counterFrom;
-        for(AssignedRangeCounter assignedRangeCounter : assignedRangeCounters) {
+        for(RequestedRangeCounter assignedRangeCounter : assignedRangeCounters) {
             int end = assignedRangeCounter.getCounterFrom() - 1;
             if(end - start + 1 >= count){ // In case the gap is big enough, create the assigned range of counters
-                AssignedRangeCounter newAssignedRangeCounter = new AssignedRangeCounter(start, start + count - 1, flights, airline);
+                RequestedRangeCounter newAssignedRangeCounter = new RequestedRangeCounter(start, start + count - 1, flights, airline, false);
                 assignedRangeCounters.add(newAssignedRangeCounter);
                 return newAssignedRangeCounter;
             }
@@ -46,7 +46,7 @@ public class RangeCounter implements Comparable<RangeCounter> {
 
         // Check the remaining space from the last registered to the end of the sector
         if(counterTo - start + 1 >= count){
-            AssignedRangeCounter newAssignedRangeCounter = new AssignedRangeCounter(start, start + count, flights, airline);
+            RequestedRangeCounter newAssignedRangeCounter = new RequestedRangeCounter(start, start + count, flights, airline, false);
             assignedRangeCounters.add(newAssignedRangeCounter);
             return newAssignedRangeCounter;
         }
@@ -54,7 +54,7 @@ public class RangeCounter implements Comparable<RangeCounter> {
         return null;
     }
 
-    public List<AssignedRangeCounter> getAssignedRangeCounters() {
+    public List<RequestedRangeCounter> getAssignedRangeCounters() {
         //return assignedRangeCounters; // TODO check thread safety
         return null;
     }
