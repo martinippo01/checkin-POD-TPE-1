@@ -8,6 +8,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
@@ -59,6 +61,32 @@ public class CounterReservationClientTest {
 
     @Test
     public void assignCounters() {
+        // Create sector A and add 1 counter
+        airportAdminClient.addSector("A");
+        airportAdminClient.addCounters("A", 1);
+        // Create sector C and add 3 counters
+        airportAdminClient.addSector("C");
+        airportAdminClient.addCounters("C", 3);
+        // Create sector D and add 2 counters
+        airportAdminClient.addSector("D");
+        airportAdminClient.addCounters("D", 2);
+        // Add 2 more counters to C
+        airportAdminClient.addCounters("C", 2);
+
+        airportAdminClient.addCounters("D", 2);
+        airportAdminClient.addCounters("C", 2);
+
+        // Create sector Z and leave it empty
+        airportAdminClient.addSector("Z");
+
+        // Add passengers
+        System.out.println("Case 1: All OK");
+        airportAdminClient.addPassengerManifest("/home/martinippo/Desktop/ITBA/POD/TPE1/grpc-com-tpe1/client/src/test/java/ar/edu/itba/pod/tpe1/client/passengersOk.csv");
+
+        List<String> flights = new ArrayList<>();
+        flights.add("AC987");
+        counterReservationClient.assignCounters("C", flights, "AirCanada", 2);
+        counterReservationClient.listSectors();
     }
 
     @Test

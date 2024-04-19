@@ -17,6 +17,14 @@ public class AssignedRangeCounter implements Comparable<AssignedRangeCounter> {
         this.airline = airline;
     }
 
+    public RequestedRangeCounter(List<Flight> flightList, Airline airline, boolean pending) {
+        this.counterFrom = -1;
+        this.counterTo = -1;
+        this.flights = flightList; // TODO CHECK THREAD SAFETY!!!
+        this.airline = airline;
+        this.pending = pending;
+    }
+
     public int getCounterFrom() {
         return counterFrom;
     }

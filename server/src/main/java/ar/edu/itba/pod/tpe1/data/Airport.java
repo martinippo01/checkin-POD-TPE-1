@@ -5,6 +5,7 @@ import ar.edu.itba.pod.tpe1.data.utils.*;
 import counter.CounterReservationServiceOuterClass;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -26,6 +27,9 @@ public class Airport {
     private final AtomicInteger counterId = new AtomicInteger(1);
 
     private static Airport instance = null;
+
+
+    private final Map<Sector, Queue<RequestedRangeCounter>> pendingRequestedCounters = new ConcurrentHashMap<>();
 
     private Airport() {}
 
@@ -57,6 +61,9 @@ public class Airport {
         // TODO: Implement condition where if sector has counters (2-4) and first Id is 5, should create a contiguos sector (2-7)
         // And the range of counters to the sector
         sectors.get(sector).add(new RangeCounter(firstId, firstId + count - 1));
+
+        // Make sure the elements are in the correct order
+        Collections.sort(sectors.get(sector));
 
         return firstId; // Success, returns the first ID of the new counters
     }
@@ -144,31 +151,39 @@ public class Airport {
         return null;
     }
 
-    public AssignedRangeCounter assignCounters (String sectorName, int count, String airlineName, List<String> flightsToReserve){
-        /* Validations:
-                - No existe un sector con ese nombre
-                - No se agregaron pasajeros esperados con el código de vuelo, para al menos uno de los vuelos solicitados
-                - Se agregaron pasajeros esperados con el código de vuelo pero con otra aerolínea, para al menos uno de los vuelos solicitados
-                - Ya existe al menos un mostrador asignado para al menos uno de los vuelos solicitados (no se permiten agrandar rangos de mostradores asignados)
-                - Ya existe una solicitud pendiente de un rango de mostradores para al menos uno de los vuelos solicitados (no se permiten reiterar asignaciones pendientes)
-                - Ya se asignó y luego se liberó un rango de mostradores para al menos uno de los vuelos solicitados (no se puede iniciar el check-in de un vuelo dos o más veces)
-        */
-        Sector sector = Sector.fromName(sectorName);
-        Airline airline = new Airline(airlineName);
 
-        // If the sector does not exist fail
-        if(!sectors.containsKey(sector)){
+    public RequestedRangeCounter assignCounters(String sectorName, int count, String airlineName, List<String> flightsToReserve) {
+        // Get the sector
+        Sector sector = Sector.fromName(sectorName);
+        if (!sectors.containsKey(sector)) {
+            // Sector does not exist
             return null;
         }
-        // If at least one of the flights has no expected passengers, or it belongs to another airline, then fail
-        for(String flight : flightsToReserve){
-            Airline a = flights.getOrDefault(new Flight(flight), null);
-            if(a == null || !a.equals(airline)){
+
+        // Check if all flights are valid and linked to the specified airline
+        Airline airline = new Airline(airlineName);
+        List<Flight> validFlights = new ArrayList<>();
+        for (String flightCode : flightsToReserve) {
+            Flight flight = new Flight(flightCode);
+            Airline registeredAirline = flights.getOrDefault(flight, null);
+            if (registeredAirline == null || !registeredAirline.equals(airline)) {
+                // If any flight does not exist or is registered to a different airline
                 return null;
             }
+            validFlights.add(flight);
         }
 
 
+        // Attempt to find a contiguous block of counters
+        List<RangeCounter> ranges = sectors.get(sector);
+        RequestedRangeCounter assignedRangeCounter = null;
+        for(RangeCounter rangeCounter : ranges){
+            assignedRangeCounter = rangeCounter.assignRange(count, validFlights, airline);
+            return assignedRangeCounter;
+        }
+
+        pendingRequestedCounters.putIfAbsent(sector, new ConcurrentLinkedQueue<>());
+        pendingRequestedCounters.get(sector).add(new RequestedRangeCounter(validFlights, airline, true));
         return null;
     }
 

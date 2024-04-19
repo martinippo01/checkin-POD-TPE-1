@@ -71,8 +71,8 @@ public class CounterReservationClient {
                 .setCounterCount(counterCount)
                 .build();
         try {
-            CounterReservationServiceOuterClass.BasicResponse response = blockingStub.assignCounters(request);
-            System.out.println(response.getMessage());
+            CounterReservationServiceOuterClass.AssignCounterResponse response = blockingStub.assignCounters(request);
+            System.out.println(response);
         } catch (StatusRuntimeException e) {
             System.err.println("RPC failed: " + e.getStatus());
         }

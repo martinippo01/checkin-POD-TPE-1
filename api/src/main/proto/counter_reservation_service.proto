@@ -50,6 +50,11 @@ message AssignCounterRequest {
   repeated string flights = 4;
 }
 
+message AssignCounterResponse{
+  bool isPending = 1;
+  int32 counterFrom = 2;
+}
+
 message FreeCounterRequest {
   string sectorName = 1;
   int32 fromVal = 2;
@@ -80,7 +85,7 @@ message PendingAssignment {
 service CounterReservationService {
   rpc listSectors(SectorRequest) returns (SectorResponse);
   rpc queryCounterRange(CounterRangeRequest) returns (CounterRangeResponse);
-  rpc assignCounters(AssignCounterRequest) returns (BasicResponse);
+  rpc assignCounters(AssignCounterRequest) returns (AssignCounterResponse);
   rpc freeCounters(FreeCounterRequest) returns (BasicResponse);
   rpc checkInCounters(CheckInCounterRequest) returns (BasicResponse);
   rpc listPendingAssignments(PendingAssignmentsRequest) returns (PendingAssignmentsResponse);
