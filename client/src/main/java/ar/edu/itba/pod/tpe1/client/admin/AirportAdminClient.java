@@ -78,6 +78,20 @@ public class AirportAdminClient extends Client {
 //    }
 
     public static void main(String[] args) {
+//        String[] test = {
+//                "-DserverAddress=localhost:50058",
+//                "-Daction=addSector",
+//                "-Dsector=C"
+//        };
+//
+//        String[] test2 = {
+//                "-DserverAddress=localhost:50058",
+//                "-Daction=addCounters",
+//                "-Dsector=C",
+//                "-Dcounters=3"
+//        };
+
+//        try (Client client = new AirportAdminClient(test2)) {
         try (Client client = new AirportAdminClient(args)) {
             client.executeAction();
         } catch (IllegalArgumentException e) {

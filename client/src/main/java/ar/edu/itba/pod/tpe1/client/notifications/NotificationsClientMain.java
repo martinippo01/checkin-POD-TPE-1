@@ -29,6 +29,13 @@ public class NotificationsClientMain extends Client {
     }
 
     public static void main(String[] args) {
+//        String[] test = {
+//                "-DserverAddress=localhost:50058", // -DserverAddress=10.6.0.1:50051
+//                "-Daction=register",
+//                "-Dairline=AmericanAirlines"
+//        };
+//
+//        try (Client client = new NotificationsClientMain(test)) {
         try (Client client = new NotificationsClientMain(args)) {
             client.executeAction();
         } catch (IllegalArgumentException e) {
