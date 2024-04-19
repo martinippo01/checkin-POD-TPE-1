@@ -72,7 +72,13 @@ public class CounterReservationClient {
                 .build();
         try {
             CounterReservationServiceOuterClass.AssignCounterResponse response = blockingStub.assignCounters(request);
-            System.out.println(response);
+            if(response.getIsPending()) {
+                String airlines = String.join("|", flights);
+                System.out.println(response.getCounterFrom() + "counters (" + response.getCounterFrom() + "-" + response.getCounterFrom() + counterCount + ") in Sector C are now checking in passengers from" +
+                        airlineName + airlines + "flights\n");
+            } else {
+                System.out.println(counterCount + " counters in Sector " + sectorName +" is pending with " + response.getPendingAhead() + " other pendings ahead\n");
+            }
         } catch (StatusRuntimeException e) {
             System.err.println("RPC failed: " + e.getStatus());
         }

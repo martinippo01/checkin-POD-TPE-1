@@ -136,7 +136,7 @@ public class Airport {
     }
 
     // TODO: Needs synchronization
-    public List<AssignedRangeCounter> getAssignedRangeCounters(String sectorName, int from, int to) {
+    public List<RequestedRangeCounter> getAssignedRangeCounters(String sectorName, int from, int to) {
 //        Sector sector = new Sector(sectorName);
 //        List<AssignedRangeCounter> toReturn = new ArrayList<>();
 //

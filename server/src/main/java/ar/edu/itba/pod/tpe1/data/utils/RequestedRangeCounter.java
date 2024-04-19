@@ -3,18 +3,20 @@ package ar.edu.itba.pod.tpe1.data.utils;
 import java.util.List;
 import java.util.Objects;
 
-public class AssignedRangeCounter implements Comparable<AssignedRangeCounter> {
+public class RequestedRangeCounter implements Comparable<RequestedRangeCounter> {
 
     private final int counterFrom;
     private final int counterTo;
     private final List<Flight> flights;
     private final Airline airline;
+    private final boolean pending;
 
-    public AssignedRangeCounter(final int counterFrom, final int counterTo, List<Flight> flightList, Airline airline) {
+    public RequestedRangeCounter(final int counterFrom, final int counterTo, List<Flight> flightList, Airline airline, boolean pending) {
         this.counterFrom = counterFrom;
         this.counterTo = counterTo;
         this.flights = flightList; // TODO CHECK THREAD SAFETY!!!
         this.airline = airline;
+        this.pending = pending;
     }
 
     public RequestedRangeCounter(List<Flight> flightList, Airline airline, boolean pending) {
@@ -43,7 +45,7 @@ public class AssignedRangeCounter implements Comparable<AssignedRangeCounter> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        AssignedRangeCounter that = (AssignedRangeCounter) o;
+        RequestedRangeCounter that = (RequestedRangeCounter) o;
 
         return counterFrom == that.counterFrom;
     }
@@ -54,7 +56,7 @@ public class AssignedRangeCounter implements Comparable<AssignedRangeCounter> {
     }
 
     @Override
-    public int compareTo(AssignedRangeCounter assignedRangeCounter) {
+    public int compareTo(RequestedRangeCounter assignedRangeCounter) {
         // Check which one starts first
         return Integer.compare(counterFrom, assignedRangeCounter.counterFrom);
     }
