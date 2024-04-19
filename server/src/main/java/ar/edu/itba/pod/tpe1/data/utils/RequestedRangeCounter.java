@@ -19,6 +19,13 @@ public class RequestedRangeCounter implements Comparable<RequestedRangeCounter> 
         this.pending = pending;
     }
 
+    public RequestedRangeCounter(RequestedRangeCounter other) {
+        this.counterFrom = other.counterFrom;
+        this.counterTo = other.counterTo;
+        this.flights = other.flights;
+        this.airline = other.airline;
+        this.pending = other.pending;
+    }
     public RequestedRangeCounter(List<Flight> flightList, Airline airline, boolean pending) {
         this.counterFrom = -1;
         this.counterTo = -1;

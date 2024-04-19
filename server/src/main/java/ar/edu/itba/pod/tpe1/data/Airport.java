@@ -157,7 +157,7 @@ public class Airport {
         for(RangeCounter rangeCounter : sectorCounters) {
             for (RequestedRangeCounter counter : rangeCounter.getAssignedRangeCounters()) {
                 if (counter.getCounterFrom() <= from && counter.getCounterTo() >= to) {
-                    out.add(counter);
+                    out.add(new RequestedRangeCounter(counter));
                 }
             }
         }
