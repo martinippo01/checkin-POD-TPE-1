@@ -1,26 +1,45 @@
 package ar.edu.itba.pod.tpe1.client;
 
+import ar.edu.itba.pod.tpe1.client.notifications.NotificationsClientMain;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class NotificationsTest {
 
-    private static Logger logger = LoggerFactory.getLogger(Client.class);
+    private static final Logger logger = LoggerFactory.getLogger(Client.class);
 
     ManagedChannel channel;
-    NotificationsClient notificationsClient;
+    NotificationsClientMain notificationsClient;
+
+    ManagedChannel channel2;
+    NotificationsClientMain notificationsClient2;
 
     @Before
     public void setUp(){
-        channel = ManagedChannelBuilder.forAddress("localhost", 50058)
-                .usePlaintext()
-                .build();
-        notificationsClient = new NotificationsClient(channel);
+        String[] args = {
+                "-DserverAddress=localhost:50058", // -DserverAddress=10.6.0.1:50051
+                "-Daction=register",
+                "-Dairline=AmericanAirlines"
+        };
+        String[] args2 = {
+                "-DserverAddress=localhost:50058", // -DserverAddress=10.6.0.1:50051
+                "-Daction=unregister",
+                "-Dairline=AmericanAirlines"
+        };
+        notificationsClient = new NotificationsClientMain(args);
+        channel = notificationsClient.getChannel();
+
+        notificationsClient2 = new NotificationsClientMain(args2);
+        channel2 = notificationsClient2.getChannel();
+
+//        channel = ManagedChannelBuilder.forAddress("localhost", 50058)
+//                .usePlaintext()
+//                .build();
+//        notificationsClient = new NotificationsClient(channel);
     }
 
     @Test
@@ -30,7 +49,8 @@ public class NotificationsTest {
         // Thread 1
         Thread thread1 = new Thread(() -> {
             logger.info("Start register thread, register airline");
-            notificationsClient.registerNotifications("AmericanAirlines");
+            notificationsClient.executeAction();
+//            notificationsClient.registerNotifications("AmericanAirlines");
             logger.info("Airline registered");
         });
 
@@ -41,7 +61,8 @@ public class NotificationsTest {
                 logger.info("Sleep register thread");
                 Thread.sleep(500); // Sleep for 5 seconds
                 logger.info("Wake up register thread, try unregister airline");
-                notificationsClient.unregisterNotifications("AmericanAirlines");
+                notificationsClient2.executeAction();
+//                notificationsAction.unregisterNotifications("AmericanAirlines");
                 logger.info("Airline unregistered");
             } catch (InterruptedException e) {
                 e.printStackTrace();
