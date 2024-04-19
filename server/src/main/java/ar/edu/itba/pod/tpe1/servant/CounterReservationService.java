@@ -23,12 +23,16 @@ public class CounterReservationService extends CounterReservationServiceGrpc.Cou
 
         Map<Sector, List<RangeCounter>> sectorInfo = airport.getSectors();
 
+        for(Sector sector : sectorInfo.keySet()){
 
-//        airport.queryCounters("").forEach(counterInfo -> {
-//            String sectorName = counterInfo.getSector();
-//            CounterReservationServiceOuterClass.Sector.Builder sectorBuilder = CounterReservationServiceOuterClass.Sector.newBuilder().setName(sectorName);
-//            response.addSectors(sectorBuilder.build());
-//        });
+            CounterReservationServiceOuterClass.Sector.Builder sectorBuilder = CounterReservationServiceOuterClass.Sector.newBuilder().setName(sector.getName());
+
+            sectorInfo.get(sector).forEach((ranges) -> {
+                sectorBuilder.addRanges(CounterReservationServiceOuterClass.Range.newBuilder().setStart(ranges.getCounterFrom()).setEnd(ranges.getCounterTo()).build());
+            });
+//            response.setSectors(sectorBuilder.build());
+            response.addSectors(sectorBuilder.build());
+        }
 
         responseObserver.onNext(response.build());
         responseObserver.onCompleted();

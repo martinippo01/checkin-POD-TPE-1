@@ -47,6 +47,7 @@ public class Airport {
     }
 
     // Adds a set of counters to a sector
+    // TODO: sync!!!
     public Integer addCounters(String sectorName, int count) {
         Sector sector = Sector.fromName(sectorName);
         if (count <= 0 || !sectors.containsKey(sector)) {
@@ -120,7 +121,11 @@ public class Airport {
 
     public Map<Sector, List<RangeCounter>> getSectors() {
         //return Collections.unmodifiableMap(sectors);
-        return new ConcurrentHashMap<>(sectors);
+        Map<Sector, List<RangeCounter>> toReturn;
+        synchronized (sectors) {
+            toReturn = new ConcurrentHashMap<>(sectors);
+        }
+        return toReturn;
     }
 
     // TODO: Needs synchronization
