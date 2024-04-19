@@ -53,6 +53,7 @@ message AssignCounterRequest {
 message AssignCounterResponse{
   bool isPending = 1;
   int32 counterFrom = 2;
+  int32 pendingAhead = 3;
 }
 
 message FreeCounterRequest {
