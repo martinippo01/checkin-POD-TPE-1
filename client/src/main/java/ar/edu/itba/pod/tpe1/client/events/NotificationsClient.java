@@ -1,4 +1,4 @@
-package ar.edu.itba.pod.tpe1.client;
+package ar.edu.itba.pod.tpe1.client.events;
 
 
 import airport.NotificationsServiceGrpc;

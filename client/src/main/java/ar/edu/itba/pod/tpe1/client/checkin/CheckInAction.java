@@ -7,27 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class CheckInAction implements Action {
-    protected final List<String> actionArguments;
-    protected final HashMap<String, String> arguments = new HashMap<>(1);
-
+public abstract class CheckInAction extends Action {
     public CheckInAction(List<String> actionArguments) {
-        this.actionArguments = actionArguments;
-    }
-
-    @Override
-    public List<String> getActionArguments() {
-        return actionArguments;
-    }
-
-    @Override
-    public void setArgumentsValues(Map<String, String> arguments) {
-        for (String actionArgument : actionArguments) {
-            if(!arguments.containsKey(actionArgument)) {
-                throw new IllegalArgumentException("Argument with key '" + actionArgument + "' is required for this action.");
-            }
-
-            this.arguments.put(actionArgument, arguments.get(actionArgument));
-        }
+        super(actionArguments);
     }
 }

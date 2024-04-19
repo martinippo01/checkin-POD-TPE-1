@@ -1,4 +1,4 @@
-package ar.edu.itba.pod.tpe1.client;
+package ar.edu.itba.pod.tpe1.client.query;
 import io.grpc.Channel;
 import airport.CounterServiceGrpc;
 import airport.CounterServiceOuterClass.QueryCountersRequest;

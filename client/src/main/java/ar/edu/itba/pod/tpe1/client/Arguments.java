@@ -1,11 +1,11 @@
-package ar.edu.itba.pod.tpe1.client.checkin;
+package ar.edu.itba.pod.tpe1.client;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public enum CheckInArguments {
+public enum Arguments {
     SERVER_ADDRESS("serverAddress"),
     ACTION("action"),
     BOOKING("booking"),
@@ -14,7 +14,7 @@ public enum CheckInArguments {
 
     private final String argument;
 
-    CheckInArguments(String argument) {
+    Arguments(String argument) {
         this.argument = argument;
     }
 
@@ -22,11 +22,11 @@ public enum CheckInArguments {
         return argument;
     }
 
-    private static final Map<String, CheckInArguments> stringToCheckInArgumentsEnum =
+    private static final Map<String, Arguments> stringToCheckInArgumentsEnum =
             Stream.of(values())
-                    .collect(Collectors.toMap(CheckInArguments::getArgument, e -> e));
+                    .collect(Collectors.toMap(Arguments::getArgument, e -> e));
 
-    public static Optional<CheckInArguments> checkInArgumentsFromString(final String symbol) {
+    public static Optional<Arguments> checkInArgumentsFromString(final String symbol) {
         return Optional.ofNullable(stringToCheckInArgumentsEnum.get(symbol));
     }
 }

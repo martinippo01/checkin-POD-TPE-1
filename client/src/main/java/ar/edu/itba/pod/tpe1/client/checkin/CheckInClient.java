@@ -1,71 +1,50 @@
 package ar.edu.itba.pod.tpe1.client.checkin;
 
 
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
+import ar.edu.itba.pod.tpe1.client.Arguments;
+import ar.edu.itba.pod.tpe1.client.Client;
+import ar.edu.itba.pod.tpe1.client.Util;
+import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.naming.ServiceUnavailableException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
+import java.io.IOException;
 
 import static ar.edu.itba.pod.tpe1.client.checkin.CheckInActions.checkInActionsFromString;
 
-public final class CheckInClient {
-    private static Map<String, String> getArgumentsAsMap(String[] args) {
-        List<String> validArgs = Arrays.stream(args)
-                .filter(arg -> arg.startsWith("-D"))
-                .filter(arg -> arg.contains("="))
-                .map(arg -> arg.substring(2))
-                .toList();
 
-        HashMap<String, String> argumentsAsMap = new HashMap<>(validArgs.size());
-        for (String arg : validArgs) {
-            int equalSignIndex = arg.indexOf("=");
+public final class CheckInClient extends Client {
+    private static final Logger logger = LoggerFactory.getLogger(CheckInClient.class);
 
-            argumentsAsMap.put(arg.substring(0, equalSignIndex), arg.substring(equalSignIndex + 1));
-        }
 
-        return argumentsAsMap;
+    public CheckInClient(String[] args) {
+        super(args);
     }
 
-    private static void executeAction(CheckInActions action, Map<String, String> arguments) throws InterruptedException {
-        if (!arguments.containsKey(CheckInArguments.SERVER_ADDRESS.getArgument())) {
-            throw new IllegalArgumentException("Argument '" + CheckInArguments.SERVER_ADDRESS.getArgument() + "' is required.");
-        }
-
-        int semicolonIndex = arguments.get(CheckInArguments.SERVER_ADDRESS.getArgument()).indexOf(":");
-        String serverAddress = arguments.get(CheckInArguments.SERVER_ADDRESS.getArgument()).substring(0, semicolonIndex);
-        int serverPort = Integer.parseInt(arguments.get(CheckInArguments.SERVER_ADDRESS.getArgument()).substring(semicolonIndex + 1));
-
-        ManagedChannel channel = ManagedChannelBuilder.forAddress(serverAddress, serverPort)
-                .usePlaintext()
-                .build();
-
-        try {
-            action.getAction().setArgumentsValues(arguments);
-            action.getAction().run(channel);
-        } catch (ServiceUnavailableException e) {
-            throw new RuntimeException(e);
-        } finally {
-            channel.shutdown().awaitTermination(10, TimeUnit.SECONDS);
-        }
-    }
-
-
-    public static void main(String[] args) throws InterruptedException {
-        Map<String, String> argsMap = getArgumentsAsMap(args);
-
-        if (!argsMap.containsKey(CheckInArguments.ACTION.getArgument())) {
-            throw new IllegalArgumentException("Expected 'action' argument.");
-        }
-
-        CheckInActions action = checkInActionsFromString(argsMap.get(CheckInArguments.ACTION.getArgument())).orElseThrow(() ->
-                new IllegalArgumentException("Provided action '" + CheckInArguments.ACTION.getArgument() + "' does not exists.")
+    @Override
+    public void executeAction() throws ServerUnavailableException {
+        CheckInActions action = checkInActionsFromString(getActionArgument()).orElseThrow(() -> {
+                    logger.error("Provided action '{}' doesn't exist.", Arguments.SERVER_ADDRESS.getArgument());
+                    return new IllegalArgumentException(Util.EXCEPTION_MESSAGE_UNEXPECTED_ARGUMENT + Arguments.ACTION.getArgument());
+                }
         );
 
-        executeAction(action, argsMap);
+        action.getAction().setArguments(getArguments());
+        action.getAction().run(getChannel());
+    }
+
+    public static void main(String[] args) {
+        try (Client client = new CheckInClient(args)) {
+            client.executeAction();
+        } catch (IllegalArgumentException e) {
+            System.err.println(Util.ERROR_MESSAGE_INVALID_ARGUMENT);
+            System.exit(1);
+        } catch (ServerUnavailableException e) {
+            System.err.println(Util.ERROR_MESSAGE_SERVER_UNAVAILABLE);
+            System.exit(2);
+        } catch (IOException e) {
+            System.err.println(Util.ERROR_MESSAGE_IO);
+            System.exit(3);
+        }
     }
 }

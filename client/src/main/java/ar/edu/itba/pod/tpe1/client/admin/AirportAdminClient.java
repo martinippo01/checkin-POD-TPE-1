@@ -1,10 +1,8 @@
-package ar.edu.itba.pod.tpe1.client;
+package ar.edu.itba.pod.tpe1.client.admin;
 
 import airport.AirportAdminServiceGrpc;
 import airport.AirportService;
 import io.grpc.Channel;
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

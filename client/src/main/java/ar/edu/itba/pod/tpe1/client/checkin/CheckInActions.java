@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static ar.edu.itba.pod.tpe1.client.checkin.CheckInArguments.*;
+import static ar.edu.itba.pod.tpe1.client.Arguments.*;
 
 public enum CheckInActions {
     FETCH_COUNTER(
