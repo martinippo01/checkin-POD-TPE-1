@@ -66,7 +66,7 @@ public class RangeCounter implements Comparable<RangeCounter> {
 
     public List<RequestedRangeCounter> getAssignedRangeCounters() {
         //return assignedRangeCounters; // TODO check thread safety
-        return null;
+        return new ArrayList<>(assignedRangeCounters);
     }
 
     @Override

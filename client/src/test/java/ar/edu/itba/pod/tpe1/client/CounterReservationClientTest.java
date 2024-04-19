@@ -73,10 +73,11 @@ public class CounterReservationClientTest {
 
         List<String> flights = new ArrayList<>();
         flights.add("AC987");
+        flights.add("AC988");
         counterReservationClient.assignCounters("C", flights, "AirCanada", 2);
         counterReservationClient.listSectors();
 
-        counterReservationClient.queryCounterRange("C", 1, 3);
+        counterReservationClient.queryCounterRange("C", 2, 4);
     }
 
     @Test
