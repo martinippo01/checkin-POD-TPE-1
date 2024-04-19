@@ -1,6 +1,7 @@
 package ar.edu.itba.pod.tpe1.data;
 
 import airport.CounterServiceOuterClass;
+import ar.edu.itba.pod.tpe1.data.exceptions.CounterReleaseException;
 import ar.edu.itba.pod.tpe1.data.utils.*;
 import counter.CounterReservationServiceOuterClass;
 import java.util.*;
@@ -151,8 +152,36 @@ public class Airport {
         return null;
     }
 
+    FreeCounterResult freeCounters(String sector, int fromVal, String airlineName) throws CounterReleaseException {
+        List<RangeCounter> sectorCounters = sectors.get(sector);
 
-    public RequestedRangeCounter assignCounters(String sectorName, int count, String airlineName, List<String> flightsToReserve) {
+        if (sectorCounters == null) {
+            throw new CounterReleaseException("Sector '" + sector + "' does not exist.");
+        }
+
+        Optional<RangeCounter> range = sectorCounters.stream()
+                .filter(r -> r.getCounterFrom() <= fromVal && r.getCounterTo() >= fromVal)
+                .findFirst();
+
+        if (!range.isPresent()) {
+            throw new CounterReleaseException("No range starting at counter " + fromVal + " exists in sector '" + sectorName + "'.");
+        }
+
+        RangeCounter foundRange = range.get();
+        if (!foundRange.get().equals(airlineName)) {
+            throw new CounterReleaseException("Range counters are not assigned to '" + airlineName + "'.");
+        }
+
+        Queue<RequestedRangeCounter> queue = pendingRequestedCounters.get(sector);
+        if (queue != null && queue.stream().anyMatch(req -> req.getCounterFrom().overlaps(foundRange))) {
+            throw new CounterReleaseException("There are passengers waiting to be attended at the counters.");
+        }
+
+        sectorCounters.remove(foundRange);  // Successfully freeing the range
+        return new FreeCounterResult(sector, foundRange.getCounterFrom(), foundRange.getCounterTo(), airlineName, foundRange.getAssignedRangeCounters().stream().toList().stream().map(requestedRangeCounter -> requestedRangeCounter.getFlights().stream().map(Flight::getFlightCode).collect(Collectors.joining())).collect(Collectors.toList()));
+    }
+
+    public RequestedRangeCounter assignCounters(String sectorName, int count, String airlineName, List<String> flightsToReserve) throws CounterReleaseException {
         // Get the sector
         Sector sector = Sector.fromName(sectorName);
         if (!sectors.containsKey(sector)) {
@@ -172,6 +201,7 @@ public class Airport {
             }
             validFlights.add(flight);
         }
+
 
 
         // Attempt to find a contiguous block of counters

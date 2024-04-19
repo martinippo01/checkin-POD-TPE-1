@@ -76,13 +76,28 @@ public class CounterReservationService extends CounterReservationServiceGrpc.Cou
 
 
     @Override
-    public void freeCounters(CounterReservationServiceOuterClass.FreeCounterRequest request, StreamObserver<CounterReservationServiceOuterClass.BasicResponse> responseObserver) {
-        CounterReservationServiceOuterClass.BasicResponse.Builder response = CounterReservationServiceOuterClass.BasicResponse.newBuilder();
-        // Logic to handle freeing counters (not detailed in provided Airport class)
-        response.setMessage("Counters freed successfully.");
-        responseObserver.onNext(response.build());
+    public void freeCounters(CounterReservationServiceOuterClass.FreeCounterRequest request, StreamObserver<CounterReservationServiceOuterClass.FreeCounterResponse> responseObserver) {
+        try {
+            FreeCounterResult result = Airport.getInstance().freeCounters(request.getSectorName(), request.getFromVal(), request.getAirlineName());
+            CounterReservationServiceOuterClass.FreeCounterResponse response = CounterReservationServiceOuterClass.FreeCounterResponse.newBuilder()
+                    .setSuccess(true)
+                    .setSectorName(result.getSectorName())
+                    .setRangeStart(result.getRangeStart())
+                    .setRangeEnd(result.getRangeEnd())
+                    .setAirlineName(result.getAirlineName())
+                    .addAllFlightNumbers(result.getFlights())
+                    .build();
+            responseObserver.onNext(response);
+        } catch (CounterReleaseException e) {
+            CounterReservationServiceOuterClass.FreeCounterResponse response = CounterReservationServiceOuterClass.FreeCounterResponse.newBuilder()
+                    .setSuccess(false)
+                    .setErrorMessage(e.getMessage())
+                    .build();
+            responseObserver.onError(response);
+        }
         responseObserver.onCompleted();
     }
+
 
     @Override
     public void checkInCounters(CounterReservationServiceOuterClass.CheckInCounterRequest request, StreamObserver<CounterReservationServiceOuterClass.BasicResponse> responseObserver) {
