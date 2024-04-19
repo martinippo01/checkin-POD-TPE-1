@@ -1,16 +1,10 @@
 package ar.edu.itba.pod.tpe1.data;
 
-import airport.AirportService;
 import airport.CounterServiceOuterClass;
 import ar.edu.itba.pod.tpe1.data.utils.*;
-import ar.edu.itba.pod.tpe1.servant.CounterReservationService;
 import counter.CounterReservationServiceOuterClass;
-import org.checkerframework.checker.units.qual.A;
-import org.checkerframework.checker.units.qual.C;
-
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -19,12 +13,12 @@ import java.util.stream.Collectors;
 public class Airport {
 
     private final ConcurrentHashMap<String, String> flightToAirlineMap = new ConcurrentHashMap<>();
-    //private final ConcurrentHashMap<String, Integer> bookingCodes = new ConcurrentHashMap<>();
+    // Key: Booking - Value: a boolean that
     private final ConcurrentHashMap<Booking, Boolean> bookingCodes = new ConcurrentHashMap<>();
 
     private final ConcurrentHashMap<Flight, Airline> flights = new ConcurrentHashMap<>();
 
-    // Make the value of the map a sorted set of type <range>. Make the class range of counters
+    // Key: Sector - Value: A list of range of sectors
     private final ConcurrentHashMap<Sector, List<RangeCounter>> sectors = new ConcurrentHashMap<>();
 
     private final List<CounterServiceOuterClass.CheckInRecord> checkIns = Collections.synchronizedList(new ArrayList<>());
@@ -59,16 +53,10 @@ public class Airport {
             return null; // Failure: sector does not exist or invalid counter count
         }
         int firstId = counterId.getAndAdd(count);
-
+        // TODO: Implement condition where if sector has counters (2-4) and first Id is 5, should create a contiguos sector (2-7)
         // And the range of counters to the sector
         sectors.get(sector).add(new RangeCounter(firstId, firstId + count - 1));
 
-
-
-//        for (int i = firstId; i < firstId + count; i++) {
-//            CounterServiceOuterClass.CounterInfo counter =  CounterServiceOuterClass.CounterInfo.newBuilder().setSector(sectorName).setRange(String.valueOf(i)).build();
-//            counterDetails.get(sectorName).put(i, counter); // Initialize counters with no airline or flight
-//        }
         return firstId; // Success, returns the first ID of the new counters
     }
 
@@ -96,19 +84,7 @@ public class Airport {
         bookingCodes.put(booking, false);
 
         return true;
-//        if(bookingCodes.putIfAbsent(booking, false) != null) {
-//            return false;
-//        }
-//
-//        if (bookingCodes.putIfAbsent(bookingCode, 1) != null) {
-//            return false; // Failure, booking code already exists
-//        }
-//        if (flightToAirlineMap.putIfAbsent(flightCode, airlineName) != null &&
-//                !flightToAirlineMap.get(flightCode).equals(airlineName)) {
-//            bookingCodes.remove(bookingCode); // Roll back the booking code insertion
-//            return false; // Failure, flight code mismatch
-//        }
-//        return true; // Success
+
     }
 
     public void logCheckIn(String sector, int counter, String airline, String flight, String booking) {
@@ -118,7 +94,9 @@ public class Airport {
     }
 
     public List<CounterServiceOuterClass.CounterInfo> queryCounters(String sector) {
-//
+
+
+
 //        if (sector == null)
 //            return new ArrayList<>();
 //
@@ -139,5 +117,55 @@ public class Airport {
     public List<CounterServiceOuterClass.CheckInRecord> queryCheckIns(String sector, String airline) {
         return new ArrayList<>();
     }
+
+    public Map<Sector, List<RangeCounter>> getSectors() {
+        //return Collections.unmodifiableMap(sectors);
+        return new ConcurrentHashMap<>(sectors);
+    }
+
+    // TODO: Needs synchronization
+    public List<AssignedRangeCounter> getAssignedRangeCounters(String sectorName, int from, int to) {
+//        Sector sector = new Sector(sectorName);
+//        List<AssignedRangeCounter> toReturn = new ArrayList<>();
+//
+//        // In case the range does not exist or the range is invalid, it fails
+//        if(!sectors.containsKey(sector) || from < to){
+//            return null;
+//        }
+//
+//        sectors.get(sector).forEach((rangeCounter) -> {
+//            if(ra)
+//        });
+        return null;
+    }
+
+    public AssignedRangeCounter assignCounters (String sectorName, int count, String airlineName, List<String> flightsToReserve){
+        /* Validations:
+                - No existe un sector con ese nombre
+                - No se agregaron pasajeros esperados con el código de vuelo, para al menos uno de los vuelos solicitados
+                - Se agregaron pasajeros esperados con el código de vuelo pero con otra aerolínea, para al menos uno de los vuelos solicitados
+                - Ya existe al menos un mostrador asignado para al menos uno de los vuelos solicitados (no se permiten agrandar rangos de mostradores asignados)
+                - Ya existe una solicitud pendiente de un rango de mostradores para al menos uno de los vuelos solicitados (no se permiten reiterar asignaciones pendientes)
+                - Ya se asignó y luego se liberó un rango de mostradores para al menos uno de los vuelos solicitados (no se puede iniciar el check-in de un vuelo dos o más veces)
+        */
+        Sector sector = Sector.fromName(sectorName);
+        Airline airline = new Airline(airlineName);
+
+        // If the sector does not exist fail
+        if(!sectors.containsKey(sector)){
+            return null;
+        }
+        // If at least one of the flights has no expected passengers, or it belongs to another airline, then fail
+        for(String flight : flightsToReserve){
+            Airline a = flights.getOrDefault(new Flight(flight), null);
+            if(a == null || !a.equals(airline)){
+                return null;
+            }
+        }
+
+
+        return null;
+    }
+
 }
 

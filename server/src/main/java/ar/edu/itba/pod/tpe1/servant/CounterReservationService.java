@@ -3,11 +3,14 @@ package ar.edu.itba.pod.tpe1.servant;
 import airport.AirportService;
 import airport.CounterServiceOuterClass;
 import ar.edu.itba.pod.tpe1.data.Airport;
+import ar.edu.itba.pod.tpe1.data.utils.RangeCounter;
+import ar.edu.itba.pod.tpe1.data.utils.Sector;
 import counter.CounterReservationServiceGrpc;
 import counter.CounterReservationServiceOuterClass;
 import io.grpc.stub.StreamObserver;
 import io.grpc.stub.StreamObserver;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class CounterReservationService extends CounterReservationServiceGrpc.CounterReservationServiceImplBase {
@@ -18,11 +21,14 @@ public class CounterReservationService extends CounterReservationServiceGrpc.Cou
     public void listSectors(CounterReservationServiceOuterClass.SectorRequest request, StreamObserver<CounterReservationServiceOuterClass.SectorResponse> responseObserver) {
         CounterReservationServiceOuterClass.SectorResponse.Builder response = CounterReservationServiceOuterClass.SectorResponse.newBuilder();
 
-        airport.queryCounters("").forEach(counterInfo -> {
-            String sectorName = counterInfo.getSector();
-            CounterReservationServiceOuterClass.Sector.Builder sectorBuilder = CounterReservationServiceOuterClass.Sector.newBuilder().setName(sectorName);
-            response.addSectors(sectorBuilder.build());
-        });
+        Map<Sector, List<RangeCounter>> sectorInfo = airport.getSectors();
+
+
+//        airport.queryCounters("").forEach(counterInfo -> {
+//            String sectorName = counterInfo.getSector();
+//            CounterReservationServiceOuterClass.Sector.Builder sectorBuilder = CounterReservationServiceOuterClass.Sector.newBuilder().setName(sectorName);
+//            response.addSectors(sectorBuilder.build());
+//        });
 
         responseObserver.onNext(response.build());
         responseObserver.onCompleted();
