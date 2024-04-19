@@ -12,7 +12,13 @@ public enum Arguments {
     SECTOR("sector"),
     COUNTER("counter"),
     COUNTERS("counters"),
-    IN_PATH("inPath");
+    IN_PATH("inPath"),
+    COUNTER_COUNT("counterCount"),
+    AIRLINE("airline"),
+    FLIGHTS("flights"),
+    COUNTER_TO("counterTo"),
+    COUNTER_FROM("counterFrom"),
+    OUT_PATH("outPath");
 
     private final String argument;
 
