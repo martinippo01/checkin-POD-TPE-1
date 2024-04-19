@@ -41,16 +41,8 @@ public class CounterReservationClientTest {
         // Create sector A and add 1 counter
         airportAdminClient.addSector("A");
         airportAdminClient.addCounters("A", 1);
-        // Create sector C and add 3 counters
-        airportAdminClient.addSector("C");
-        airportAdminClient.addCounters("C", 3);
-        // Create sector D and add 2 counters
-        airportAdminClient.addSector("D");
-        airportAdminClient.addCounters("D", 2);
-        // Add 2 more counters to C
-        airportAdminClient.addCounters("C", 2);
-        // Create sector Z and leave it empty
-        airportAdminClient.addSector("Z");
+        airportAdminClient.addCounters("A", 3);
+        airportAdminClient.addCounters("A", 2);
 
         counterReservationClient.listSectors();
     }
