@@ -10,7 +10,9 @@ public enum Arguments {
     ACTION("action"),
     BOOKING("booking"),
     SECTOR("sector"),
-    COUNTER("counter");
+    COUNTER("counter"),
+    COUNTERS("counters"),
+    IN_PATH("inPath");
 
     private final String argument;
 
