@@ -189,7 +189,7 @@ public class Airport {
     public Map<Sector, List<RangeCounter>> getSectors() {
 
         if(sectors.isEmpty())
-            return null;
+            throw new IllegalStateException("There are no sectors registered at the airport.");
 
         Map<Sector, List<RangeCounter>> toReturn;
         synchronized (sectors) {
@@ -218,8 +218,11 @@ public class Airport {
         Sector sector = new Sector(sectorName);
 
         // If sector does not exist or range is not valid, fail
-        if(!sectors.containsKey(sector) || to < from)
-            return null;
+        if(!sectors.containsKey(sector))
+            throw new IllegalStateException("Invalid sector");
+
+        if(to < from)
+            throw new IllegalArgumentException("Invalid range.");
 
         List<RangeCounter> sectorCounters = sectors.get(sector);
         List<RequestedRangeCounter> out = new ArrayList<>();

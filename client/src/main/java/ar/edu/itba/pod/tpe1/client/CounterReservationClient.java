@@ -60,7 +60,15 @@ public class CounterReservationClient {
                 System.out.println(line);
             });
         } catch (StatusRuntimeException e) {
-            System.out.println("Failed: " + e.getStatus().asRuntimeException());
+            if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
+                System.out.println("Error: The specified sector '" + sectorName + "' does not exist.");
+            } else if (e.getStatus().getCode() == Status.Code.INVALID_ARGUMENT) {
+                System.out.println("Error: The counter range must be positive");
+            } else {
+                System.out.println("Failed: " + e.getStatus().asRuntimeException());
+            }
+        } catch (Exception e) {
+            System.out.println("RPC failed: " + e);
         }
     }
 
