@@ -160,8 +160,14 @@ public class Airport {
         List<RequestedRangeCounter> out = new ArrayList<>();
         for(RangeCounter rangeCounter : sectorCounters) {
             for (RequestedRangeCounter counter : rangeCounter.getAssignedRangeCounters()) {
-                if (counter.getCounterFrom() <= from && counter.getCounterTo() >= to) {
+                if (counter.getCounterFrom() >= from && counter.getCounterTo() <= to) {
                     out.add(new RequestedRangeCounter(counter));
+                }
+            }
+            for(int i = rangeCounter.getCounterFrom(); i <= rangeCounter.getCounterTo(); i++) {
+                RequestedRangeCounter temp = new RequestedRangeCounter(new ArrayList<>(), new Airline(""), false, i - rangeCounter.getCounterFrom() + 1);
+                if (!rangeCounter.getAssignedRangeCounters().contains(temp) && temp.getCounterFrom() >= from && temp.getCounterTo() <= to) {
+                    out.add(temp);
                 }
             }
         }
