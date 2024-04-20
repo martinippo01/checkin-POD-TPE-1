@@ -135,7 +135,7 @@ public class CounterReservationClientTest {
 
         // Add passengers
         System.out.println("Case 1: All OK");
-        airportAdminClient.addPassengerManifest("/Users/marcoscilipoti/Documents/1Q 2024/POD/checkin-POD-TPE-1/client/src/test/java/ar/edu/itba/pod/tpe1/client/passengersOk.csv");
+        airportAdminClient.addPassengerManifest("/home/martinippo/Desktop/ITBA/POD/TPE1/grpc-com-tpe1/client/src/test/java/ar/edu/itba/pod/tpe1/client/passengersOk.csv");
 
         List<String> flights = new ArrayList<>();
         flights.add("AC987");
@@ -156,6 +156,67 @@ public class CounterReservationClientTest {
 
     @Test
     public void checkInCounters() {
+
+    }
+
+    @Test
+    public void assignPendingWhenFreeCounter(){
+        // Create sector A and add 1 counter
+        airportAdminClient.addSector("A");
+        airportAdminClient.addCounters("A", 3);
+
+        // Add passengers
+        System.out.println("Case 1: All OK");
+        airportAdminClient.addPassengerManifest("/home/martinippo/Desktop/ITBA/POD/TPE1/grpc-com-tpe1/client/src/test/java/ar/edu/itba/pod/tpe1/client/passengersOk.csv");
+
+        // Assign the first Flight-Airline
+        List<String> flights = new ArrayList<>();
+        flights.add("AC987");
+        counterReservationClient.assignCounters("A", flights, "AirCanada", 2);
+        counterReservationClient.listSectors();
+
+        // Assign the second one and it'll be pending
+        List<String> flights1 = new ArrayList<>();
+        flights1.add("AC988");
+        counterReservationClient.assignCounters("A", flights1, "AirCanada", 2);
+        counterReservationClient.listPendingAssignments("A");
+
+        // Free the counters for flight AC987
+        counterReservationClient.freeCounters("A", 1,"AirCanada" );
+
+        // Check if the assignation was made
+        counterReservationClient.listPendingAssignments("A");
+
+    }
+
+    @Test
+    public void assignPendingWhenAddedCountersToSector(){
+        // Create sector A and add 1 counter
+        airportAdminClient.addSector("A");
+        airportAdminClient.addCounters("A", 3);
+
+        // Add passengers
+        System.out.println("Case 1: All OK");
+        airportAdminClient.addPassengerManifest("/home/martinippo/Desktop/ITBA/POD/TPE1/grpc-com-tpe1/client/src/test/java/ar/edu/itba/pod/tpe1/client/passengersOk.csv");
+
+        // Assign the first Flight-Airline
+        List<String> flights = new ArrayList<>();
+        flights.add("AC987");
+        counterReservationClient.assignCounters("A", flights, "AirCanada", 2);
+        counterReservationClient.listSectors();
+
+        // Assign the second one and it'll be pending
+        List<String> flights1 = new ArrayList<>();
+        flights1.add("AC988");
+        counterReservationClient.assignCounters("A", flights1, "AirCanada", 2);
+        counterReservationClient.listPendingAssignments("A");
+
+        // Free the counters for flight AC987
+        airportAdminClient.addCounters("A", 2);
+
+        // Check if the assignation was made
+        counterReservationClient.listPendingAssignments("A");
+
     }
 
     @Test
