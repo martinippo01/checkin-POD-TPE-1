@@ -169,14 +169,14 @@ public class Airport {
     }
 
     // TODO:
-    public FreeCounterResult freeCounters(String sectorName, int fromVal, String airlineName) throws CounterReleaseException {
+    public FreeCounterResult freeCounters(String sectorName, int fromVal, String airlineName) throws Exception {
 
         Sector sector = new Sector(sectorName);
         Airline airline = new Airline(airlineName);
         List<RangeCounter> sectorCounters = sectors.get(sector);
 
         if (sectorCounters == null) {
-            throw new CounterReleaseException("Sector '" + sector + "' does not exist.");
+            throw new ClassNotFoundException("Sector '" + sectorName + "' does not exist.");
         }
 
         RequestedRangeCounter rangeCounterFound = null;
@@ -192,11 +192,14 @@ public class Airport {
         }
 
         if(rangeCounterFound == null){
-            throw new CounterReleaseException("No range starting at counter " + fromVal + " exists in sector '" + sectorName + "'.");
+            throw new IllegalArgumentException("No range starting at counter " + fromVal + " exists in sector '" + sectorName + "'.");
 
         }
 
         //TODO: VERIFICAR PERSONAS EN ESPERA
+        boolean waiting = false;
+        if(waiting)
+            throw new IllegalStateException("Cannot free counters as there are passengers waiting to be attended.");
 
         return new FreeCounterResult(String.valueOf(rangeCounterFound.getCounterFrom()), rangeCounterFound.getCounterFrom(), rangeCounterFound.getCounterTo(), rangeCounterFound.getAirline().getName(), rangeCounterFound.getFlights().stream().map(Flight::getFlightCode).collect(Collectors.toList()));
     }

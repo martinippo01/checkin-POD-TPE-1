@@ -29,7 +29,9 @@ public class RangeCounter implements Comparable<RangeCounter> {
 
     public RequestedRangeCounter freeRange(final int fromVal, final Airline airline) {
         for(RequestedRangeCounter assignedRangeCounter : assignedRangeCounters) {
-            if (assignedRangeCounter.getCounterFrom() == fromVal && assignedRangeCounter.getAirline().equals(airline)) {
+            if (assignedRangeCounter.getCounterFrom() == fromVal) {
+                if(!assignedRangeCounter.getAirline().equals(airline))
+                    throw new IllegalCallerException("The airline does not own the counter");
                 assignedRangeCounters.remove(assignedRangeCounter);
                 return assignedRangeCounter;
             }

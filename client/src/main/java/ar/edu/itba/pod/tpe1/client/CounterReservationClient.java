@@ -93,26 +93,22 @@ public class CounterReservationClient {
                 .build();
         try {
             CounterReservationServiceOuterClass.FreeCounterResponse response = blockingStub.freeCounters(request);
-            if (response.getSuccess()) {
-                String range = " on counters " + response.getRangeStart() + "-" + response.getRangeEnd();
-                System.out.println("Ended check-in for flights " + String.join("|", response.getFlightNumbersList()) + range + " in Sector " + response.getSectorName());
-            } else {
-                System.err.println("Operation failed: Unspecified error");
-            }
+            String range = " on counters " + response.getRangeStart() + "-" + response.getRangeEnd();
+            System.out.println("Ended check-in for flights " + String.join("|", response.getFlightNumbersList()) + range + " in Sector " + response.getSectorName());
         } catch (StatusRuntimeException e) {
-//            if (e.getStatus().getCode() == Status.Code.NOT_FOUND ) {
-//                System.err.println("Error: The specified sector '" + sectorName + "' does not exist.");
-//            } else if (e.getStatus().getCode() == Status.Code.INVALID_ARGUMENT) {
-//                System.err.println("Error: The specified counter range starting at " + fromVal + " does not exist in sector '" + sectorName + "'.");
-//            } else if (e.getStatus().getCode() == Status.Code.PERMISSION_DENIED ) {
-//                System.err.println("Error: The counter range cannot be freed as it is not assigned to '" + airlineName + "'.");
-//            } else if (e.getStatus().getCode() == Status.Code.FAILED_PRECONDITION) {
-//                System.err.println("Error: Cannot free counters as there are passengers waiting to be attended.");
-//            } else {
-                System.err.println("RPC failed: " + e.getStatus());
+            if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
+                System.out.println("Error: The specified sector '" + sectorName + "' does not exist.");
+            } else if (e.getStatus().getCode() == Status.Code.INVALID_ARGUMENT) {
+                System.out.println("Error: The specified counter range starting at " + fromVal + " does not exist in sector '" + sectorName + "'.");
+            } else if (e.getStatus().getCode() == Status.Code.PERMISSION_DENIED) {
+                System.out.println("Error: The counter range cannot be freed as it is not assigned to '" + airlineName + "'.");
+            } else if (e.getStatus().getCode() == Status.Code.FAILED_PRECONDITION) {
+                System.out.println("Error: Cannot free counters as there are passengers waiting to be attended.");
+            } else {
+                System.out.println("RPC failed: " + e.getStatus());
+            }
         }
     }
-
 
     public void checkInCounters(String sectorName, int fromVal, String airlineName) {
         CounterReservationServiceOuterClass.CheckInCounterRequest request = CounterReservationServiceOuterClass.CheckInCounterRequest.newBuilder()

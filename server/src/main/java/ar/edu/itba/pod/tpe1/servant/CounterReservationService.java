@@ -7,6 +7,7 @@ import ar.edu.itba.pod.tpe1.data.exceptions.CounterReleaseException;
 import ar.edu.itba.pod.tpe1.data.utils.*;
 import counter.CounterReservationServiceGrpc;
 import counter.CounterReservationServiceOuterClass;
+import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import io.grpc.stub.StreamObserver;
 import java.util.List;
@@ -84,7 +85,6 @@ public class CounterReservationService extends CounterReservationServiceGrpc.Cou
         try {
             FreeCounterResult result = airport.freeCounters(request.getSectorName(), request.getFromVal(), request.getAirlineName());
             CounterReservationServiceOuterClass.FreeCounterResponse response = CounterReservationServiceOuterClass.FreeCounterResponse.newBuilder()
-                    .setSuccess(true)
                     .setSectorName(result.getSectorName())
                     .setRangeStart(result.getRangeStart())
                     .setRangeEnd(result.getRangeEnd())
@@ -92,14 +92,18 @@ public class CounterReservationService extends CounterReservationServiceGrpc.Cou
                     .addAllFlightNumbers(result.getFlights())
                     .build();
             responseObserver.onNext(response);
-        } catch (CounterReleaseException e) {
-            CounterReservationServiceOuterClass.FreeCounterResponse response = CounterReservationServiceOuterClass.FreeCounterResponse.newBuilder()
-                    .setSuccess(false)
-                    .build();
-            responseObserver.onNext(response);
-            responseObserver.onError(e);
+            responseObserver.onCompleted();
+        } catch (ClassNotFoundException e) {
+            responseObserver.onError(io.grpc.Status.NOT_FOUND.withDescription(e.getMessage()).asRuntimeException());
+        } catch (IllegalArgumentException e) {
+            responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException());
+        }  catch (IllegalCallerException e) {
+            responseObserver.onError(Status.PERMISSION_DENIED.withDescription(e.getMessage()).asRuntimeException());
+        } catch (IllegalStateException e) {
+            responseObserver.onError(Status.FAILED_PRECONDITION.withDescription(e.getMessage()).asRuntimeException());
+        } catch (Exception e) {
+            responseObserver.onError(Status.UNKNOWN.withDescription(e.getMessage()).asRuntimeException());
         }
-        responseObserver.onCompleted();
     }
 
 
