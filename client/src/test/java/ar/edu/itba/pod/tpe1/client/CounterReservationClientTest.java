@@ -102,6 +102,25 @@ public class CounterReservationClientTest {
     }
 
     @Test
+    public void queryCounterRangeFailNoSectors() {
+
+        counterReservationClient.queryCounterRange("C", 2, 4);
+
+        airportAdminClient.addSector("A");
+
+        counterReservationClient.queryCounterRange("C", 2, 4);
+    }
+
+    @Test
+    public void queryCounterRangeFailInvalidRange() {
+
+        airportAdminClient.addSector("A");
+        airportAdminClient.addCounters("A", 3);
+
+        counterReservationClient.queryCounterRange("C", 4, 2);
+    }
+
+    @Test
     public void assignCounters() {
         // Create sector A and add 1 counter
         airportAdminClient.addSector("A");

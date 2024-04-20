@@ -60,7 +60,7 @@ public class CounterReservationClient {
                 System.out.println(line);
             });
         } catch (StatusRuntimeException e) {
-            System.err.println("RPC failed: " + e.getStatus());
+            System.out.println("Failed: " + e.getStatus().asRuntimeException());
         }
     }
 
