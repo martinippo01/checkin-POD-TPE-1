@@ -50,12 +50,26 @@ message AssignCounterRequest {
   repeated string flights = 4;
 }
 
+message AssignCounterResponse{
+  bool isPending = 1;
+  int32 counterFrom = 2;
+  int32 pendingAhead = 3;
+}
+
 message FreeCounterRequest {
   string sectorName = 1;
   int32 fromVal = 2;
   string airlineName = 3;
 }
 
+message FreeCounterResponse {
+  bool success = 1;
+  string sectorName = 2;
+  int32 rangeStart = 3;
+  int32 rangeEnd = 4;
+  string airlineName = 5;
+  repeated string flightNumbers = 6;  // List of flights affected
+}
 message CheckInCounterRequest {
   string sectorName = 1;
   int32 fromVal = 2;
@@ -80,8 +94,8 @@ message PendingAssignment {
 service CounterReservationService {
   rpc listSectors(SectorRequest) returns (SectorResponse);
   rpc queryCounterRange(CounterRangeRequest) returns (CounterRangeResponse);
-  rpc assignCounters(AssignCounterRequest) returns (BasicResponse);
-  rpc freeCounters(FreeCounterRequest) returns (BasicResponse);
+  rpc assignCounters(AssignCounterRequest) returns (AssignCounterResponse);
+  rpc freeCounters(FreeCounterRequest) returns (FreeCounterResponse);
   rpc checkInCounters(CheckInCounterRequest) returns (BasicResponse);
   rpc listPendingAssignments(PendingAssignmentsRequest) returns (PendingAssignmentsResponse);
 }
