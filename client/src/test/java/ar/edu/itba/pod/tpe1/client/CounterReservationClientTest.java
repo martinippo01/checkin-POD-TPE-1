@@ -69,7 +69,7 @@ public class CounterReservationClientTest {
 
         // Add passengers
         System.out.println("Case 1: All OK");
-        airportAdminClient.addPassengerManifest("/Users/marcoscilipoti/Documents/1Q 2024/POD/checkin-POD-TPE-1/client/src/test/java/ar/edu/itba/pod/tpe1/client/passengersOk.csv");
+        airportAdminClient.addPassengerManifest("/home/martinippo/Desktop/ITBA/POD/TPE1/grpc-com-tpe1/client/src/test/java/ar/edu/itba/pod/tpe1/client/passengersOk.csv");
 
         List<String> flights = new ArrayList<>();
         flights.add("AC987");
@@ -180,8 +180,16 @@ public class CounterReservationClientTest {
         flights3.add("AA123");
         counterReservationClient.assignCounters("A", flights3, "AmericanAirlines", 3);
 
+        System.out.println("Prior additions of counter");
         counterReservationClient.listPendingAssignments("A");
+
+        airportAdminClient.addCounters("A", 5);
+
+        System.out.println("Post additions of counter");
+        counterReservationClient.listPendingAssignments("A");
+
         counterReservationClient.listSectors();
+        counterReservationClient.queryCounterRange("A", 1, 10);
     }
 
     @Test

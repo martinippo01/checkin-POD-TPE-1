@@ -76,10 +76,11 @@ public class Airport {
         }
         if(lastCounterOfSector == firstId - 1){
             sectors.get(sector).remove(removeRangeCounter);
-            RangeCounter newRangeCounter = new RangeCounter(removeRangeCounter.getCounterFrom(), firstId + count - 1);
+            RangeCounter newRangeCounter = new RangeCounter(removeRangeCounter, firstId + count - 1);
             sectors.get(sector).add(newRangeCounter);
             // Make sure the elements are in the correct order
             Collections.sort(sectors.get(sector));
+            tryToAssignPendings(sector); // If there were pending assignments, try to solve them
             return newRangeCounter;
         }else{
             RangeCounter newRangeCounter = new RangeCounter(firstId, firstId + count - 1);
@@ -87,6 +88,7 @@ public class Airport {
             sectors.get(sector).add(newRangeCounter);
             // Make sure the elements are in the correct order
             Collections.sort(sectors.get(sector));
+            tryToAssignPendings(sector); // If there were pending assignments, try to solve them
             return newRangeCounter; // Success, returns the first ID of the new counters
         }
     }
@@ -158,21 +160,25 @@ public class Airport {
         Sector sector = new Sector(sectorName);
         List<RangeCounter> sectorCounters = sectors.get(sector);
         List<RequestedRangeCounter> out = new ArrayList<>();
+        boolean containsAssignedRangeCounter = false;
+
         for(RangeCounter rangeCounter : sectorCounters) {
-            for (RequestedRangeCounter counter : rangeCounter.getAssignedRangeCounters()) {
-                if (counter.getCounterFrom() >= from && counter.getCounterTo() <= to) {
-                    out.add(new RequestedRangeCounter(counter));
+            if(!(to <= rangeCounter.getCounterFrom() || from >= rangeCounter.getCounterTo())) { // In case the range is outside the from-to
+                int prevFrom = rangeCounter.getCounterFrom();
+                for (RequestedRangeCounter counter : rangeCounter.getAssignedRangeCounters()) {
+                    if (prevFrom < counter.getCounterFrom())
+                        out.add(new RequestedRangeCounter(prevFrom, counter.getCounterFrom() - 1, new ArrayList<>(), new Airline(""), false));
+                    if (counter.getCounterFrom() >= from && counter.getCounterTo() <= to) {
+                        containsAssignedRangeCounter = true;
+                        out.add(new RequestedRangeCounter(counter));
+                    }
+                    prevFrom = counter.getCounterTo() + 1;
                 }
-            }
-            //intento agregar los counters sin airline asignado, como el enunciado marcaba
-            for(int i = rangeCounter.getCounterFrom(); i <= rangeCounter.getCounterTo(); i++) {
-                RequestedRangeCounter temp = new RequestedRangeCounter(new ArrayList<>(), new Airline(""), false, i - rangeCounter.getCounterFrom() + 1);
-                if (!rangeCounter.getAssignedRangeCounters().contains(temp) && temp.getCounterFrom() >= from && temp.getCounterTo() <= to) {
-                    out.add(temp);
-                }
+                if (prevFrom <= rangeCounter.getCounterTo())
+                    out.add(new RequestedRangeCounter(prevFrom, rangeCounter.getCounterTo(), new ArrayList<>(), new Airline(""), false));
             }
         }
-        return out;
+        return containsAssignedRangeCounter ? out : new ArrayList<>();
     }
 
     // TODO:
@@ -242,17 +248,25 @@ public class Airport {
             validFlights.add(flight);
         }
 
-        // Attempt to find a contiguous block of counters
+        RequestedRangeCounter assigned = findSpaceForRange(sector, validFlights, airline, count);
+
+        if(assigned == null) {
+            pendingRequestedCounters.putIfAbsent(sector, new ConcurrentLinkedQueue<>());
+            pendingRequestedCounters.get(sector).add(new RequestedRangeCounter(validFlights, airline, true, count));
+            return null;
+        }
+        return assigned;
+
+    }
+
+    private RequestedRangeCounter findSpaceForRange(Sector sector, List<Flight> flights, Airline airline, int count){
         List<RangeCounter> ranges = sectors.get(sector);
         RequestedRangeCounter assignedRangeCounter = null;
         for(RangeCounter rangeCounter : ranges){
-            assignedRangeCounter = rangeCounter.assignRange(count, validFlights, airline);
+            assignedRangeCounter = rangeCounter.assignRange(count, flights, airline);
             if(assignedRangeCounter != null)
                 return assignedRangeCounter;
         }
-
-        pendingRequestedCounters.putIfAbsent(sector, new ConcurrentLinkedQueue<>());
-        pendingRequestedCounters.get(sector).add(new RequestedRangeCounter(validFlights, airline, true, count));
         return null;
     }
 
@@ -262,6 +276,20 @@ public class Airport {
         if(requestedRangeCounters == null)
             throw new IllegalArgumentException();
         return new ArrayList<>(requestedRangeCounters);
+    }
+
+    private void tryToAssignPendings(Sector sector){
+
+        for(RequestedRangeCounter reqRangeCounter : pendingRequestedCounters.get(sector)){
+            RequestedRangeCounter assigned = findSpaceForRange(sector, reqRangeCounter.getFlights(), reqRangeCounter.getAirline(), reqRangeCounter.getRequestedRange());
+            if(assigned != null){
+                pendingRequestedCounters.get(sector).remove(reqRangeCounter); // If it was assigned, remove it from the queue
+                // Notify notifications
+            }else{
+
+            }
+        }
+
     }
 
 }
