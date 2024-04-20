@@ -119,16 +119,23 @@ public class Airport {
     }
 
     public List<CounterServiceOuterClass.CounterInfo> queryCountersBySector(String sectorName) throws RuntimeException {
-        if(!sectorName.equals(""))
+
+        //This
+        if(sectors.isEmpty()) {
+            throw new IllegalStateException("There are no sectors registered at the airport.");
+        }
+
+        if(!sectorName.equals("")) {
             return queryCounters(sectorName, false).stream().map(
                     requestedRangeCounter -> CounterServiceOuterClass.CounterInfo.newBuilder()
-                        .setSector(requestedRangeCounter.getCounterFrom() + "-" + requestedRangeCounter.getCounterTo())
-                        .setAirline(requestedRangeCounter.getAirline().getName())
-                        .addAllFlights(requestedRangeCounter.getFlights().stream().map(Flight::getFlightCode).toList())
-                        .setWaitingPeople(requestedRangeCounter.getRequestedRange())
-                        .setSector(sectorName)
-                        .build()
+                            .setSector(requestedRangeCounter.getCounterFrom() + "-" + requestedRangeCounter.getCounterTo())
+                            .setAirline(requestedRangeCounter.getAirline().getName())
+                            .addAllFlights(requestedRangeCounter.getFlights().stream().map(Flight::getFlightCode).toList())
+                            .setWaitingPeople(requestedRangeCounter.getRequestedRange())
+                            .setSector(sectorName)
+                            .build()
             ).toList();
+        }
 
         List<CounterServiceOuterClass.CounterInfo> out = new ArrayList<>();
 

@@ -25,8 +25,12 @@ public class CounterQueryClient {
             QueryCountersResponse response = blockingStub.queryCounters(request);
             printCounterQueryResponse(response);
         } catch (StatusRuntimeException e) {
+            if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
                 System.out.println("Sector  Counters  Airline          Flights             People");
                 System.out.println("###############################################################");
+            } else if (e.getStatus().getCode() == Status.Code.FAILED_PRECONDITION) {
+                System.out.println("No counters found, please add counters to the sector. Optional -DoutPath= file skipped");
+            }
         } catch (Exception e) {
             System.err.println("RPC failed: " + e.getMessage());
         }

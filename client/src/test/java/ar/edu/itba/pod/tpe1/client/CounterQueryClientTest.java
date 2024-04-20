@@ -33,6 +33,8 @@ public class CounterQueryClientTest {
     }
     @Test
     public void queryCounters() {
+        counterQueryClient.queryCounters("C");
+
         // Create sector A and add 1 counter
         airportAdminClient.addSector("A");
         airportAdminClient.addCounters("A", 1);
@@ -62,7 +64,6 @@ public class CounterQueryClientTest {
         counterReservationClient.assignCounters("D", flights, "AirCanada", 2);
         counterReservationClient.listSectors();
 
-        System.out.println("Querying Fucking Counters");
         counterQueryClient.queryCounters("C");
         counterQueryClient.queryCounters("Z");
         counterQueryClient.queryCounters("");
