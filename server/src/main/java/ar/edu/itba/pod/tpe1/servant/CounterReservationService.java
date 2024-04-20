@@ -24,6 +24,11 @@ public class CounterReservationService extends CounterReservationServiceGrpc.Cou
 
         Map<Sector, List<RangeCounter>> sectorInfo = airport.getSectors();
 
+        if(sectorInfo == null) {
+            responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("There are no sectors registered at the airport").asRuntimeException());
+            return;
+        }
+
         for(Sector sector : sectorInfo.keySet()){
 
             CounterReservationServiceOuterClass.Sector.Builder sectorBuilder = CounterReservationServiceOuterClass.Sector.newBuilder().setName(sector.getName());
@@ -43,6 +48,11 @@ public class CounterReservationService extends CounterReservationServiceGrpc.Cou
         CounterReservationServiceOuterClass.CounterRangeResponse.Builder response = CounterReservationServiceOuterClass.CounterRangeResponse.newBuilder();
 
         List<RequestedRangeCounter> counters = airport.listCounters(request.getSectorName(), request.getFromVal(), request.getToVal());
+
+        if(counters == null){
+            responseObserver.onError(Status.INVALID_ARGUMENT.asRuntimeException());
+            return;
+        }
 
         for (RequestedRangeCounter counter : counters) {
                 CounterReservationServiceOuterClass.CounterRange.Builder rangeBuilder = CounterReservationServiceOuterClass.CounterRange.newBuilder()
@@ -79,7 +89,6 @@ public class CounterReservationService extends CounterReservationServiceGrpc.Cou
         responseObserver.onCompleted();
     }
 
-
     @Override
     public void freeCounters(CounterReservationServiceOuterClass.FreeCounterRequest request, StreamObserver<CounterReservationServiceOuterClass.FreeCounterResponse> responseObserver) {
         try {
@@ -105,7 +114,6 @@ public class CounterReservationService extends CounterReservationServiceGrpc.Cou
             responseObserver.onError(Status.UNKNOWN.withDescription(e.getMessage()).asRuntimeException());
         }
     }
-
 
     @Override
     public void checkInCounters(CounterReservationServiceOuterClass.CheckInCounterRequest request, StreamObserver<CounterReservationServiceOuterClass.BasicResponse> responseObserver) {

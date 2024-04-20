@@ -179,7 +179,10 @@ public class Airport {
     }
 
     public Map<Sector, List<RangeCounter>> getSectors() {
-        //return Collections.unmodifiableMap(sectors);
+
+        if(sectors.isEmpty())
+            return null;
+
         Map<Sector, List<RangeCounter>> toReturn;
         synchronized (sectors) {
             toReturn = new ConcurrentHashMap<>(sectors);
@@ -205,6 +208,11 @@ public class Airport {
 
     public List<RequestedRangeCounter> listCounters(String sectorName, int from, int to) {
         Sector sector = new Sector(sectorName);
+
+        // If sector does not exist or range is not valid, fail
+        if(!sectors.containsKey(sector) || to < from)
+            return null;
+
         List<RangeCounter> sectorCounters = sectors.get(sector);
         List<RequestedRangeCounter> out = new ArrayList<>();
         boolean containsAssignedRangeCounter = false;
