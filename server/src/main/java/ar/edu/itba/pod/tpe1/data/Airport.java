@@ -120,7 +120,7 @@ public class Airport {
 
     public List<CounterServiceOuterClass.CounterInfo> queryCountersBySector(String sectorName) throws RuntimeException {
         if(!sectorName.equals(""))
-            return queryCounters(sectorName).stream().map(
+            return queryCounters(sectorName, false).stream().map(
                     requestedRangeCounter -> CounterServiceOuterClass.CounterInfo.newBuilder()
                         .setSector(requestedRangeCounter.getCounterFrom() + "-" + requestedRangeCounter.getCounterTo())
                         .setAirline(requestedRangeCounter.getAirline().getName())
@@ -133,27 +133,33 @@ public class Airport {
         List<CounterServiceOuterClass.CounterInfo> out = new ArrayList<>();
 
         for (Sector sector : sectors.keySet()) {
-            out.addAll(
-                    queryCounters(sector.getName()).stream().map(
-                    requestedRangeCounter -> CounterServiceOuterClass.CounterInfo.newBuilder()
+            String sectorName2 = sector.getName();
+            List<RequestedRangeCounter> requestedRangeCounters = queryCounters(sectorName2, true);
+
+            for(RequestedRangeCounter requestedRangeCounter : requestedRangeCounters){
+                CounterServiceOuterClass.CounterInfo counterInfo = CounterServiceOuterClass.CounterInfo.newBuilder()
                             .setSector(requestedRangeCounter.getCounterFrom() + "-" + requestedRangeCounter.getCounterTo())
                             .setAirline(requestedRangeCounter.getAirline().getName())
                             .addAllFlights(requestedRangeCounter.getFlights().stream().map(Flight::getFlightCode).toList())
                             .setWaitingPeople(requestedRangeCounter.getRequestedRange())
-                            .setSector(sectorName)
-                            .build()).toList());
+                            .setSector(sector.getName())
+                            .build();
+                out.add(counterInfo);
+            }
         }
 
         return out;
     }
 
-    public List<RequestedRangeCounter> queryCounters(String sectorName) throws RuntimeException {
+    public List<RequestedRangeCounter> queryCounters(String sectorName, Boolean allCounters) throws RuntimeException {
 
         Sector sector = new Sector(sectorName);
         List<RangeCounter> sectorCounters = sectors.getOrDefault(sector, new ArrayList<>());
 
-        if(sectorCounters.isEmpty())
+        //a small patch, really hard bug to catch
+        if(sectorCounters.isEmpty() && !allCounters) {
             throw new IllegalArgumentException("No counters found for the specified sector.");
+        }
 
         List<RequestedRangeCounter> out = new ArrayList<>();
         boolean containsAssignedRangeCounter = false;

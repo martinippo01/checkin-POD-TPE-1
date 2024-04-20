@@ -59,6 +59,7 @@ public class CounterQueryClientTest {
         flights.add("AC987");
         flights.add("AC988");
         counterReservationClient.assignCounters("C", flights, "AirCanada", 2);
+        counterReservationClient.assignCounters("D", flights, "AirCanada", 2);
         counterReservationClient.listSectors();
 
         System.out.println("Querying Fucking Counters");
