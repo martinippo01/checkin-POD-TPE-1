@@ -141,6 +141,11 @@ public class CounterReservationClientTest {
 
         counterReservationClient.queryCounterRange("C", 1, 3);
         counterReservationClient.freeCounters("C", 2,"AirCanada" );
+        counterReservationClient.freeCounters("C", 2,"AirCanada" );
+        counterReservationClient.freeCounters("F", 2,"AirCanada" );
+
+        counterReservationClient.assignCounters("C", flights, "AirCanada", 2);
+        counterReservationClient.freeCounters("C", 2,"AirCanada2" );
 
         counterReservationClient.listSectors();
 
