@@ -48,7 +48,11 @@ public class Airport {
     // Adds a sector if it does not already exist
     public boolean addSector(String sectorName) {
         // Failure if sector already exists
-        return sectors.putIfAbsent(new Sector(sectorName), new ArrayList<>()) == null;
+        if(sectors.putIfAbsent(new Sector(sectorName), new ArrayList<>()) != null)
+            return false;
+        // In case it does not exist, create the pending queue for counter assignments
+        pendingRequestedCounters.put(new Sector(sectorName), new ConcurrentLinkedQueue<>());
+        return true;
     }
 
     // Adds a set of counters to a sector
@@ -164,6 +168,7 @@ public class Airport {
         return out;
     }
 
+    // TODO:
     public FreeCounterResult freeCounters(String sectorName, int fromVal, String airlineName) throws CounterReleaseException {
 
         Sector sector = new Sector(sectorName);
@@ -201,7 +206,7 @@ public class Airport {
         Sector sector = Sector.fromName(sectorName);
         if (!sectors.containsKey(sector)) {
             // Sector does not exist
-            return null;
+            throw new IllegalArgumentException();
         }
 
         // Check if all flights are valid and linked to the specified airline
@@ -212,24 +217,31 @@ public class Airport {
             Airline registeredAirline = flights.getOrDefault(flight, null);
             if (registeredAirline == null || !registeredAirline.equals(airline)) {
                 // If any flight does not exist or is registered to a different airline
-                return null;
+                throw new IllegalArgumentException();
             }
             validFlights.add(flight);
         }
-
-
 
         // Attempt to find a contiguous block of counters
         List<RangeCounter> ranges = sectors.get(sector);
         RequestedRangeCounter assignedRangeCounter = null;
         for(RangeCounter rangeCounter : ranges){
             assignedRangeCounter = rangeCounter.assignRange(count, validFlights, airline);
-            return assignedRangeCounter;
+            if(assignedRangeCounter != null)
+                return assignedRangeCounter;
         }
 
         pendingRequestedCounters.putIfAbsent(sector, new ConcurrentLinkedQueue<>());
-        pendingRequestedCounters.get(sector).add(new RequestedRangeCounter(validFlights, airline, true));
+        pendingRequestedCounters.get(sector).add(new RequestedRangeCounter(validFlights, airline, true, count));
         return null;
+    }
+
+    public List<RequestedRangeCounter> listPendingRequestedCounters(String sectorName) {
+        Sector sector = new Sector(sectorName);
+        Queue<RequestedRangeCounter> requestedRangeCounters = pendingRequestedCounters.get(sector);
+        if(requestedRangeCounters == null)
+            throw new IllegalArgumentException();
+        return new ArrayList<>(requestedRangeCounters);
     }
 
 }

@@ -10,6 +10,7 @@ public class RequestedRangeCounter implements Comparable<RequestedRangeCounter> 
     private final List<Flight> flights;
     private final Airline airline;
     private final boolean pending;
+    private final int requestedRange;
 
     public RequestedRangeCounter(final int counterFrom, final int counterTo, List<Flight> flightList, Airline airline, boolean pending) {
         this.counterFrom = counterFrom;
@@ -17,6 +18,7 @@ public class RequestedRangeCounter implements Comparable<RequestedRangeCounter> 
         this.flights = flightList; // TODO CHECK THREAD SAFETY!!!
         this.airline = airline;
         this.pending = pending;
+        this.requestedRange = counterTo - counterFrom + 1;
     }
 
     public RequestedRangeCounter(RequestedRangeCounter other) {
@@ -25,13 +27,15 @@ public class RequestedRangeCounter implements Comparable<RequestedRangeCounter> 
         this.flights = other.flights;
         this.airline = other.airline;
         this.pending = other.pending;
+        this.requestedRange = other.requestedRange;
     }
-    public RequestedRangeCounter(List<Flight> flightList, Airline airline, boolean pending) {
+    public RequestedRangeCounter(List<Flight> flightList, Airline airline, boolean pending, int requestedRange) {
         this.counterFrom = -1;
         this.counterTo = -1;
         this.flights = flightList; // TODO CHECK THREAD SAFETY!!!
         this.airline = airline;
         this.pending = pending;
+        this.requestedRange = requestedRange;
     }
 
     public int getCounterFrom() {
@@ -45,6 +49,9 @@ public class RequestedRangeCounter implements Comparable<RequestedRangeCounter> 
     }
     public Airline getAirline() {
         return airline;
+    }
+    public int getRequestedRange() {
+        return requestedRange;
     }
 
     // CounterFrom is unique among assigned counters

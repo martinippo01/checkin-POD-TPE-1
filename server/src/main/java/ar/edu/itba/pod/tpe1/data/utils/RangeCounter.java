@@ -56,7 +56,7 @@ public class RangeCounter implements Comparable<RangeCounter> {
 
         // Check the remaining space from the last registered to the end of the sector
         if(counterTo - start + 1 >= count){
-            RequestedRangeCounter newAssignedRangeCounter = new RequestedRangeCounter(start, start + count, flights, airline, false);
+            RequestedRangeCounter newAssignedRangeCounter = new RequestedRangeCounter(start, start + count - 1, flights, airline, false);
             assignedRangeCounters.add(newAssignedRangeCounter);
             return newAssignedRangeCounter;
         }

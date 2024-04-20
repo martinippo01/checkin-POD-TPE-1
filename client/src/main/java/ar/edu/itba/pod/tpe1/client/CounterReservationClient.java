@@ -73,9 +73,9 @@ public class CounterReservationClient {
                 .build();
         try {
             CounterReservationServiceOuterClass.AssignCounterResponse response = blockingStub.assignCounters(request);
-            if(response.getIsPending()) {
+            if(!(response.getIsPending())) {
                 String airlines = String.join("|", flights);
-                System.out.println(response.getCounterFrom() + " counters (" + response.getCounterFrom() + "-" + String.valueOf(response.getCounterFrom() + counterCount) + ") in Sector C are now checking in passengers from " +
+                System.out.println(counterCount + " counters (" + response.getCounterFrom() + "-" + String.valueOf(response.getCounterFrom() + counterCount - 1) + ") in Sector C are now checking in passengers from " +
                         airlineName + " " + airlines + " flights\n");
             } else {
                 System.out.println(counterCount + " counters in Sector " + sectorName +" is pending with " + response.getPendingAhead() + " other pendings ahead\n");

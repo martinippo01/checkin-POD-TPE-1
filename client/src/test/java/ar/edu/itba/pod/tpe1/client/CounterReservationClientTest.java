@@ -102,7 +102,7 @@ public class CounterReservationClientTest {
 
         // Add passengers
         System.out.println("Case 1: All OK");
-        airportAdminClient.addPassengerManifest("/Users/marcoscilipoti/Documents/1Q 2024/POD/checkin-POD-TPE-1/client/src/test/java/ar/edu/itba/pod/tpe1/client/passengersOk.csv");
+        airportAdminClient.addPassengerManifest("/home/martinippo/Desktop/ITBA/POD/TPE1/grpc-com-tpe1/client/src/test/java/ar/edu/itba/pod/tpe1/client/passengersOk.csv");
 
         List<String> flights = new ArrayList<>();
         flights.add("AC987");
@@ -149,5 +149,53 @@ public class CounterReservationClientTest {
 
     @Test
     public void listPendingAssignments() {
+        // Create sector A and add 1 counter
+        airportAdminClient.addSector("A");
+        airportAdminClient.addCounters("A", 5);
+
+        // Add passengers
+        System.out.println("Case 1: All OK");
+        airportAdminClient.addPassengerManifest("/home/martinippo/Desktop/ITBA/POD/TPE1/grpc-com-tpe1/client/src/test/java/ar/edu/itba/pod/tpe1/client/passengersOk.csv");
+
+        List<String> flights1 = new ArrayList<>();
+        flights1.add("AC987");
+        counterReservationClient.assignCounters("A", flights1, "AirCanada", 2);
+
+        List<String> flights2 = new ArrayList<>();
+        flights2.add("AC988");
+        counterReservationClient.assignCounters("A", flights2, "AirCanada", 3);
+
+        List<String> flights3 = new ArrayList<>();
+        flights3.add("AA123");
+        counterReservationClient.assignCounters("A", flights3, "AmericanAirlines", 3);
+
+        counterReservationClient.listPendingAssignments("A");
+        counterReservationClient.listSectors();
+    }
+
+    @Test
+    public void listPendingAssignmentsWhenNoPending() {
+        // Create sector A and add 1 counter
+        airportAdminClient.addSector("A");
+        airportAdminClient.addCounters("A", 10);
+
+        // Add passengers
+        System.out.println("Case 1: All OK");
+        airportAdminClient.addPassengerManifest("/home/martinippo/Desktop/ITBA/POD/TPE1/grpc-com-tpe1/client/src/test/java/ar/edu/itba/pod/tpe1/client/passengersOk.csv");
+
+        List<String> flights1 = new ArrayList<>();
+        flights1.add("AC987");
+        counterReservationClient.assignCounters("A", flights1, "AirCanada", 2);
+
+        List<String> flights2 = new ArrayList<>();
+        flights2.add("AC988");
+        counterReservationClient.assignCounters("A", flights2, "AirCanada", 3);
+
+        List<String> flights3 = new ArrayList<>();
+        flights3.add("AA123");
+        counterReservationClient.assignCounters("A", flights3, "AmericanAirlines", 3);
+
+        counterReservationClient.listPendingAssignments("A");
+        counterReservationClient.listSectors();
     }
 }

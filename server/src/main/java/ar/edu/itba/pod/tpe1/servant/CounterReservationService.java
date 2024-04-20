@@ -60,8 +60,13 @@ public class CounterReservationService extends CounterReservationServiceGrpc.Cou
     @Override
     public void assignCounters(CounterReservationServiceOuterClass.AssignCounterRequest request, StreamObserver<CounterReservationServiceOuterClass.AssignCounterResponse> responseObserver) {
         CounterReservationServiceOuterClass.AssignCounterResponse.Builder response = CounterReservationServiceOuterClass.AssignCounterResponse.newBuilder();
-
-        RequestedRangeCounter addedCounters = airport.assignCounters(request.getSectorName(), request.getCounterCount(), request.getAirlineName(), request.getFlightsList());
+        RequestedRangeCounter addedCounters = null;
+        try {
+            addedCounters = airport.assignCounters(request.getSectorName(), request.getCounterCount(), request.getAirlineName(), request.getFlightsList());
+        }catch (IllegalArgumentException e){
+            responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription("Failed to assigned counter").asException());
+            return;
+        }
 
         if(addedCounters == null)
             response.setIsPending(true);
@@ -112,6 +117,25 @@ public class CounterReservationService extends CounterReservationServiceGrpc.Cou
     public void listPendingAssignments(CounterReservationServiceOuterClass.PendingAssignmentsRequest request, StreamObserver<CounterReservationServiceOuterClass.PendingAssignmentsResponse> responseObserver) {
         CounterReservationServiceOuterClass.PendingAssignmentsResponse.Builder response = CounterReservationServiceOuterClass.PendingAssignmentsResponse.newBuilder();
         // Placeholder logic for listing pending assignments
+        List<RequestedRangeCounter> requestedRangeCounters;
+        try {
+            requestedRangeCounters = airport.listPendingRequestedCounters(request.getSectorName());
+        }catch (IllegalArgumentException e){
+            responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription("Failed to list pending counters").asException());
+            return;
+        }
+
+        if (requestedRangeCounters != null) {
+            for (RequestedRangeCounter requestedRangeCounter : requestedRangeCounters) {
+                response.addAssignments(
+                        CounterReservationServiceOuterClass.PendingAssignment.newBuilder()
+                                .setCounterCount(requestedRangeCounter.getRequestedRange())
+                                .setAirlineName(requestedRangeCounter.getAirline().getName())
+                                .addAllFlights(requestedRangeCounter.getFlights().stream().map(Flight::getFlightCode).collect(Collectors.toList()))
+                                .build()
+                );
+            }
+        }
         responseObserver.onNext(response.build());
         responseObserver.onCompleted();
     }
