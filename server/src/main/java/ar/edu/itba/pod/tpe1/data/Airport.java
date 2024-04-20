@@ -3,6 +3,8 @@ package ar.edu.itba.pod.tpe1.data;
 import airport.CounterServiceOuterClass;
 import ar.edu.itba.pod.tpe1.data.utils.*;
 import counter.CounterReservationServiceOuterClass;
+import org.checkerframework.checker.units.qual.A;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -13,11 +15,15 @@ import java.util.stream.Collectors;
 
 public class Airport {
 
+    private final Notifications notifications = Notifications.getInstance();
+
     // Key: Booking - Value: a boolean
     private final ConcurrentHashMap<Booking, Boolean> bookingCodes = new ConcurrentHashMap<>();
 
     // Key: Flight - Value: An airline that
     private final ConcurrentHashMap<Flight, Airline> flights = new ConcurrentHashMap<>();
+
+    private final Set<Airline> airlines = Collections.synchronizedSet(new HashSet<>());
 
     // Key: Sector - Value: A list of range of sectors
     private final ConcurrentHashMap<Sector, List<RangeCounter>> sectors = new ConcurrentHashMap<>();
@@ -109,6 +115,7 @@ public class Airport {
         // If absent, put the flight and mark as it is not assigned yet
         flights.putIfAbsent(flight, airline);
         flightWasAssigned.putIfAbsent(flight, false);
+        airlines.add(airline);
         // Put the new booking code
         bookingCodes.put(booking, false);
     }
@@ -247,7 +254,6 @@ public class Airport {
         return containsAssignedRangeCounter ? out : new ArrayList<>();
     }
 
-    // TODO:
     public FreeCounterResult freeCounters(String sectorName, int fromVal, String airlineName) throws Exception {
 
         Sector sector = new Sector(sectorName);
@@ -272,6 +278,9 @@ public class Airport {
 
         if(rangeCounterFound == null){
             throw new IllegalArgumentException("No range starting at counter " + fromVal + " exists in sector '" + sectorName + "'.");
+        }else{
+            // Notify the airline, tha counters where removed
+            notifications.notifyCountersRemoved(rangeCounterFound.getAirline(), rangeCounterFound.getFlights(), rangeCounterFound.getCounterFrom(), rangeCounterFound.getCounterTo(), sectorName);
         }
 
         //TODO: VERIFICAR PERSONAS EN ESPERA
@@ -308,6 +317,7 @@ public class Airport {
         if(assigned == null) {
             pendingRequestedCounters.putIfAbsent(sector, new ConcurrentLinkedQueue<>());
             pendingRequestedCounters.get(sector).add(new RequestedRangeCounter(validFlights, airline, true, count));
+            notifications.notifyCountersPending(airline, count, sectorName, validFlights, 0); // TODO: send proper airlines ahead
             return null;
         }
         return assigned;
@@ -388,12 +398,23 @@ public class Airport {
             RequestedRangeCounter assigned = findSpaceForRange(sector, reqRangeCounter.getFlights(), reqRangeCounter.getAirline(), reqRangeCounter.getRequestedRange());
             if(assigned != null){
                 pendingRequestedCounters.get(sector).remove(reqRangeCounter); // If it was assigned, remove it from the queue
-                // Notify notifications
+                // Notify the counters where assigned
+                notifications.notifyCountersAssigned(assigned.getCounterFrom(), assigned.getCounterTo(), sector.getName(), assigned.getFlights(), assigned.getAirline());
             }else{
 
             }
         }
 
+        // TODO: for each that checks who i need to send a notification that has moved up the queue
+
+    }
+
+    public boolean airlineExists(Airline airline){
+        return airlines.contains(airline);
+    }
+
+    public boolean flightExists(String flightName){
+        return flights.containsKey(new Flight(flightName));
     }
 
 }
