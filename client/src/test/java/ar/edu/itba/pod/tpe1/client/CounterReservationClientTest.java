@@ -151,6 +151,198 @@ public class CounterReservationClientTest {
     }
 
     @Test
+    public void assignCountersFailNoSectors() {
+        // Create sector A and add 1 counter
+        airportAdminClient.addSector("A");
+        airportAdminClient.addCounters("A", 1);
+        // Create sector C and add 3 counters
+        airportAdminClient.addSector("C");
+        airportAdminClient.addCounters("C", 3);
+        // Create sector D and add 2 counters
+        airportAdminClient.addSector("D");
+        airportAdminClient.addCounters("D", 2);
+        // Add 2 more counters to C
+        airportAdminClient.addCounters("C", 2);
+
+        airportAdminClient.addCounters("D", 2);
+        airportAdminClient.addCounters("C", 2);
+
+        // Create sector Z and leave it empty
+        airportAdminClient.addSector("Z");
+
+        // Add passengers
+        System.out.println("Case 1: All OK");
+        airportAdminClient.addPassengerManifest("/home/martinippo/Desktop/ITBA/POD/TPE1/grpc-com-tpe1/client/src/test/java/ar/edu/itba/pod/tpe1/client/passengersOk.csv");
+
+        List<String> flights = new ArrayList<>();
+        flights.add("AC987");
+        counterReservationClient.assignCounters("X", flights, "AirCanada", 2);
+        counterReservationClient.listSectors();
+    }
+
+    @Test
+    public void assignCountersFailFlightNotRegistered() {
+        // Create sector A and add 1 counter
+        airportAdminClient.addSector("A");
+        airportAdminClient.addCounters("A", 1);
+        // Create sector C and add 3 counters
+        airportAdminClient.addSector("C");
+        airportAdminClient.addCounters("C", 3);
+        // Create sector D and add 2 counters
+        airportAdminClient.addSector("D");
+        airportAdminClient.addCounters("D", 2);
+        // Add 2 more counters to C
+        airportAdminClient.addCounters("C", 2);
+
+        airportAdminClient.addCounters("D", 2);
+        airportAdminClient.addCounters("C", 2);
+
+        // Create sector Z and leave it empty
+        airportAdminClient.addSector("Z");
+
+        // Add passengers
+        System.out.println("Case 1: All OK");
+        airportAdminClient.addPassengerManifest("/home/martinippo/Desktop/ITBA/POD/TPE1/grpc-com-tpe1/client/src/test/java/ar/edu/itba/pod/tpe1/client/passengersOk.csv");
+
+        List<String> flights = new ArrayList<>();
+        flights.add("FO542");
+        counterReservationClient.assignCounters("C", flights, "AirCanada", 2);
+        counterReservationClient.listSectors();
+    }
+
+    @Test
+    public void assignCountersFailFlightFromOtherAirline() {
+        // Create sector A and add 1 counter
+        airportAdminClient.addSector("A");
+        airportAdminClient.addCounters("A", 1);
+        // Create sector C and add 3 counters
+        airportAdminClient.addSector("C");
+        airportAdminClient.addCounters("C", 3);
+        // Create sector D and add 2 counters
+        airportAdminClient.addSector("D");
+        airportAdminClient.addCounters("D", 2);
+        // Add 2 more counters to C
+        airportAdminClient.addCounters("C", 2);
+
+        airportAdminClient.addCounters("D", 2);
+        airportAdminClient.addCounters("C", 2);
+
+        // Create sector Z and leave it empty
+        airportAdminClient.addSector("Z");
+
+        // Add passengers
+        System.out.println("Case 1: All OK");
+        airportAdminClient.addPassengerManifest("/home/martinippo/Desktop/ITBA/POD/TPE1/grpc-com-tpe1/client/src/test/java/ar/edu/itba/pod/tpe1/client/passengersOk.csv");
+
+        List<String> flights = new ArrayList<>();
+        flights.add("AC987");
+        counterReservationClient.assignCounters("C", flights, "AmericanAirline", 2);
+        counterReservationClient.listSectors();
+    }
+
+    @Test
+    public void assignCountersFailFlightInOtherCounter() {
+        // Create sector A and add 1 counter
+        airportAdminClient.addSector("A");
+        airportAdminClient.addCounters("A", 1);
+        // Create sector C and add 3 counters
+        airportAdminClient.addSector("C");
+        airportAdminClient.addCounters("C", 3);
+        // Create sector D and add 2 counters
+        airportAdminClient.addSector("D");
+        airportAdminClient.addCounters("D", 2);
+        // Add 2 more counters to C
+        airportAdminClient.addCounters("C", 2);
+
+        airportAdminClient.addCounters("D", 2);
+        airportAdminClient.addCounters("C", 2);
+
+        // Create sector Z and leave it empty
+        airportAdminClient.addSector("Z");
+
+        // Add passengers
+        System.out.println("Case 1: All OK");
+        airportAdminClient.addPassengerManifest("/home/martinippo/Desktop/ITBA/POD/TPE1/grpc-com-tpe1/client/src/test/java/ar/edu/itba/pod/tpe1/client/passengersOk.csv");
+
+        List<String> flights = new ArrayList<>();
+        flights.add("AC987");
+        counterReservationClient.assignCounters("C", flights, "AirCanada", 2);
+
+        List<String> flights2 = new ArrayList<>();
+        flights2.add("AC988");
+        flights2.add("AC987");
+        counterReservationClient.assignCounters("D", flights2, "AirCanada", 2);
+
+        counterReservationClient.listSectors();
+    }
+
+    @Test
+    public void assignCountersFailFlightIsAlreadyPending() {
+        // Create sector A and add 1 counter
+        airportAdminClient.addSector("A");
+        airportAdminClient.addCounters("A", 1);
+        // Create sector C and add 3 counters
+        airportAdminClient.addSector("C");
+        airportAdminClient.addCounters("C", 3);
+        // Create sector D and add 2 counters
+        airportAdminClient.addSector("D");
+        airportAdminClient.addCounters("D", 2);
+        // Add 2 more counters to C
+        airportAdminClient.addCounters("C", 2);
+
+        airportAdminClient.addCounters("D", 2);
+        airportAdminClient.addCounters("C", 2);
+
+        // Create sector Z and leave it empty
+        airportAdminClient.addSector("Z");
+
+        // Add passengers
+        System.out.println("Case 1: All OK");
+        airportAdminClient.addPassengerManifest("/home/martinippo/Desktop/ITBA/POD/TPE1/grpc-com-tpe1/client/src/test/java/ar/edu/itba/pod/tpe1/client/passengersOk.csv");
+
+        List<String> flights = new ArrayList<>();
+        flights.add("AC987");
+        counterReservationClient.assignCounters("A", flights, "AirCanada", 2); // Will be pending
+
+        counterReservationClient.assignCounters("D", flights, "AirCanada", 2);
+
+        counterReservationClient.listSectors();
+    }
+
+    @Test
+    public void assignCountersFailFlightAssignedInThePast() {
+        // Create sector A and add 1 counter
+        airportAdminClient.addSector("A");
+        airportAdminClient.addCounters("A", 1);
+        // Create sector C and add 3 counters
+        airportAdminClient.addSector("C");
+        airportAdminClient.addCounters("C", 3);
+        // Create sector D and add 2 counters
+        airportAdminClient.addSector("D");
+        airportAdminClient.addCounters("D", 2);
+        // Add 2 more counters to C
+        airportAdminClient.addCounters("C", 2);
+
+        airportAdminClient.addCounters("D", 2);
+        airportAdminClient.addCounters("C", 2);
+
+        // Create sector Z and leave it empty
+        airportAdminClient.addSector("Z");
+
+        // Add passengers
+        System.out.println("Case 1: All OK");
+        airportAdminClient.addPassengerManifest("/home/martinippo/Desktop/ITBA/POD/TPE1/grpc-com-tpe1/client/src/test/java/ar/edu/itba/pod/tpe1/client/passengersOk.csv");
+
+        List<String> flights = new ArrayList<>();
+        flights.add("AC987");
+        counterReservationClient.assignCounters("C", flights, "AirCanada", 2);
+        counterReservationClient.freeCounters("C", 2, "AirCanada");
+        counterReservationClient.assignCounters("D", flights, "AirCanada", 2);
+
+        counterReservationClient.listSectors();
+    }
+
+    @Test
     public void freeCounters() {
         // Create sector A and add 1 counter
         airportAdminClient.addSector("A");

@@ -17,12 +17,14 @@ public class Airport {
     // Key: Booking - Value: a boolean
     private final ConcurrentHashMap<Booking, Boolean> bookingCodes = new ConcurrentHashMap<>();
 
+    // Key: Flight - Value: An airline that
     private final ConcurrentHashMap<Flight, Airline> flights = new ConcurrentHashMap<>();
 
     // Key: Sector - Value: A list of range of sectors
     private final ConcurrentHashMap<Sector, List<RangeCounter>> sectors = new ConcurrentHashMap<>();
 
-//    private final List<CheckIn> checkIns = new ArrayList<>();
+    private final ConcurrentHashMap<Flight, Boolean> flightWasAssigned = new ConcurrentHashMap<>();
+
     private final AtomicInteger counterId = new AtomicInteger(1);
 
     private static Airport instance = null;
@@ -109,8 +111,9 @@ public class Airport {
                 return false;
         }
 
-        // If absent, put the flight
+        // If absent, put the flight and mark as it is not assigned yet
         flights.putIfAbsent(flight, airline);
+        flightWasAssigned.putIfAbsent(flight, false);
         // Put the new booking code
         bookingCodes.put(booking, false);
 
@@ -288,15 +291,6 @@ public class Airport {
     }
 
     public RequestedRangeCounter assignCounters(String sectorName, int count, String airlineName, List<String> flightsToReserve) {
-        /*
-        TODO: Check conditions
-        No existe un sector con ese nombre
-        No se agregaron pasajeros esperados con el código de vuelo, para al menos uno de los vuelos solicitados
-        Se agregaron pasajeros esperados con el código de vuelo pero con otra aerolínea, para al menos uno de los vuelos solicitados
-        Ya existe al menos un mostrador asignado para al menos uno de los vuelos solicitados (no se permiten agrandar rangos de mostradores asignados)
-        Ya existe una solicitud pendiente de un rango de mostradores para al menos uno de los vuelos solicitados (no se permiten reiterar asignaciones pendientes)
-        Ya se asignó y luego se liberó un rango de mostradores para al menos uno de los vuelos solicitados (no se puede iniciar el check-in de un vuelo dos o más veces)
-        * */
 
         // Get the sector
         Sector sector = Sector.fromName(sectorName);
@@ -304,22 +298,18 @@ public class Airport {
             // Sector does not exist
             throw new IllegalArgumentException();
         }
-
-        // Check if all flights are valid and linked to the specified airline
         Airline airline = new Airline(airlineName);
-        List<Flight> validFlights = new ArrayList<>();
-        for (String flightCode : flightsToReserve) {
-            Flight flight = new Flight(flightCode);
-            Airline registeredAirline = flights.getOrDefault(flight, null);
-            if (registeredAirline == null || !registeredAirline.equals(airline)) {
-                // If any flight does not exist or is registered to a different airline
-                throw new IllegalArgumentException();
-            }
-            validFlights.add(flight);
-        }
 
+        // Validate that the flights are correct
+        List<Flight> validFlights = checkFlights(sector, airline, flightsToReserve);
+        // In case at least one of the flights is not valid for any reason, fail
+        if(validFlights == null)
+            throw new IllegalArgumentException();
+
+        // Attempt to assign a range at the requested sector
         RequestedRangeCounter assigned = findSpaceForRange(sector, validFlights, airline, count);
 
+        // In case there was no space for the range, append it to the queue
         if(assigned == null) {
             pendingRequestedCounters.putIfAbsent(sector, new ConcurrentLinkedQueue<>());
             pendingRequestedCounters.get(sector).add(new RequestedRangeCounter(validFlights, airline, true, count));
@@ -327,6 +317,55 @@ public class Airport {
         }
         return assigned;
 
+    }
+
+    private List<Flight> checkFlights(Sector sector, Airline airline, List<String> flightsToReserve){
+        /* Check conditions for flights:
+            + Check if there are passengers expected for each flight
+            + Check if the flight code does not belong to another airline
+            + There are no counters for the flight code somewhere else
+            + There are no pending assignations that have the flight code in it
+            + There were no assignations in the past for that airline
+         */
+
+        List<Flight> validFlights = new ArrayList<>();
+        for (String flightCode : flightsToReserve) {
+
+            Flight flight = new Flight(flightCode);
+            Airline registeredAirline = flights.getOrDefault(flight, null);
+
+            // Check Flight exists and is registered to the same airline and was not assigned before
+            if (registeredAirline == null || !registeredAirline.equals(airline) || flightWasAssigned.get(flight)) { // Flight does not exist or Registered to a different airline
+                return null;
+            }
+
+            // For each sector of the airport
+            for(Sector otherSector: sectors.keySet()){
+
+                // Check that the flight is not assigned in another counter
+                for(RangeCounter rangeCounter: sectors.getOrDefault(otherSector, new ArrayList<>())){
+                    for(RequestedRangeCounter counter: rangeCounter.getAssignedRangeCounters()){
+                        if(counter.getFlights().contains(flight))
+                            return null;
+                    }
+                }
+
+                // Check that there is no pending assignation with the flight
+                for(RequestedRangeCounter pendingAssignation : pendingRequestedCounters.get(sector)){
+                    if(pendingAssignation.getFlights().contains(flight))
+                        return null;
+                }
+            }
+
+            validFlights.add(flight);
+        }
+
+        for (Flight flight : validFlights) {
+            // Mark the flight as assigned
+            flightWasAssigned.put(flight, Boolean.TRUE);
+        }
+
+        return validFlights;
     }
 
     private RequestedRangeCounter findSpaceForRange(Sector sector, List<Flight> flights, Airline airline, int count){
