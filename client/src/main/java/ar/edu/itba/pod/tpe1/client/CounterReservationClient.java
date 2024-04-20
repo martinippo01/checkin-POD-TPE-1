@@ -150,7 +150,11 @@ public class CounterReservationClient {
                         assignment.getCounterCount(), assignment.getAirlineName(), flights);
             });
         } catch (StatusRuntimeException e) {
-            System.err.println("RPC failed: " + e.getStatus());
+            if (e.getStatus().getCode() == Status.Code.INVALID_ARGUMENT) {
+                System.out.println("Error: The specified sector '" + sectorName + "' does not exist.");
+            }
+        } catch(Exception e) {
+            System.err.println("RPC failed: " + e.getMessage());
         }
     }
 }

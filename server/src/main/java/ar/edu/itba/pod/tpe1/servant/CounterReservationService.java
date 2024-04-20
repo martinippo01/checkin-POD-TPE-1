@@ -84,7 +84,6 @@ public class CounterReservationService extends CounterReservationServiceGrpc.Cou
                 response.setIsPending(false).setCounterFrom(addedCounters.getCounterFrom());
 
             responseObserver.onNext(response.build());
-
             responseObserver.onCompleted();
         } catch (IllegalArgumentException e){
             responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asException());
@@ -132,28 +131,25 @@ public class CounterReservationService extends CounterReservationServiceGrpc.Cou
 
     @Override
     public void listPendingAssignments(CounterReservationServiceOuterClass.PendingAssignmentsRequest request, StreamObserver<CounterReservationServiceOuterClass.PendingAssignmentsResponse> responseObserver) {
-        CounterReservationServiceOuterClass.PendingAssignmentsResponse.Builder response = CounterReservationServiceOuterClass.PendingAssignmentsResponse.newBuilder();
-        // Placeholder logic for listing pending assignments
-        List<RequestedRangeCounter> requestedRangeCounters;
         try {
-            requestedRangeCounters = airport.listPendingRequestedCounters(request.getSectorName());
-        }catch (IllegalArgumentException e){
-            responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription("Failed to list pending counters").asException());
-            return;
-        }
+            CounterReservationServiceOuterClass.PendingAssignmentsResponse.Builder response = CounterReservationServiceOuterClass.PendingAssignmentsResponse.newBuilder();
+            List<RequestedRangeCounter> requestedRangeCounters = airport.listPendingRequestedCounters(request.getSectorName());
 
-        if (requestedRangeCounters != null) {
-            for (RequestedRangeCounter requestedRangeCounter : requestedRangeCounters) {
-                response.addAssignments(
-                        CounterReservationServiceOuterClass.PendingAssignment.newBuilder()
-                                .setCounterCount(requestedRangeCounter.getRequestedRange())
-                                .setAirlineName(requestedRangeCounter.getAirline().getName())
-                                .addAllFlights(requestedRangeCounter.getFlights().stream().map(Flight::getFlightCode).collect(Collectors.toList()))
-                                .build()
-                );
-            }
+                for (RequestedRangeCounter requestedRangeCounter : requestedRangeCounters) {
+                    response.addAssignments(
+                            CounterReservationServiceOuterClass.PendingAssignment.newBuilder()
+                                    .setCounterCount(requestedRangeCounter.getRequestedRange())
+                                    .setAirlineName(requestedRangeCounter.getAirline().getName())
+                                    .addAllFlights(requestedRangeCounter.getFlights().stream().map(Flight::getFlightCode).collect(Collectors.toList()))
+                                    .build()
+                    );
+                }
+
+            responseObserver.onNext(response.build());
+            responseObserver.onCompleted();
+
+        } catch (IllegalArgumentException e){
+            responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asException());
         }
-        responseObserver.onNext(response.build());
-        responseObserver.onCompleted();
     }
 }

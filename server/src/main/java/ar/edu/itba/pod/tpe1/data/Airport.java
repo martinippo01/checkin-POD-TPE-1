@@ -376,9 +376,9 @@ public class Airport {
 
     public List<RequestedRangeCounter> listPendingRequestedCounters(String sectorName) {
         Sector sector = new Sector(sectorName);
-        Queue<RequestedRangeCounter> requestedRangeCounters = pendingRequestedCounters.get(sector);
-        if(requestedRangeCounters == null)
-            throw new IllegalArgumentException();
+        Queue<RequestedRangeCounter> requestedRangeCounters = pendingRequestedCounters.getOrDefault(sector, new ArrayDeque<>());
+        if(requestedRangeCounters.isEmpty())
+            throw new IllegalArgumentException("Invalid sector.");
         return new ArrayList<>(requestedRangeCounters);
     }
 
