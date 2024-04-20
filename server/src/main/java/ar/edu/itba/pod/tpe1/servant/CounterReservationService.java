@@ -24,6 +24,9 @@ public class CounterReservationService extends CounterReservationServiceGrpc.Cou
 
         Map<Sector, List<RangeCounter>> sectorInfo = airport.getSectors();
 
+        if(sectorInfo == null)
+            responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("There are no sectors registered at the airport").asRuntimeException());
+
         for(Sector sector : sectorInfo.keySet()){
 
             CounterReservationServiceOuterClass.Sector.Builder sectorBuilder = CounterReservationServiceOuterClass.Sector.newBuilder().setName(sector.getName());

@@ -130,7 +130,10 @@ public class Airport {
     }
 
     public Map<Sector, List<RangeCounter>> getSectors() {
-        //return Collections.unmodifiableMap(sectors);
+
+        if(sectors.isEmpty())
+            return null;
+
         Map<Sector, List<RangeCounter>> toReturn;
         synchronized (sectors) {
             toReturn = new ConcurrentHashMap<>(sectors);

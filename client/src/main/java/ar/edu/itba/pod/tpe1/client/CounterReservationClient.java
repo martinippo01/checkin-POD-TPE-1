@@ -34,7 +34,7 @@ public class CounterReservationClient {
                 System.out.printf("%s         %s\n", sector.getName(), ranges);
             });
         } catch (StatusRuntimeException e) {
-            System.err.println("RPC failed: " + e.getStatus());
+            System.out.println("Failed: " + e.getStatus().asRuntimeException());
         }
     }
 
