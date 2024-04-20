@@ -7,6 +7,8 @@ import airport.CounterServiceOuterClass.QueryCheckInsRequest;
 import airport.CounterServiceOuterClass.QueryCheckInsResponse;
 import airport.CounterServiceOuterClass.CounterInfo;
 import airport.CounterServiceOuterClass.CheckInRecord;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 
 public class CounterQueryClient {
     private final CounterServiceGrpc.CounterServiceBlockingStub blockingStub;
@@ -16,15 +18,20 @@ public class CounterQueryClient {
     }
 
     public void queryCounters(String sector) {
-        QueryCountersRequest request = QueryCountersRequest.newBuilder()
-                .setSector(sector)
-                .build();
-        QueryCountersResponse response = blockingStub.queryCounters(request);
-        if (response.getCountersCount() == 0) {
-            System.out.println("No counters found for the specified sector.");
-            return;
+        try {
+            QueryCountersRequest request = QueryCountersRequest.newBuilder()
+                    .setSector(sector)
+                    .build();
+            QueryCountersResponse response = blockingStub.queryCounters(request);
+            printCounterQueryResponse(response);
+        } catch (StatusRuntimeException e) {
+            if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
+                System.out.println("   Sector  Counters  Airline          Flights             People");
+                System.out.println("   ###############################################################");
+            }
+        } catch (Exception e) {
+            System.err.println("RPC failed: " + e.getMessage());
         }
-        printCounterQueryResponse(response);
     }
 
     private void printCounterQueryResponse(QueryCountersResponse response) {

@@ -13,15 +13,21 @@ public class CounterQueryServant extends CounterServiceGrpc.CounterServiceImplBa
 
     @Override
     public void queryCounters(CounterServiceOuterClass.QueryCountersRequest req, StreamObserver<CounterServiceOuterClass.QueryCountersResponse> responseObserver) {
-        List<CounterServiceOuterClass.CounterInfo> results = airport.queryCounters(req.getSector());
+        try {
+            List<CounterServiceOuterClass.CounterInfo> results = airport.queryCounters(req.getSector());
 
-        CounterServiceOuterClass.QueryCountersResponse.Builder responseBuilder
-                = CounterServiceOuterClass.QueryCountersResponse
+            CounterServiceOuterClass.QueryCountersResponse.Builder responseBuilder
+                    = CounterServiceOuterClass.QueryCountersResponse
                     .newBuilder()
                     .addAllCounters(results);
 
-        responseObserver.onNext(responseBuilder.build());
-        responseObserver.onCompleted();
+            responseObserver.onNext(responseBuilder.build());
+            responseObserver.onCompleted();
+        } catch (IllegalStateException e) {
+            responseObserver.onError(io.grpc.Status.NOT_FOUND.withDescription(e.getMessage()).asRuntimeException());
+        } catch (Exception e) {
+            responseObserver.onError(io.grpc.Status.INTERNAL.withDescription(e.getMessage()).asRuntimeException());
+        }
     }
 
     @Override
