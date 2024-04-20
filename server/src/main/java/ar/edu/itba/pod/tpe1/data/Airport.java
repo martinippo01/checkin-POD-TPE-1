@@ -164,6 +164,7 @@ public class Airport {
                     out.add(new RequestedRangeCounter(counter));
                 }
             }
+            //intento agregar los counters sin airline asignado, como el enunciado marcaba
             for(int i = rangeCounter.getCounterFrom(); i <= rangeCounter.getCounterTo(); i++) {
                 RequestedRangeCounter temp = new RequestedRangeCounter(new ArrayList<>(), new Airline(""), false, i - rangeCounter.getCounterFrom() + 1);
                 if (!rangeCounter.getAssignedRangeCounters().contains(temp) && temp.getCounterFrom() >= from && temp.getCounterTo() <= to) {
