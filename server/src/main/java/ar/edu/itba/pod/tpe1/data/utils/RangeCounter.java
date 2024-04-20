@@ -8,11 +8,18 @@ public class RangeCounter implements Comparable<RangeCounter> {
     private final int counterTo;
     // Metadata
     //private final List<AssignedRangeCounter> assignedRangeCounters = new ArrayList<>(); // TODO check thread safety
-    private final Set<RequestedRangeCounter> assignedRangeCounters = new TreeSet<>(); // TODO check thread safety
+    private final Set<RequestedRangeCounter> assignedRangeCounters;// = new TreeSet<>(); // TODO check thread safety
 
     public RangeCounter(final int counterFrom, final int counterTo) {
         this.counterFrom = counterFrom;
         this.counterTo = counterTo;
+        this.assignedRangeCounters = new TreeSet<>();
+    }
+
+    public RangeCounter(RangeCounter rangeCounter, int counterTo) {
+        this.counterFrom = rangeCounter.counterFrom;
+        this.counterTo = counterTo;
+        this.assignedRangeCounters = rangeCounter.assignedRangeCounters;
     }
 
     public int getCounterFrom() {
@@ -67,6 +74,10 @@ public class RangeCounter implements Comparable<RangeCounter> {
     public List<RequestedRangeCounter> getAssignedRangeCounters() {
         //return assignedRangeCounters; // TODO check thread safety
         return new ArrayList<>(assignedRangeCounters);
+    }
+
+    public void expandRangeCounter(int delta){
+
     }
 
     @Override

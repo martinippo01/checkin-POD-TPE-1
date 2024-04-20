@@ -169,8 +169,16 @@ public class CounterReservationClientTest {
         flights3.add("AA123");
         counterReservationClient.assignCounters("A", flights3, "AmericanAirlines", 3);
 
+        System.out.println("Prior additions of counter");
         counterReservationClient.listPendingAssignments("A");
+
+        airportAdminClient.addCounters("A", 5);
+
+        System.out.println("Post additions of counter");
+        counterReservationClient.listPendingAssignments("A");
+
         counterReservationClient.listSectors();
+        counterReservationClient.queryCounterRange("A", 1, 10);
     }
 
     @Test
