@@ -1,7 +1,6 @@
 package ar.edu.itba.pod.tpe1.data;
 
 import airport.CounterServiceOuterClass;
-import ar.edu.itba.pod.tpe1.data.exceptions.CounterReleaseException;
 import ar.edu.itba.pod.tpe1.data.utils.*;
 import counter.CounterReservationServiceOuterClass;
 import java.util.*;
@@ -43,14 +42,10 @@ public class Airport {
         return new ArrayList<>();
     }
 
-    // Adds a sector if it does not already exist
-    public boolean addSector(String sectorName) {
-        // Failure if sector already exists
+    public void addSector(String sectorName) throws Exception {
         if(sectors.putIfAbsent(new Sector(sectorName), new ArrayList<>()) != null)
-            return false;
-        // In case it does not exist, create the pending queue for counter assignments
+            return;
         pendingRequestedCounters.put(new Sector(sectorName), new ConcurrentLinkedQueue<>());
-        return true;
     }
 
     // Adds a set of counters to a sector
@@ -58,7 +53,7 @@ public class Airport {
     public RangeCounter addCounters(String sectorName, int count) {
         Sector sector = Sector.fromName(sectorName);
         if (count <= 0 || !sectors.containsKey(sector)) {
-            return null; // Failure: sector does not exist or invalid counter count
+            throw new IllegalStateException("Invalid number of counters (must be positive)/sector does not exist.");
         }
         int firstId = counterId.getAndAdd(count);
 
@@ -92,30 +87,27 @@ public class Airport {
     }
 
     // Register a passenger, link booking and flight codes
-    public boolean registerPassenger(String bookingCode, String flightCode, String airlineName) {
+    public void registerPassenger(String bookingCode, String flightCode, String airlineName) throws Exception {
 
         Flight flight = new Flight(flightCode);
         Airline airline = new Airline(airlineName);
         Booking booking = new Booking(bookingCode, flight);
 
         if (bookingCodes.containsKey(booking)){ // In case the booking already exists, it fails
-            return false;
+            throw new IllegalArgumentException("Booking code already exists.");
         }
 
         // In case the flight exists
         if(flights.containsKey(flight) ){
             // Check if it belongs to other airline, in that case it fails
             if(!flights.get(flight).equals(airline))
-                return false;
+                throw new IllegalCallerException("The flight is already registered to another airline.");
         }
 
         // If absent, put the flight
         flights.putIfAbsent(flight, airline);
         // Put the new booking code
         bookingCodes.put(booking, false);
-
-        return true;
-
     }
 
     public List<CounterServiceOuterClass.CounterInfo> queryCountersBySector(String sectorName) throws RuntimeException {

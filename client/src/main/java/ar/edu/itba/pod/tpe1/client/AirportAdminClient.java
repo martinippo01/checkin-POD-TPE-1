@@ -2,9 +2,7 @@ package ar.edu.itba.pod.tpe1.client;
 
 import airport.AirportAdminServiceGrpc;
 import airport.AirportService;
-import io.grpc.Channel;
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
+import io.grpc.*;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -18,22 +16,30 @@ public class AirportAdminClient {
     }
 
     public void addSector(String sectorName) {
-        AirportService.SectorRequest request = AirportService.SectorRequest.newBuilder().setSectorName(sectorName).build();
-        AirportService.SectorResponse response = blockingStub.addSector(request);
-        if (response.getStatus() == AirportService.ResponseStatus.SUCCESS) {
+        try {
+            AirportService.SectorRequest request = AirportService.SectorRequest.newBuilder().setSectorName(sectorName).build();
+            AirportService.SectorResponse response = blockingStub.addSector(request);
             System.out.println("Sector " + response.getSectorName() + " added successfully");
-        } else {
-            System.out.println("Failed to add sector: " + response.getSectorName());
+        } catch (StatusRuntimeException e) {
+            if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
+                System.out.println("Failed to add sector: ");
+            }
+        } catch (Exception e) {
+            System.err.println("RPC failed: " + e.getMessage());
         }
     }
 
     public void addCounters(String sectorName, int counterCount) {
-        AirportService.CounterRequest request = AirportService.CounterRequest.newBuilder().setSectorName(sectorName).setCounterCount(counterCount).build();
-        AirportService.CounterResponse response = blockingStub.addCounters(request);
-        if (response.getStatus() == AirportService.ResponseStatus.SUCCESS) {
+        try {
+            AirportService.CounterRequest request = AirportService.CounterRequest.newBuilder().setSectorName(sectorName).setCounterCount(counterCount).build();
+            AirportService.CounterResponse response = blockingStub.addCounters(request);
             System.out.println(counterCount + " new counters (" + response.getFirstCounterId() + "-" + response.getLastCounterId() + ") in Sector " + response.getSectorName() + " added successfully");
-        } else {
-            System.out.println("Failed to add counters to sector: " + sectorName);
+        } catch (StatusRuntimeException e) {
+            if (e.getStatus().getCode() == Status.Code.FAILED_PRECONDITION) {
+                System.out.println("Failed to add counters to sector: " + sectorName);
+            }
+        } catch (Exception e) {
+            System.err.println("RPC failed: " + e.getMessage());
         }
     }
 
@@ -44,16 +50,22 @@ public class AirportAdminClient {
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(";");
                 if (parts.length == 3) {
+                    try {
                     AirportService.AddPassengerRequest request = AirportService.AddPassengerRequest.newBuilder()
                             .setBookingCode(parts[0])
                             .setFlightCode(parts[1])
                             .setAirlineName(parts[2])
                             .build();
                     AirportService.AddPassengerResponse response = blockingStub.addPassenger(request);
-                    if (response.getStatus() == AirportService.ResponseStatus.SUCCESS) {
-                        System.out.println("Booking " + response.getBookingCode() + " added successfully");
-                    } else {
-                        System.out.println("Failed to add booking " + response.getBookingCode());
+                    System.out.println("Booking " + response.getBookingCode() + " added successfully");
+                    } catch (StatusRuntimeException e) {
+                        if (e.getStatus().getCode() == Status.Code.INVALID_ARGUMENT) {
+                            System.out.println("Failed to add counters to sector: Booking already exists");
+                        } else if (e.getStatus().getCode() == Status.Code.PERMISSION_DENIED) {
+                            System.out.println("Failed to add booking: Failed registered to another airline");
+                        }
+                    } catch (Exception e) {
+                        System.err.println("RPC failed: " + e.getMessage());
                     }
                 }
             }
