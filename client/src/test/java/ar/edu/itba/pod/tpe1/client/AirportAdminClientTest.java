@@ -56,6 +56,14 @@ public class AirportAdminClientTest {
     }
 
     @Test
+    public void testAddCounterAndSectorWhenContiguos() {
+        // Create sector A and add 1 counter
+        airportAdminClient.addSector("A");
+        airportAdminClient.addCounters("A", 1);
+        airportAdminClient.addCounters("A", 2);
+    }
+
+    @Test
     public void testAddPassengerManifest() {
         // This csv is correct
         System.out.println("Case 1: All OK");

@@ -3,6 +3,7 @@ package ar.edu.itba.pod.tpe1.servant;
 import airport.AirportAdminServiceGrpc;
 import airport.AirportService;
 import ar.edu.itba.pod.tpe1.data.Airport;
+import ar.edu.itba.pod.tpe1.data.utils.RangeCounter;
 import io.grpc.stub.StreamObserver;
 
 import io.grpc.stub.StreamObserver;
@@ -25,19 +26,18 @@ public class AirportAdminServant extends AirportAdminServiceGrpc.AirportAdminSer
 
     @Override
     public void addCounters(AirportService.CounterRequest req, StreamObserver<AirportService.CounterResponse> responseObserver) {
-        Integer firstId = airport.addCounters(req.getSectorName(), req.getCounterCount());
-        if (firstId == null) {
+        RangeCounter rangeCounter = airport.addCounters(req.getSectorName(), req.getCounterCount());
+        if (rangeCounter == null) {
             responseObserver.onNext(AirportService.CounterResponse.newBuilder()
                     .setStatus(AirportService.ResponseStatus.FAILURE)
                     .setSectorName(req.getSectorName())
                     .build());
         } else {
-            int lastId = firstId + req.getCounterCount() - 1;
             responseObserver.onNext(AirportService.CounterResponse.newBuilder()
                     .setStatus(AirportService.ResponseStatus.SUCCESS)
                     .setSectorName(req.getSectorName())
-                    .setFirstCounterId(firstId)
-                    .setLastCounterId(lastId)
+                    .setFirstCounterId(rangeCounter.getCounterFrom())
+                    .setLastCounterId(rangeCounter.getCounterTo())
                     .build());
         }
         responseObserver.onCompleted();
