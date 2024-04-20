@@ -104,9 +104,9 @@ public class CounterReservationClient {
                 System.out.println("Error: The counter range cannot be freed as it is not assigned to '" + airlineName + "'.");
             } else if (e.getStatus().getCode() == Status.Code.FAILED_PRECONDITION) {
                 System.out.println("Error: Cannot free counters as there are passengers waiting to be attended.");
-            } else {
-                System.out.println("RPC failed: " + e.getStatus());
             }
+        } catch (Exception e) {
+           System.out.println("RPC failed: " + e);
         }
     }
 

@@ -23,8 +23,6 @@ public class Airport {
     private final ConcurrentHashMap<Sector, List<RangeCounter>> sectors = new ConcurrentHashMap<>();
 
 //    private final List<CheckIn> checkIns = new ArrayList<>();
-    private final List<CounterServiceOuterClass.CheckInRecord> checkIns = Collections.synchronizedList(new ArrayList<>());
-
     private final AtomicInteger counterId = new AtomicInteger(1);
 
     private static Airport instance = null;
@@ -120,7 +118,15 @@ public class Airport {
 
     }
 
-    public List<CounterServiceOuterClass.CounterInfo> queryCounters(String sector) {
+    public List<CounterServiceOuterClass.CounterInfo> queryCounters(String sectorName) throws RuntimeException {
+
+        Sector sector = new Sector(sectorName);
+        List<RangeCounter> sectorCounters = sectors.getOrDefault(sector, new ArrayList<>());
+
+        if(sectorCounters.isEmpty())
+            throw new IllegalArgumentException("No counters found for the specified sector.");
+
+
 
         return null;
     }
@@ -186,9 +192,9 @@ public class Airport {
 
         Sector sector = new Sector(sectorName);
         Airline airline = new Airline(airlineName);
-        List<RangeCounter> sectorCounters = sectors.get(sector);
+        List<RangeCounter> sectorCounters = sectors.getOrDefault(sector, new ArrayList<>());
 
-        if (sectorCounters == null) {
+        if (sectorCounters.isEmpty()) {
             throw new ClassNotFoundException("Sector '" + sectorName + "' does not exist.");
         }
 
