@@ -131,7 +131,6 @@ public class Airport {
         return null;
     }
 
-
     public List<CounterServiceOuterClass.CheckInRecord> queryCheckIns(String sector, String airline) {
         return new ArrayList<>();
     }
@@ -160,7 +159,6 @@ public class Airport {
 //        });
         return null;
     }
-
 
     public List<RequestedRangeCounter> listCounters(String sectorName, int from, int to) {
         Sector sector = new Sector(sectorName);
@@ -212,13 +210,15 @@ public class Airport {
 
         if(rangeCounterFound == null){
             throw new IllegalArgumentException("No range starting at counter " + fromVal + " exists in sector '" + sectorName + "'.");
-
         }
 
         //TODO: VERIFICAR PERSONAS EN ESPERA
         boolean waiting = false;
         if(waiting)
             throw new IllegalStateException("Cannot free counters as there are passengers waiting to be attended.");
+
+        // Attempt to assign from the queue when a sector was freed
+        tryToAssignPendings(sector);
 
         return new FreeCounterResult(String.valueOf(rangeCounterFound.getCounterFrom()), rangeCounterFound.getCounterFrom(), rangeCounterFound.getCounterTo(), rangeCounterFound.getAirline().getName(), rangeCounterFound.getFlights().stream().map(Flight::getFlightCode).collect(Collectors.toList()));
     }
