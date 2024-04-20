@@ -97,4 +97,14 @@ public class NotificationsTest {
         }
     }
 
+    @Test
+    public void testRegisterAndWaitForNotifications(){
+        airportAdminClient.addSector("A");
+        airportAdminClient.addCounters("A", 10);
+
+        airportAdminClient.addPassengerManifest("src/test/java/ar/edu/itba/pod/tpe1/client/passengersOk.csv");
+
+        notificationsClient.registerNotifications("AirCanada");
+    }
+
 }

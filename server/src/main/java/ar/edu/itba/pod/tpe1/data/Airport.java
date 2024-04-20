@@ -317,7 +317,7 @@ public class Airport {
         if(assigned == null) {
             pendingRequestedCounters.putIfAbsent(sector, new ConcurrentLinkedQueue<>());
             pendingRequestedCounters.get(sector).add(new RequestedRangeCounter(validFlights, airline, true, count));
-            notifications.notifyCountersPending(airline, count, sectorName, validFlights, 0); // TODO: send proper airlines ahead
+            notifications.notifyCountersPending(airline, count, sectorName, validFlights, 0); // TODO: send proper pending ahead
             return null;
         }
         return assigned;

@@ -49,10 +49,15 @@ public class Notifications {
         notifications.remove(airline);
     }
 
-    public void notifyAirline(Airline airline, Notification notification){
+    public void notifyAirline(Airline airline, Notification notification) {
         if(!notifications.containsKey(airline))
             throw new IllegalArgumentException();
-        notifications.get(airline).add(notification);
+        try {
+            notifications.get(airline).put(notification);
+        }catch (InterruptedException e){
+            e.printStackTrace();
+        }
+
     }
 
     public Notification getNotification(Airline airline) throws InterruptedException {
@@ -60,7 +65,10 @@ public class Notifications {
             // This can happen if the airline got unregistered, or it never was registered
             return null;
         // I'll block if there are no elementes in queue
+
         return notifications.get(airline).take();
+
+
     }
 
     public void notifyCountersAssigned(int from, int to, String sector, List<Flight> flights, Airline airline){
