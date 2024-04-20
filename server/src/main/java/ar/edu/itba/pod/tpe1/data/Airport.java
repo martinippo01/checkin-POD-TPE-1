@@ -202,6 +202,16 @@ public class Airport {
     }
 
     public RequestedRangeCounter assignCounters(String sectorName, int count, String airlineName, List<String> flightsToReserve) {
+        /*
+        TODO: Check conditions
+        No existe un sector con ese nombre
+        No se agregaron pasajeros esperados con el código de vuelo, para al menos uno de los vuelos solicitados
+        Se agregaron pasajeros esperados con el código de vuelo pero con otra aerolínea, para al menos uno de los vuelos solicitados
+        Ya existe al menos un mostrador asignado para al menos uno de los vuelos solicitados (no se permiten agrandar rangos de mostradores asignados)
+        Ya existe una solicitud pendiente de un rango de mostradores para al menos uno de los vuelos solicitados (no se permiten reiterar asignaciones pendientes)
+        Ya se asignó y luego se liberó un rango de mostradores para al menos uno de los vuelos solicitados (no se puede iniciar el check-in de un vuelo dos o más veces)
+        * */
+
         // Get the sector
         Sector sector = Sector.fromName(sectorName);
         if (!sectors.containsKey(sector)) {
