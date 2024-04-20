@@ -25,25 +25,23 @@ public class CounterQueryClient {
             QueryCountersResponse response = blockingStub.queryCounters(request);
             printCounterQueryResponse(response);
         } catch (StatusRuntimeException e) {
-            if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
-                System.out.println("   Sector  Counters  Airline          Flights             People");
-                System.out.println("   ###############################################################");
-            }
+                System.out.println("Sector  Counters  Airline          Flights             People");
+                System.out.println("###############################################################");
         } catch (Exception e) {
             System.err.println("RPC failed: " + e.getMessage());
         }
     }
 
     private void printCounterQueryResponse(QueryCountersResponse response) {
-        System.out.println("   Sector  Counters  Airline          Flights             People");
-        System.out.println("   ###############################################################");
+        System.out.println("Sector  Counters  Airline          Flights             People");
+        System.out.println("###############################################################");
         for (CounterInfo counter : response.getCountersList()) {
             String flights = String.join("|", counter.getFlightsList());
             if (flights.isEmpty()) flights = "-";
             String airline = counter.getAirline().isEmpty() ? "-" : counter.getAirline();
             System.out.printf("   %-7s %-9s %-16s %-17s %-4d%n",
                     counter.getSector(),
-                    "(" + counter.getRange() + ")",
+                    counter.getRange() ,
                     airline,
                     flights,
                     counter.getWaitingPeople());

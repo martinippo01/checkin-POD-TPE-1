@@ -14,10 +14,9 @@ public class CounterQueryServant extends CounterServiceGrpc.CounterServiceImplBa
     @Override
     public void queryCounters(CounterServiceOuterClass.QueryCountersRequest req, StreamObserver<CounterServiceOuterClass.QueryCountersResponse> responseObserver) {
         try {
-            List<CounterServiceOuterClass.CounterInfo> results = airport.queryCounters(req.getSector());
+            List<CounterServiceOuterClass.CounterInfo> results = airport.queryCountersBySector(req.getSector());
 
-            CounterServiceOuterClass.QueryCountersResponse.Builder responseBuilder
-                    = CounterServiceOuterClass.QueryCountersResponse
+            CounterServiceOuterClass.QueryCountersResponse.Builder responseBuilder = CounterServiceOuterClass.QueryCountersResponse
                     .newBuilder()
                     .addAllCounters(results);
 
