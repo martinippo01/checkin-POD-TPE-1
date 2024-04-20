@@ -160,20 +160,25 @@ public class Airport {
         Sector sector = new Sector(sectorName);
         List<RangeCounter> sectorCounters = sectors.get(sector);
         List<RequestedRangeCounter> out = new ArrayList<>();
+        boolean containsAssignedRangeCounter = false;
+
         for(RangeCounter rangeCounter : sectorCounters) {
-            for (RequestedRangeCounter counter : rangeCounter.getAssignedRangeCounters()) {
-                if (counter.getCounterFrom() >= from && counter.getCounterTo() <= to) {
-                    out.add(new RequestedRangeCounter(counter));
+            if(!(to <= rangeCounter.getCounterFrom() || from >= rangeCounter.getCounterTo())) { // In case the range is outside the from-to
+                int prevFrom = rangeCounter.getCounterFrom();
+                for (RequestedRangeCounter counter : rangeCounter.getAssignedRangeCounters()) {
+                    if (prevFrom < counter.getCounterFrom())
+                        out.add(new RequestedRangeCounter(prevFrom, counter.getCounterFrom() - 1, new ArrayList<>(), new Airline(""), false));
+                    if (counter.getCounterFrom() >= from && counter.getCounterTo() <= to) {
+                        containsAssignedRangeCounter = true;
+                        out.add(new RequestedRangeCounter(counter));
+                    }
+                    prevFrom = counter.getCounterTo() + 1;
                 }
-            }
-            for(int i = rangeCounter.getCounterFrom(); i <= rangeCounter.getCounterTo(); i++) {
-                RequestedRangeCounter temp = new RequestedRangeCounter(new ArrayList<>(), new Airline(""), false, i - rangeCounter.getCounterFrom() + 1);
-                if (!rangeCounter.getAssignedRangeCounters().contains(temp) && temp.getCounterFrom() >= from && temp.getCounterTo() <= to) {
-                    out.add(temp);
-                }
+                if (prevFrom <= rangeCounter.getCounterTo())
+                    out.add(new RequestedRangeCounter(prevFrom, rangeCounter.getCounterTo(), new ArrayList<>(), new Airline(""), false));
             }
         }
-        return out;
+        return containsAssignedRangeCounter ? out : new ArrayList<>();
     }
 
     // TODO:
