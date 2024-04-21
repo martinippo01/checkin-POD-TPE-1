@@ -321,6 +321,8 @@ public class Airport {
             pendingRequestedCounters.get(sector).add(new RequestedRangeCounter(validFlights, airline, true, count));
             notifications.notifyCountersPending(airline, count, sectorName, validFlights, 0); // TODO: send proper pending ahead
             return null;
+        }else{
+            notifications.notifyCountersAssigned(assigned.getCounterFrom(), assigned.getCounterTo(), sectorName, assigned.getFlights(), airline);
         }
         return assigned;
 

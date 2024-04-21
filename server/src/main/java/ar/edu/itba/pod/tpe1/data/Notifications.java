@@ -5,6 +5,9 @@ import ar.edu.itba.pod.tpe1.data.utils.Airline;
 import ar.edu.itba.pod.tpe1.data.utils.Flight;
 import ar.edu.itba.pod.tpe1.data.utils.Notification;
 import ar.edu.itba.pod.tpe1.data.utils.Sector;
+import ar.edu.itba.pod.tpe1.servant.NotificationsServant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -14,6 +17,9 @@ import java.util.stream.Collectors;
 
 
 public class Notifications {
+
+    // Logger
+    private static final Logger logger = LoggerFactory.getLogger(Notifications.class);
 
     private final ConcurrentHashMap<Airline, BlockingQueue<Notification>> notifications = new ConcurrentHashMap<>();
 
@@ -33,6 +39,7 @@ public class Notifications {
         if(notifications.containsKey(airline) || airport.airlineExists(airline))
             return false;
         notifications.put(airline, new LinkedBlockingQueue<>());
+        logger.info("Airline {} registered", airline.getName());
         return true;
     }
 
@@ -42,6 +49,7 @@ public class Notifications {
         // TODO: Check if the addition should be .add or .put
         // Add to the queue a poisson pill, so when producer consumes it, will stop taking form the queue
         notifications.get(airline).add(new Notification.Builder().setPoisonPill().build());
+        logger.info("Airline {} unregistered", airline.getName());
         return true;
     }
 
@@ -51,13 +59,14 @@ public class Notifications {
 
     public void notifyAirline(Airline airline, Notification notification) {
         if(!notifications.containsKey(airline))
-            throw new IllegalArgumentException();
-        try {
-            notifications.get(airline).put(notification);
-        }catch (InterruptedException e){
-            e.printStackTrace();
-        }
-
+            return;
+//        try {
+//            notifications.get(airline).put(notification);
+//        }catch (InterruptedException e){
+//            e.printStackTrace();
+//        }
+        logger.info("Airline {} trying to add notification", airline.getName());
+        notifications.get(airline).add(notification);
     }
 
     public Notification getNotification(Airline airline) throws InterruptedException {
