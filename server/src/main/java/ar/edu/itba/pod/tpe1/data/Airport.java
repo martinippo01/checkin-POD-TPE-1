@@ -56,41 +56,43 @@ public class Airport {
         pendingRequestedCounters.put(new Sector(sectorName), new ConcurrentLinkedQueue<>());
     }
 
-    // Adds a set of counters to a sector
-    // TODO: sync!!!
     public RangeCounter addCounters(String sectorName, int count) {
         Sector sector = Sector.fromName(sectorName);
-        if (count <= 0 || !sectors.containsKey(sector)) {
-            throw new IllegalStateException("Invalid number of counters (must be positive)/sector does not exist.");
-        }
-        int firstId = counterId.getAndAdd(count);
 
-        // Se which is the last counter number of the sector, and in that case expand the RangeCounter
-        int lastCounterOfSector = -1;
-        RangeCounter removeRangeCounter = null;
-        for(RangeCounter rangeCounter : sectors.get(sector)){
-            if(rangeCounter.getCounterTo() >= lastCounterOfSector) {
-                lastCounterOfSector = rangeCounter.getCounterTo();
-                removeRangeCounter = rangeCounter;
+        //TODO: minimize the object that determines the synchronized block i.e. sectors
+        synchronized (sectors) {
+            if (count <= 0 || !sectors.containsKey(sector)) {
+                throw new IllegalStateException("Invalid number of counters (must be positive)/sector does not exist.");
             }
-            lastCounterOfSector = Math.max(rangeCounter.getCounterTo(), lastCounterOfSector);
-        }
-        if(lastCounterOfSector == firstId - 1){
-            sectors.get(sector).remove(removeRangeCounter);
-            RangeCounter newRangeCounter = new RangeCounter(removeRangeCounter, firstId + count - 1);
-            sectors.get(sector).add(newRangeCounter);
-            // Make sure the elements are in the correct order
-            Collections.sort(sectors.get(sector));
-            tryToAssignPendings(sector); // If there were pending assignments, try to solve them
-            return newRangeCounter;
-        }else{
-            RangeCounter newRangeCounter = new RangeCounter(firstId, firstId + count - 1);
-                    // And the range of counters to the sector, from the last
-            sectors.get(sector).add(newRangeCounter);
-            // Make sure the elements are in the correct order
-            Collections.sort(sectors.get(sector));
-            tryToAssignPendings(sector); // If there were pending assignments, try to solve them
-            return newRangeCounter; // Success, returns the first ID of the new counters
+            int firstId = counterId.getAndAdd(count);
+
+            // Se which is the last counter number of the sector, and in that case expand the RangeCounter
+            int lastCounterOfSector = -1;
+            RangeCounter removeRangeCounter = null;
+            for (RangeCounter rangeCounter : sectors.get(sector)) {
+                if (rangeCounter.getCounterTo() >= lastCounterOfSector) {
+                    lastCounterOfSector = rangeCounter.getCounterTo();
+                    removeRangeCounter = rangeCounter;
+                }
+                lastCounterOfSector = Math.max(rangeCounter.getCounterTo(), lastCounterOfSector);
+            }
+            if (lastCounterOfSector == firstId - 1) {
+                sectors.get(sector).remove(removeRangeCounter);
+                RangeCounter newRangeCounter = new RangeCounter(removeRangeCounter, firstId + count - 1);
+                sectors.get(sector).add(newRangeCounter);
+                // Make sure the elements are in the correct order
+                Collections.sort(sectors.get(sector));
+                tryToAssignPendings(sector); // If there were pending assignments, try to solve them
+                return newRangeCounter;
+            } else {
+                RangeCounter newRangeCounter = new RangeCounter(firstId, firstId + count - 1);
+                // And the range of counters to the sector, from the last
+                sectors.get(sector).add(newRangeCounter);
+                // Make sure the elements are in the correct order
+                Collections.sort(sectors.get(sector));
+                tryToAssignPendings(sector); // If there were pending assignments, try to solve them
+                return newRangeCounter; // Success, returns the first ID of the new counters
+            }
         }
     }
 
