@@ -462,13 +462,14 @@ public class CounterReservationClientTest {
         flights1.add("AC987");
         counterReservationClient.assignCounters("A", flights1, "AirCanada", 2);
 
-        List<String> flights2 = new ArrayList<>();
-        flights2.add("AC988");
-        counterReservationClient.assignCounters("A", flights2, "AirCanada", 3);
 
         List<String> flights3 = new ArrayList<>();
         flights3.add("AA123");
         counterReservationClient.assignCounters("A", flights3, "AmericanAirlines", 3);
+
+        List<String> flights2 = new ArrayList<>();
+        flights2.add("AC988");
+        counterReservationClient.assignCounters("A", flights2, "AirCanada", 3);
 
         System.out.println("Prior additions of counter");
         counterReservationClient.listPendingAssignments("A");
@@ -479,7 +480,7 @@ public class CounterReservationClientTest {
         counterReservationClient.listPendingAssignments("A");
 
         counterReservationClient.listSectors();
-        counterReservationClient.queryCounterRange("A", 1, 10);
+        counterReservationClient.queryCounterRange("A", 1, 20);
     }
 
     @Test
