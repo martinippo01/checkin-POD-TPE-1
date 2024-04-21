@@ -7,7 +7,6 @@ public class RangeCounter implements Comparable<RangeCounter> {
     private final int counterFrom;
     private final int counterTo;
     // Metadata
-    //private final List<AssignedRangeCounter> assignedRangeCounters = new ArrayList<>(); // TODO check thread safety
     private final Set<RequestedRangeCounter> assignedRangeCounters;// = new TreeSet<>(); // TODO check thread safety
 
     public RangeCounter(final int counterFrom, final int counterTo) {
