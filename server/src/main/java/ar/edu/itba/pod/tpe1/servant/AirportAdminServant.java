@@ -4,8 +4,7 @@ import airport.AirportAdminServiceGrpc;
 import airport.AirportService;
 import ar.edu.itba.pod.tpe1.data.Airport;
 import ar.edu.itba.pod.tpe1.data.utils.RangeCounter;
-import io.grpc.stub.StreamObserver;
-
+import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 
 public class AirportAdminServant extends AirportAdminServiceGrpc.AirportAdminServiceImplBase {
@@ -14,45 +13,52 @@ public class AirportAdminServant extends AirportAdminServiceGrpc.AirportAdminSer
 
     @Override
     public void addSector(AirportService.SectorRequest req, StreamObserver<AirportService.SectorResponse> responseObserver) {
-        boolean success = airport.addSector(req.getSectorName());
-        AirportService.ResponseStatus status = success ?
-                AirportService.ResponseStatus.SUCCESS : AirportService.ResponseStatus.FAILURE;
-        responseObserver.onNext(AirportService.SectorResponse.newBuilder()
-                .setStatus(status)
-                .setSectorName(req.getSectorName())
-                .build());
-        responseObserver.onCompleted();
+        try {
+            airport.addSector(req.getSectorName());
+            responseObserver.onNext(AirportService.SectorResponse.newBuilder()
+                    .setSectorName(req.getSectorName())
+                    .build());
+            responseObserver.onCompleted();
+        } catch (IllegalArgumentException e) {
+            responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException());
+        } catch (Exception e) {
+            responseObserver.onError(io.grpc.Status.INTERNAL.withDescription(e.getMessage()).asRuntimeException());
+        }
     }
 
     @Override
     public void addCounters(AirportService.CounterRequest req, StreamObserver<AirportService.CounterResponse> responseObserver) {
-        RangeCounter rangeCounter = airport.addCounters(req.getSectorName(), req.getCounterCount());
-        if (rangeCounter == null) {
+        try {
+            RangeCounter counter = airport.addCounters(req.getSectorName(), req.getCounterCount());
             responseObserver.onNext(AirportService.CounterResponse.newBuilder()
-                    .setStatus(AirportService.ResponseStatus.FAILURE)
                     .setSectorName(req.getSectorName())
+                            .setLastCounterId(counter.getCounterTo())
+                            .setFirstCounterId(counter.getCounterFrom())
                     .build());
-        } else {
-            responseObserver.onNext(AirportService.CounterResponse.newBuilder()
-                    .setStatus(AirportService.ResponseStatus.SUCCESS)
-                    .setSectorName(req.getSectorName())
-                    .setFirstCounterId(rangeCounter.getCounterFrom())
-                    .setLastCounterId(rangeCounter.getCounterTo())
-                    .build());
+            responseObserver.onCompleted();
+        } catch (IllegalArgumentException e) {
+            responseObserver.onError(Status.FAILED_PRECONDITION.withDescription(e.getMessage()).asRuntimeException());
+        } catch (Exception e) {
+            responseObserver.onError(Status.INTERNAL.withDescription(e.getMessage()).asRuntimeException());
         }
-        responseObserver.onCompleted();
     }
 
     @Override
     public void addPassenger(AirportService.AddPassengerRequest req, StreamObserver<AirportService.AddPassengerResponse> responseObserver) {
-        boolean success = airport.registerPassenger(req.getBookingCode(), req.getFlightCode(), req.getAirlineName());
-        AirportService.ResponseStatus status = success ?
-                AirportService.ResponseStatus.SUCCESS : AirportService.ResponseStatus.FAILURE;
-        responseObserver.onNext(AirportService.AddPassengerResponse.newBuilder()
-                .setBookingCode(req.getBookingCode())
-                .setStatus(status)
-                .build());
-        responseObserver.onCompleted();
+        try {
+            airport.registerPassenger(req.getBookingCode(), req.getFlightCode(), req.getAirlineName());
+            responseObserver.onNext(AirportService.AddPassengerResponse.newBuilder()
+                    .setBookingCode(req.getBookingCode())
+                    .build());
+            responseObserver.onCompleted();
+        } catch (IllegalArgumentException e) {
+            responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException());
+        } catch (IllegalCallerException e) {
+            responseObserver.onError(Status.PERMISSION_DENIED.withDescription(e.getMessage()).asRuntimeException());
+        } catch (Exception e) {
+            responseObserver.onError(Status.INTERNAL.withDescription(e.getMessage()).asRuntimeException());
+        }
+
     }
 }
 

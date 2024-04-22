@@ -92,8 +92,11 @@ public class RequestedRangeCounter implements Comparable<RequestedRangeCounter> 
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         RequestedRangeCounter that = (RequestedRangeCounter) o;
-
-        return counterFrom == that.counterFrom;
+        // If it is pending, it is equal by counterFrom, if not it has to match the rest
+        if(!pending)
+            return counterFrom == that.counterFrom;
+        else
+            return requestedRange == that.requestedRange && airline.equals(that.airline) && flights.equals(that.flights);
     }
 
     @Override

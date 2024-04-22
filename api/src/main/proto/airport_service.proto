@@ -2,12 +2,6 @@ syntax = "proto3";
 
 package airport;
 
-// Define custom enums for clearer responses
-enum ResponseStatus {
-  SUCCESS = 0;
-  FAILURE = 1;
-}
-
 // Service Definition
 service AirportAdminService {
   rpc AddSector(SectorRequest) returns (SectorResponse);
@@ -21,7 +15,6 @@ message SectorRequest {
 }
 
 message SectorResponse {
-  ResponseStatus status = 1;
   string sectorName = 2;
 }
 
@@ -31,7 +24,6 @@ message CounterRequest {
 }
 
 message CounterResponse {
-  ResponseStatus status = 1;
   string sectorName = 2;
   int32 firstCounterId = 3;
   int32 lastCounterId = 4;
@@ -45,5 +37,4 @@ message AddPassengerRequest {
 
 message AddPassengerResponse {
   string bookingCode = 1;
-  ResponseStatus status = 2;
 }

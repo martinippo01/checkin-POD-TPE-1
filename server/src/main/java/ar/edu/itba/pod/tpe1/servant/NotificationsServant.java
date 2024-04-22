@@ -35,7 +35,7 @@ public class NotificationsServant extends NotificationsServiceGrpc.Notifications
                 logger.info("Airline: {} successfully registered to notifications service", airline.getName());
                 responseObserver.onNext(buildNotificationProto(new Notification.Builder().setNotificationType(NotificationsServiceOuterClass.NotificationType.SUCCESSFUL_REGISTER).build()));
             } else {
-                // TODO: evaluate cases, it can fail because the airline does not exist or there are no one waiting
+                // TODO: evaluate there are no passengers waiting
                 // Mainly, evaluate the case when the airline exists, but there's no expected passengers
                 logger.error("Airline: {} failed to register to notifications service", airline.getName());
                 responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription("Failed to register airline " + req.getAirline()).asRuntimeException());
