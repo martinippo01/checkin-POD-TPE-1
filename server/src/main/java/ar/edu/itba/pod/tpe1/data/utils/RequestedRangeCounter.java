@@ -1,7 +1,9 @@
 package ar.edu.itba.pod.tpe1.data.utils;
 
+import java.awt.print.Book;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class RequestedRangeCounter implements Comparable<RequestedRangeCounter> {
 
@@ -11,6 +13,8 @@ public class RequestedRangeCounter implements Comparable<RequestedRangeCounter> 
     private final Airline airline;
     private final boolean pending;
     private final int requestedRange;
+
+    private final ConcurrentLinkedQueue<Booking> waitingQueue = new ConcurrentLinkedQueue<Booking>();
 
     public RequestedRangeCounter(final int counterFrom, final int counterTo, List<Flight> flightList, Airline airline, boolean pending) {
         this.counterFrom = counterFrom;
@@ -44,6 +48,15 @@ public class RequestedRangeCounter implements Comparable<RequestedRangeCounter> 
     public int getCounterTo() {
         return counterTo;
     }
+
+    public int getSize() {
+        return counterTo - counterFrom + 1;
+    }
+
+    public boolean isInRange(int counter) {
+        return counter >= counterFrom && counter <= counterTo;
+    }
+
     public List<Flight> getFlights() {
         return flights; // TODO CHECK THREAD SAFETY!!!
     }
@@ -52,6 +65,25 @@ public class RequestedRangeCounter implements Comparable<RequestedRangeCounter> 
     }
     public int getRequestedRange() {
         return requestedRange;
+    }
+
+    public void addBookingToWaitingQueue(Booking booking) {
+        Objects.requireNonNull(booking, "Received NULL booking");
+        waitingQueue.add(booking);
+    }
+
+    /* Returns first Booking in queue, or null if empty */
+    public Booking getFromWaitingQueue() {
+        return waitingQueue.poll();
+    }
+
+    public int getWaitingQueueLength () {
+        return waitingQueue.size();
+    }
+
+    public boolean isWaitingInQueue(Booking booking) {
+        Objects.requireNonNull(booking, "Received NULL booking");
+        return waitingQueue.contains(booking);
     }
 
     // CounterFrom is unique among assigned counters

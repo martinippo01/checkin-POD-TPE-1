@@ -27,6 +27,19 @@ public class RangeCounter implements Comparable<RangeCounter> {
         return counterTo - counterFrom + 1;
     }
 
+    public boolean isInRange(int counter) {
+        return counter >= counterFrom && counter <= counterTo
+                && assignedRangeCounters.stream().anyMatch(arc -> arc.isInRange(counter));
+    }
+
+    public Optional<RequestedRangeCounter> getAssignedRangeCounterWithCounter(int counter) {
+       if (!isInRange(counter)) {
+           return Optional.empty();
+       }
+
+       return assignedRangeCounters.stream().filter(arc -> arc.isInRange(counter)).findFirst();
+    }
+
     public RequestedRangeCounter freeRange(final int fromVal, final Airline airline) {
         for(RequestedRangeCounter assignedRangeCounter : assignedRangeCounters) {
             if (assignedRangeCounter.getCounterFrom() == fromVal && assignedRangeCounter.getAirline().equals(airline)) {
@@ -66,7 +79,7 @@ public class RangeCounter implements Comparable<RangeCounter> {
 
     public List<RequestedRangeCounter> getAssignedRangeCounters() {
         //return assignedRangeCounters; // TODO check thread safety
-        return new ArrayList<>(assignedRangeCounters);
+        return assignedRangeCounters.stream().toList();
     }
 
     @Override
