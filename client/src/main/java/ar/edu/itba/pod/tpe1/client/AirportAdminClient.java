@@ -25,7 +25,7 @@ public class AirportAdminClient {
                 System.out.println("Failed to add sector: ");
             }
         } catch (Exception e) {
-            System.err.println("RPC failed: " + e.getMessage());
+            System.out.println("RPC failed: " + e.getMessage());
         }
     }
 

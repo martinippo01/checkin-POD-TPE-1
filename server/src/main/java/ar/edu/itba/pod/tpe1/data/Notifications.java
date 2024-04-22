@@ -24,7 +24,6 @@ public class Notifications {
     private final ConcurrentHashMap<Airline, BlockingQueue<Notification>> notifications = new ConcurrentHashMap<>();
 
     private static Notifications instance = null;
-    private static Airport airport = Airport.getInstance();
 
     public Notifications() {}
 
@@ -36,8 +35,10 @@ public class Notifications {
     }
 
     public boolean registerAirline(Airline airline){
-        if(notifications.containsKey(airline) || airport.airlineExists(airline))
-            return false;
+        // TODO: evaluate there are no passengers waiting for this airline
+        if(notifications.containsKey(airline))
+            throw new IllegalArgumentException("Airline " + airline + " already registered.");
+
         notifications.put(airline, new LinkedBlockingQueue<>());
         logger.info("Airline {} registered", airline.getName());
         return true;
@@ -46,7 +47,6 @@ public class Notifications {
     public boolean unregisterAirline(Airline airline){
         if(!notifications.containsKey(airline))
             return false;
-        // TODO: Check if the addition should be .add or .put
         // Add to the queue a poisson pill, so when producer consumes it, will stop taking form the queue
         notifications.get(airline).add(new Notification.Builder().setPoisonPill().build());
         logger.info("Airline {} unregistered", airline.getName());
@@ -60,11 +60,6 @@ public class Notifications {
     public void notifyAirline(Airline airline, Notification notification) {
         if(!notifications.containsKey(airline))
             return;
-//        try {
-//            notifications.get(airline).put(notification);
-//        }catch (InterruptedException e){
-//            e.printStackTrace();
-//        }
         logger.info("Airline {} trying to add notification", airline.getName());
         notifications.get(airline).add(notification);
     }
@@ -74,10 +69,7 @@ public class Notifications {
             // This can happen if the airline got unregistered, or it never was registered
             return null;
         // I'll block if there are no elementes in queue
-
         return notifications.get(airline).take();
-
-
     }
 
     public void notifyCountersAssigned(int from, int to, String sector, List<Flight> flights, Airline airline){

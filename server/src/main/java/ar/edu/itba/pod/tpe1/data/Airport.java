@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 public class Airport {
 
+    // Notifications State
     private final Notifications notifications = Notifications.getInstance();
 
     // Key: Booking - Value: a boolean
@@ -47,6 +48,10 @@ public class Airport {
         return instance;
     }
 
+    public Notifications getNotificationsService() {
+        return notifications;
+    }
+
     public List<CounterReservationServiceOuterClass.Sector> listSectors() {
         return new ArrayList<>();
     }
@@ -56,7 +61,6 @@ public class Airport {
 
         if(sectors.putIfAbsent(sector, new ArrayList<>()) != null)
             return;
-
         pendingRequestedCounters.put(sector, new ConcurrentLinkedQueue<>());
     }
 
@@ -79,23 +83,20 @@ public class Airport {
                 }
                 lastCounterOfSector = Math.max(rangeCounter.getCounterTo(), lastCounterOfSector);
             }
+            RangeCounter newRangeCounter;
             if (lastCounterOfSector == firstId - 1) {
                 sectors.get(sector).remove(removeRangeCounter);
-                RangeCounter newRangeCounter = new RangeCounter(removeRangeCounter, firstId + count - 1);
+                newRangeCounter = new RangeCounter(removeRangeCounter, firstId + count - 1);
                 sectors.get(sector).add(newRangeCounter);
-                // Make sure the elements are in the correct order
-                Collections.sort(sectors.get(sector));
-                tryToAssignPendings(sector); // If there were pending assignments, try to solve them
-                return newRangeCounter;
             } else {
-                RangeCounter newRangeCounter = new RangeCounter(firstId, firstId + count - 1);
+                newRangeCounter = new RangeCounter(firstId, firstId + count - 1);
                 // And the range of counters to the sector, from the last
                 sectors.get(sector).add(newRangeCounter);
-                // Make sure the elements are in the correct order
-                Collections.sort(sectors.get(sector));
-                tryToAssignPendings(sector); // If there were pending assignments, try to solve them
-                return newRangeCounter; // Success, returns the first ID of the new counters
             }
+            // Make sure the elements are in the correct order
+            Collections.sort(sectors.get(sector));
+            tryToAssignPendings(sector); // If there were pending assignments, try to solve them
+            return newRangeCounter; // Success, returns the first ID of the new counters
         }
     }
 
@@ -106,7 +107,7 @@ public class Airport {
         Airline airline = new Airline(airlineName);
         Booking booking = new Booking(bookingCode, flight);
 
-        synchronized (passengerLock) {
+
             if (bookingCodes.containsKey(booking)) { // In case the booking already exists, it fails
                 throw new IllegalArgumentException("Booking code already exists.");
             }
@@ -124,7 +125,7 @@ public class Airport {
             airlines.add(airline);
             // Put the new booking code
             bookingCodes.put(booking, false);
-        }
+
     }
 
     public List<CounterServiceOuterClass.CounterInfo> queryCountersBySector(String sectorName) throws RuntimeException {
@@ -303,15 +304,14 @@ public class Airport {
         Sector sector = Sector.fromName(sectorName);
         if (!sectors.containsKey(sector)) {
             // Sector does not exist
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Sector does not exist");
         }
         Airline airline = new Airline(airlineName);
 
         // Validate that the flights are correct
+
         List<Flight> validFlights = checkFlights(sector, airline, flightsToReserve);
-        // In case at least one of the flights is not valid for any reason, fail
-        if(validFlights == null)
-            throw new IllegalArgumentException();
+
 
         // Attempt to assign a range at the requested sector
         RequestedRangeCounter assigned = findSpaceForRange(sector, validFlights, airline, count);
@@ -320,7 +320,7 @@ public class Airport {
         if(assigned == null) {
             pendingRequestedCounters.putIfAbsent(sector, new ConcurrentLinkedQueue<>());
             pendingRequestedCounters.get(sector).add(new RequestedRangeCounter(validFlights, airline, true, count));
-            notifications.notifyCountersPending(airline, count, sectorName, validFlights, 0); // TODO: send proper pending ahead
+            notifications.notifyCountersPending(airline, count, sectorName, validFlights, pendingRequestedCounters.get(sector).size() - 1);
             return null;
         }else{
             notifications.notifyCountersAssigned(assigned.getCounterFrom(), assigned.getCounterTo(), sectorName, assigned.getFlights(), airline);
@@ -337,16 +337,21 @@ public class Airport {
             + There are no pending assignations that have the flight code in it
             + There were no assignations in the past for that airline
          */
-
+        // TODO: sync!!! It must be synced but take into account here we use sectors and the rest of the collections
         List<Flight> validFlights = new ArrayList<>();
         for (String flightCode : flightsToReserve) {
 
             Flight flight = new Flight(flightCode);
             Airline registeredAirline = flights.getOrDefault(flight, null);
 
-            // Check Flight exists and is registered to the same airline and was not assigned before
-            if (registeredAirline == null || !registeredAirline.equals(airline) || flightWasAssigned.get(flight)) { // Flight does not exist or Registered to a different airline
-                return null;
+            // Check Flight exists
+            if (registeredAirline == null) {
+                throw new IllegalArgumentException("Flight: " + flightCode + " does not exist (There are no airlines that matches the flight code).");
+            }
+
+            // registered to the same airline
+            if (!registeredAirline.equals(airline)) {
+                throw new IllegalArgumentException("Flight: " + flightCode + " already exists in airline: " + registeredAirline);
             }
 
             // For each sector of the airport
@@ -356,19 +361,26 @@ public class Airport {
                 for(RangeCounter rangeCounter: sectors.getOrDefault(otherSector, new ArrayList<>())){
                     for(RequestedRangeCounter counter: rangeCounter.getAssignedRangeCounters()){
                         if(counter.getFlights().contains(flight))
-                            return null;
+                            throw new IllegalArgumentException("Flight: " + flightCode + " is already assigned at sector " + otherSector.getName() + ".");
                     }
                 }
 
                 // Check that there is no pending assignation with the flight
                 for(RequestedRangeCounter pendingAssignation : pendingRequestedCounters.get(sector)){
                     if(pendingAssignation.getFlights().contains(flight))
-                        return null;
+                        throw new IllegalArgumentException("Flight: " + flightCode + " is pending to be assigned.");
                 }
+            }
+
+            // was not assigned before
+            if (flightWasAssigned.get(flight)) {
+                throw new IllegalArgumentException("Flight: " + flightCode + " was already assigned in the past.");
             }
 
             validFlights.add(flight);
         }
+
+
 
         for (Flight flight : validFlights) {
             // Mark the flight as assigned
@@ -391,27 +403,48 @@ public class Airport {
 
     public List<RequestedRangeCounter> listPendingRequestedCounters(String sectorName) {
         Sector sector = new Sector(sectorName);
-        Queue<RequestedRangeCounter> requestedRangeCounters = pendingRequestedCounters.getOrDefault(sector, new ArrayDeque<>());
-        if(requestedRangeCounters.isEmpty())
-            throw new IllegalArgumentException("Invalid sector.");
-        return new ArrayList<>(requestedRangeCounters);
+        synchronized (pendingRequestedCounters) { // TODO: Take the sectors lock instead of this one
+            Queue<RequestedRangeCounter> requestedRangeCounters = pendingRequestedCounters.getOrDefault(sector, new ArrayDeque<>());
+            if (requestedRangeCounters.isEmpty())
+                throw new IllegalArgumentException("Invalid sector.");
+            return new ArrayList<>(requestedRangeCounters);
+        }
     }
 
     private void tryToAssignPendings(Sector sector){
+        // TODO: Consider not to sync this because i might always have the sectors lock!!!!!
 
-        for(RequestedRangeCounter reqRangeCounter : pendingRequestedCounters.get(sector)){
+        // The Requests will be saved to be deleted after processing each
+        List<RequestedRangeCounter> pendingToRemove = new ArrayList<>();
+
+        int assignationsCount = 0, positionInQueue = 0;
+        for (RequestedRangeCounter reqRangeCounter : pendingRequestedCounters.get(sector)) {
             RequestedRangeCounter assigned = findSpaceForRange(sector, reqRangeCounter.getFlights(), reqRangeCounter.getAirline(), reqRangeCounter.getRequestedRange());
-            if(assigned != null){
-                pendingRequestedCounters.get(sector).remove(reqRangeCounter); // If it was assigned, remove it from the queue
+            if (assigned != null) {
+                assignationsCount++;
+                //pendingRequestedCounters.get(sector).remove(reqRangeCounter); // If it was assigned, remove it from the queue
+                pendingToRemove.add(reqRangeCounter); // The
                 // Notify the counters where assigned
                 notifications.notifyCountersAssigned(assigned.getCounterFrom(), assigned.getCounterTo(), sector.getName(), assigned.getFlights(), assigned.getAirline());
-            }else{
-
+                // Notify the airlines that are behind the one assigned that they have moved up the queue
+                notifyAirlinesInQueue(pendingRequestedCounters.get(sector), positionInQueue, assignationsCount, sector.getName());
             }
+            positionInQueue++;
         }
+        for(RequestedRangeCounter reqRangeCounter : pendingToRemove){
+            pendingRequestedCounters.get(sector).remove(reqRangeCounter); // If it was assigned, remove it from the queue
+        }
+    }
 
-        // TODO: for each that checks who i need to send a notification that has moved up the queue
-
+    private void notifyAirlinesInQueue(Queue<RequestedRangeCounter> requestedRangeCounterQueue, int positionInQueue, int assignedCount, String sectorName){
+        // Do not sync, we've already taken the lock from method we were called
+        int pos = 0;
+        for(RequestedRangeCounter reqRangeCounter : requestedRangeCounterQueue){
+            if(pos >= positionInQueue) {
+                notifications.notifyCountersPendingUpdate(reqRangeCounter.getAirline(), reqRangeCounter.getRequestedRange(), sectorName, reqRangeCounter.getFlights(), pos - assignedCount);
+            }
+            positionInQueue++;
+        }
     }
 
     public boolean airlineExists(Airline airline){

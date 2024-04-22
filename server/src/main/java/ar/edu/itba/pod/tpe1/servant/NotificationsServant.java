@@ -15,10 +15,8 @@ public class NotificationsServant extends NotificationsServiceGrpc.Notifications
 
     // Logger
     private static final Logger logger = LoggerFactory.getLogger(NotificationsServant.class);
-
     // State
     private final Airport airport = Airport.getInstance();
-    private final Notifications notifications = Notifications.getInstance();
 
     @Override
     public void registerNotifications(
@@ -29,23 +27,29 @@ public class NotificationsServant extends NotificationsServiceGrpc.Notifications
             logger.info("Airline: {} requested register to notifications service", req.getAirline());
             Airline airline = new Airline(req.getAirline());
 
-            // First register the airline
-            boolean success = notifications.registerAirline(airline);
-            if (success) {
-                logger.info("Airline: {} successfully registered to notifications service", airline.getName());
-                responseObserver.onNext(buildNotificationProto(new Notification.Builder().setNotificationType(NotificationsServiceOuterClass.NotificationType.SUCCESSFUL_REGISTER).build()));
-            } else {
-                // TODO: evaluate there are no passengers waiting
-                // Mainly, evaluate the case when the airline exists, but there's no expected passengers
+            // Check the airline exists
+            if(!airport.airlineExists(airline)) {
                 logger.error("Airline: {} failed to register to notifications service", airline.getName());
-                responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription("Failed to register airline " + req.getAirline()).asRuntimeException());
+                responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription("Airline " + airline + " is not registered at the airport.").asRuntimeException());
                 return;
             }
+
+            // First register the airline
+            try {
+                airport.getNotificationsService().registerAirline(airline);
+            }catch (IllegalArgumentException e){
+                logger.error("Airline: {} failed to register to notifications service", airline.getName());
+                responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException());
+                return;
+            }
+
+            logger.info("Airline: {} successfully registered to notifications service", airline.getName());
+            responseObserver.onNext(buildNotificationProto(new Notification.Builder().setNotificationType(NotificationsServiceOuterClass.NotificationType.SUCCESSFUL_REGISTER).build()));
 
             // Stream the notifications
             Notification notification;
             do {
-                notification = notifications.getNotification(airline);
+                notification = airport.getNotificationsService().getNotification(airline);
                 if (notification != null && !notification.isPoissonPill()) {
                     responseObserver.onNext(buildNotificationProto(notification));
                     logger.info("Sent notification of type {} to airline: {}", notification.getNotificationType(), airline.getName());
@@ -53,7 +57,7 @@ public class NotificationsServant extends NotificationsServiceGrpc.Notifications
             } while (notification != null && !notification.isPoissonPill()); // null is the poison pill - For when no more notifications need to be sent to the client
 
             // Once consumed the poisson pill, remove the airline from the airport
-            notifications.removeAirline(airline);
+            airport.getNotificationsService().removeAirline(airline);
 
             // Complete
             responseObserver.onCompleted();
@@ -74,7 +78,7 @@ public class NotificationsServant extends NotificationsServiceGrpc.Notifications
         logger.info("Airline: {} requested to be removed from notifications service", airline.getName());
 
         // Unregister the airline
-        boolean success = notifications.unregisterAirline(airline);
+        boolean success = airport.getNotificationsService().unregisterAirline(airline);
 
         if(success){
             // In case the airline was registered, and now is not. Response goes empty

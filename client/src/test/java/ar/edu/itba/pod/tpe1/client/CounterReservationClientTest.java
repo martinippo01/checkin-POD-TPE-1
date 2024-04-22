@@ -453,6 +453,7 @@ public class CounterReservationClientTest {
         // Create sector A and add 1 counter
         airportAdminClient.addSector("A");
         airportAdminClient.addCounters("A", 5);
+        airportAdminClient.addSector("M");
 
         // Add passengers
         System.out.println("Case 1: All OK");
@@ -460,15 +461,17 @@ public class CounterReservationClientTest {
 
         List<String> flights1 = new ArrayList<>();
         flights1.add("AC987");
-        counterReservationClient.assignCounters("A", flights1, "AirCanada", 2);
+        counterReservationClient.assignCounters("J", flights1, "AirCanada", 4);
 
 
         List<String> flights3 = new ArrayList<>();
-        flights3.add("AA123");
+        flights3.add("AA133");
         counterReservationClient.assignCounters("A", flights3, "AmericanAirlines", 3);
+        counterReservationClient.assignCounters("M", flights3, "AmericanAirlines", 3);
 
         List<String> flights2 = new ArrayList<>();
         flights2.add("AC988");
+        counterReservationClient.assignCounters("A", flights2, "AirCanada", 3);
         counterReservationClient.assignCounters("A", flights2, "AirCanada", 3);
 
         System.out.println("Prior additions of counter");
@@ -481,6 +484,17 @@ public class CounterReservationClientTest {
 
         counterReservationClient.listSectors();
         counterReservationClient.queryCounterRange("A", 1, 20);
+    }
+
+    @Test
+    public void tmp(){
+        counterReservationClient.listPendingAssignments("A");
+        counterReservationClient.freeCounters("A", 1, "AirCanada");
+        counterReservationClient.listPendingAssignments("A");
+        counterReservationClient.freeCounters("A", 8, "AirCanada");
+        counterReservationClient.listPendingAssignments("A");
+        counterReservationClient.freeCounters("A", 5, "AmericanAirlines");
+        counterReservationClient.listPendingAssignments("A");
     }
 
     @Test

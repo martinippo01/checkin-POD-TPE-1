@@ -99,7 +99,13 @@ public class NotificationsTest {
 
     @Test
     public void testRegisterAndWaitForNotifications(){
-        notificationsClient.registerNotifications("AirCanada");
+        airportAdminClient.addPassengerManifest("src/test/java/ar/edu/itba/pod/tpe1/client/passengersOk.csv");
+        notificationsClient.registerNotifications("AmericanAirlines");
+    }
+
+    @Test
+    public void testUnregister(){
+        notificationsClient.unregisterNotifications("AmericanAirlines");
     }
 
 }
