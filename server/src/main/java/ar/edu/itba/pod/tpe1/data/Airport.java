@@ -2,17 +2,13 @@ package ar.edu.itba.pod.tpe1.data;
 
 import airport.CounterServiceOuterClass;
 import ar.edu.itba.pod.tpe1.*;
-import ar.edu.itba.pod.tpe1.data.exceptions.CounterReleaseException;
 import ar.edu.itba.pod.tpe1.data.utils.*;
 import counter.CounterReservationServiceOuterClass;
-import org.checkerframework.checker.units.qual.A;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
-
-
 import java.util.stream.Collectors;
 
 public class Airport {
@@ -58,7 +54,7 @@ public class Airport {
     public void addSector(String sectorName) throws Exception {
         Sector sector = new Sector(sectorName);
 
-        if(sectors.putIfAbsent(sector, new ArrayList<>()) != null)
+        if (sectors.putIfAbsent(sector, new ArrayList<>()) != null)
             return;
 
         pendingRequestedCounters.put(sector, new ConcurrentLinkedQueue<>());
@@ -135,12 +131,12 @@ public class Airport {
     public List<CounterServiceOuterClass.CounterInfo> queryCountersBySector(String sectorName) throws RuntimeException {
 
         //This
-        if(sectors.isEmpty()) {
+        if (sectors.isEmpty()) {
             throw new IllegalStateException("There are no sectors registered at the airport.");
         }
 
         // In case there's no specified sector, print every sector and then return
-        if(!sectorName.equals("")) {
+        if (!sectorName.equals("")) {
             return queryCounters(sectorName, false).stream().map(
                     requestedRangeCounter -> CounterServiceOuterClass.CounterInfo.newBuilder()
                             .setSector(requestedRangeCounter.getCounterFrom() + "-" + requestedRangeCounter.getCounterTo())
@@ -190,18 +186,17 @@ public class Airport {
             }
 
 
-
             for (RangeCounter rangeCounter : sectorCounters) {
                 int prevFrom = rangeCounter.getCounterFrom();
                 for (RequestedRangeCounter counter : rangeCounter.getAssignedRangeCounters()) {
                     if (prevFrom < counter.getCounterFrom())
-                        out.add(new RequestedRangeCounter(prevFrom, counter.getCounterFrom() - 1, new ArrayList<>(), new Airline(""), false));
+                        out.add(new RequestedRangeCounter(prevFrom, counter.getCounterFrom() - 1, new ArrayList<>(), new Airline(""), false, sector));
                     containsAssignedRangeCounter = true;
                     out.add(new RequestedRangeCounter(counter));
                     prevFrom = counter.getCounterTo() + 1;
                 }
                 if (prevFrom <= rangeCounter.getCounterTo())
-                    out.add(new RequestedRangeCounter(prevFrom, rangeCounter.getCounterTo(), new ArrayList<>(), new Airline(""), false));
+                    out.add(new RequestedRangeCounter(prevFrom, rangeCounter.getCounterTo(), new ArrayList<>(), new Airline(""), false, sector));
             }
         }
         return containsAssignedRangeCounter ? out : new ArrayList<>();
@@ -213,7 +208,7 @@ public class Airport {
 
     public Map<Sector, List<RangeCounter>> getSectors() {
 
-        if(sectors.isEmpty())
+        if (sectors.isEmpty())
             throw new IllegalStateException("There are no sectors registered at the airport.");
 
         Map<Sector, List<RangeCounter>> toReturn;
@@ -227,9 +222,9 @@ public class Airport {
 
         Sector sector = new Sector(sectorName);
         // If sector does not exist or range is not valid, fail
-        if(!sectors.containsKey(sector))
+        if (!sectors.containsKey(sector))
             throw new IllegalStateException("Invalid sector");
-        if(to < from)
+        if (to < from)
             throw new IllegalArgumentException("Invalid range.");
 
 
@@ -243,7 +238,7 @@ public class Airport {
                     int prevFrom = rangeCounter.getCounterFrom();
                     for (RequestedRangeCounter counter : rangeCounter.getAssignedRangeCounters()) {
                         if (prevFrom < counter.getCounterFrom())
-                            out.add(new RequestedRangeCounter(prevFrom, counter.getCounterFrom() - 1, new ArrayList<>(), new Airline(""), false));
+                            out.add(new RequestedRangeCounter(prevFrom, counter.getCounterFrom() - 1, new ArrayList<>(), new Airline(""), false, sector));
                         if (counter.getCounterFrom() >= from && counter.getCounterTo() <= to) {
                             containsAssignedRangeCounter = true;
                             out.add(new RequestedRangeCounter(counter));
@@ -251,7 +246,7 @@ public class Airport {
                         prevFrom = counter.getCounterTo() + 1;
                     }
                     if (prevFrom <= rangeCounter.getCounterTo())
-                        out.add(new RequestedRangeCounter(prevFrom, rangeCounter.getCounterTo(), new ArrayList<>(), new Airline(""), false));
+                        out.add(new RequestedRangeCounter(prevFrom, rangeCounter.getCounterTo(), new ArrayList<>(), new Airline(""), false, sector));
                 }
             }
         }
@@ -315,26 +310,29 @@ public class Airport {
         // Validate that the flights are correct
         List<Flight> validFlights = checkFlights(sector, airline, flightsToReserve);
         // In case at least one of the flights is not valid for any reason, fail
-        if(validFlights == null)
+        if (validFlights == null)
             throw new IllegalArgumentException();
 
         // Attempt to assign a range at the requested sector
         RequestedRangeCounter assigned = findSpaceForRange(sector, validFlights, airline, count);
 
         // In case there was no space for the range, append it to the queue
-        if(assigned == null) {
+        if (assigned == null) {
             pendingRequestedCounters.putIfAbsent(sector, new ConcurrentLinkedQueue<>());
-            pendingRequestedCounters.get(sector).add(new RequestedRangeCounter(validFlights, airline, true, count));
+            pendingRequestedCounters.get(sector).add(new RequestedRangeCounter(validFlights, airline, true, count, sector));
             notifications.notifyCountersPending(airline, count, sectorName, validFlights, 0); // TODO: send proper pending ahead
             return null;
-        }else{
+        } else {
+            airline.addRequestedCounters(validFlights, assigned);
+            validFlights.forEach(flight -> flights.replace(flight, airline));
+
             notifications.notifyCountersAssigned(assigned.getCounterFrom(), assigned.getCounterTo(), sectorName, assigned.getFlights(), airline);
         }
         return assigned;
 
     }
 
-    private List<Flight> checkFlights(Sector sector, Airline airline, List<String> flightsToReserve){
+    private List<Flight> checkFlights(Sector sector, Airline airline, List<String> flightsToReserve) {
         /* Check conditions for flights:
             + Check if there are passengers expected for each flight
             + Check if the flight code does not belong to another airline
@@ -355,19 +353,19 @@ public class Airport {
             }
 
             // For each sector of the airport
-            for(Sector otherSector: sectors.keySet()){
+            for (Sector otherSector : sectors.keySet()) {
 
                 // Check that the flight is not assigned in another counter
-                for(RangeCounter rangeCounter: sectors.getOrDefault(otherSector, new ArrayList<>())){
-                    for(RequestedRangeCounter counter: rangeCounter.getAssignedRangeCounters()){
-                        if(counter.getFlights().contains(flight))
+                for (RangeCounter rangeCounter : sectors.getOrDefault(otherSector, new ArrayList<>())) {
+                    for (RequestedRangeCounter counter : rangeCounter.getAssignedRangeCounters()) {
+                        if (counter.getFlights().contains(flight))
                             return null;
                     }
                 }
 
                 // Check that there is no pending assignation with the flight
-                for(RequestedRangeCounter pendingAssignation : pendingRequestedCounters.get(sector)){
-                    if(pendingAssignation.getFlights().contains(flight))
+                for (RequestedRangeCounter pendingAssignation : pendingRequestedCounters.get(sector)) {
+                    if (pendingAssignation.getFlights().contains(flight))
                         return null;
                 }
             }
@@ -383,15 +381,14 @@ public class Airport {
         return validFlights;
     }
 
-    private RequestedRangeCounter findSpaceForRange(Sector sector, List<Flight> flights, Airline airline, int count){
+    private RequestedRangeCounter findSpaceForRange(Sector sector, List<Flight> flights, Airline airline, int count) {
         List<RangeCounter> ranges = sectors.get(sector);
         RequestedRangeCounter assignedRangeCounter = null;
         for (RangeCounter rangeCounter : ranges) {
-            assignedRangeCounter = rangeCounter.assignRange(count, flights, airline);
-            if(assignedRangeCounter != null)
-                // TODO: Check that this updates requestedCounters in each Flight in airport
-                airline.addRequestedCounters(flights, assignedRangeCounter);
+            assignedRangeCounter = rangeCounter.assignRange(count, flights, airline, sector);
+            if (assignedRangeCounter != null) {
                 return assignedRangeCounter;
+            }
         }
         return null;
     }
@@ -399,20 +396,20 @@ public class Airport {
     public List<RequestedRangeCounter> listPendingRequestedCounters(String sectorName) {
         Sector sector = new Sector(sectorName);
         Queue<RequestedRangeCounter> requestedRangeCounters = pendingRequestedCounters.getOrDefault(sector, new ArrayDeque<>());
-        if(requestedRangeCounters.isEmpty())
+        if (requestedRangeCounters.isEmpty())
             throw new IllegalArgumentException("Invalid sector.");
         return new ArrayList<>(requestedRangeCounters);
     }
 
-    private void tryToAssignPendings(Sector sector){
+    private void tryToAssignPendings(Sector sector) {
 
-        for(RequestedRangeCounter reqRangeCounter : pendingRequestedCounters.get(sector)){
+        for (RequestedRangeCounter reqRangeCounter : pendingRequestedCounters.get(sector)) {
             RequestedRangeCounter assigned = findSpaceForRange(sector, reqRangeCounter.getFlights(), reqRangeCounter.getAirline(), reqRangeCounter.getRequestedRange());
-            if(assigned != null){
+            if (assigned != null) {
                 pendingRequestedCounters.get(sector).remove(reqRangeCounter); // If it was assigned, remove it from the queue
                 // Notify the counters where assigned
                 notifications.notifyCountersAssigned(assigned.getCounterFrom(), assigned.getCounterTo(), sector.getName(), assigned.getFlights(), assigned.getAirline());
-            }else{
+            } else {
 
             }
         }
@@ -421,11 +418,11 @@ public class Airport {
 
     }
 
-    public boolean airlineExists(Airline airline){
+    public boolean airlineExists(Airline airline) {
         return airlines.contains(airline);
     }
 
-    public boolean flightExists(String flightName){
+    public boolean flightExists(String flightName) {
         return flights.containsKey(new Flight(flightName));
     }
 
@@ -442,51 +439,79 @@ public class Airport {
         return null;
     }
 
-    public boolean performCheckIn(String sectorName, int counterFrom, String airlineName) {
+    public CheckInCountersResponse.Builder performCheckIn(String sectorName, int counterFrom, String airlineName) {
+        CheckInCountersResponse.Builder response = CheckInCountersResponse.newBuilder();
+
         Sector sector = new Sector(sectorName);
         if (!sectors.containsKey(sector)) {
-            return false; // Sector does not exist
+            return response.setStatus(CheckInCountersStatus.CHECK_IN_COUNTERS_STATUS_INVALID_SECTOR_NAME);
         }
 
         RequestedRangeCounter requestedRangeCounter = rangeCounterBySector(sector, counterFrom);
         if (requestedRangeCounter == null) {
-            return false; // Counter not in range/sector
+            return response.setStatus(CheckInCountersStatus.CHECK_IN_COUNTERS_STATUS_COUNTERS_NOT_ASSIGNED);
         }
 
         if (!requestedRangeCounter.getAirline().getName().equals(airlineName)) {
-            return false; // Invalid airline name
+            return response.setStatus(CheckInCountersStatus.CHECK_IN_COUNTERS_STATUS_INVALID_AIRLINE_NAME);
         }
 
         int queueLength = requestedRangeCounter.getWaitingQueueLength();
         if (queueLength == 0) {
-            return true; // Early return: nothing to do
+            return response.setStatus(CheckInCountersStatus.CHECK_IN_COUNTERS_STATUS_EMPTY_QUEUE);
         }
 
         int checkInsToPerform = Math.min(queueLength, requestedRangeCounter.getSize());
 
-        List<Booking> checkedInBookings = new ArrayList<>(checkInsToPerform);
+        List<CheckInCounterInformation> checkInCountersInformation = new ArrayList<>();
         for (int i = 0; i < checkInsToPerform; i++) {
             Booking pendingCheckIn = requestedRangeCounter.getFromWaitingQueue();
             CheckIn queuedCheckIn = checkIns.get(pendingCheckIn);
 
             if (!requestedRangeCounter.getFlights().contains(queuedCheckIn.getFlight())) {
-                return false; // Flight mismatch
+                continue; // Flight mismatch
             }
+
+            CheckIn performedCheckIn = new CheckIn(
+                    CheckInStatus.DONE,
+                    queuedCheckIn.getFlight(),
+                    requestedRangeCounter.getCounterFrom() + i,
+                    sector);
 
             checkIns.replace(
                     pendingCheckIn,
                     queuedCheckIn,
-                    new CheckIn(
-                            CheckInStatus.DONE,
-                            queuedCheckIn.getFlight(),
-                            requestedRangeCounter.getCounterFrom() + i,
-                            sector));
+                    performedCheckIn);
 
-            checkedInBookings.add(pendingCheckIn);
+            checkInCountersInformation.add(
+                    CheckInCounterInformation.newBuilder()
+                            .setStatus(CheckInCounterStatus.CHECK_IN_COUNTER_STATUS_SUCCESS)
+                            .setBooking(BookingInformation.newBuilder()
+                                    .setBookingCode(pendingCheckIn.getBookingCode())
+                                    .setFlightCode(performedCheckIn.getFlight().getFlightCode())
+                                    .setAirlineName(flights.get(performedCheckIn.getFlight()).getName())
+                            )
+                            .setCounter(performedCheckIn.getCounterWhereCheckInWasDone())
+                            .build()
+            );
         }
 
-        // TODO: Return check ins from checked in bookings
-        return true;
+        // Some counters didn't perform a check-in
+        if (checkInCountersInformation.size() < requestedRangeCounter.getSize()) {
+            final int lastCounterWithCheckIn = checkInCountersInformation.get(checkInCountersInformation.size() - 1).getCounter();
+            final int lastIdleCounter = requestedRangeCounter.getCounterTo() - lastCounterWithCheckIn + 1;
+
+            for (int i = lastCounterWithCheckIn; i < lastIdleCounter; i++) {
+                checkInCountersInformation.add(
+                        CheckInCounterInformation.newBuilder()
+                                .setStatus(CheckInCounterStatus.CHECK_IN_COUNTER_STATUS_IDLE)
+                                .setCounter(i + 1)
+                                .build()
+                );
+            }
+        }
+
+        return response.setStatus(CheckInCountersStatus.CHECK_IN_COUNTERS_STATUS_CHECKIN_DONE).addAllData(checkInCountersInformation);
     }
 
     private List<CountersInformation> getRangeCountersAsInformation(Flight flight, Airline airline, Set<RequestedRangeCounter> requestedRangeCounters) {
@@ -498,7 +523,7 @@ public class Airport {
                                     .setFirstCounterNumber(rrc.getCounterFrom())
                                     .setNumberOfConsecutiveCounters(rrc.getSize())
                                     .build())
-                            .setSectorName("") // TODO
+                            .setSectorName(rrc.getSector().getName())
                             .setPeopleInQueue(rrc.getWaitingQueueLength())
                             .build()
                     );
@@ -530,7 +555,7 @@ public class Airport {
 
 
         Set<RequestedRangeCounter> requestedRangeCounters = airline.getRequestedCounters(flight);
-        if (requestedRangeCounters.isEmpty()) {
+        if (requestedRangeCounters == null || requestedRangeCounters.isEmpty()) {
             return response.setStatus(CounterStatus.COUNTER_STATUS_COUNTERS_NOT_ASSIGNED);
         }
 

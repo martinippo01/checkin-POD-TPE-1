@@ -8,7 +8,7 @@ public class Airline {
     private final String name;
 
     // Counters assigned to each flight. Many Flights may share the same RequestedRangeCounter
-    private ConcurrentHashMap<Flight, TreeSet<RequestedRangeCounter>> requestedCounters;
+    private ConcurrentHashMap<Flight, TreeSet<RequestedRangeCounter>> requestedCounters = new ConcurrentHashMap<>();
 
     public Airline(final String name) {
         this.name = name;
@@ -19,6 +19,9 @@ public class Airline {
     }
 
     public SortedSet<RequestedRangeCounter> getRequestedCounters(Flight flight) {
+        if (requestedCounters == null) {
+            return null;
+        }
         return requestedCounters.get(flight);
     }
 
@@ -28,6 +31,10 @@ public class Airline {
 
     public void addRequestedCounters(Flight flight, RequestedRangeCounter requestedCounter) {
         TreeSet<RequestedRangeCounter> counters = requestedCounters.get(flight);
+        if (counters == null) {
+            counters = new TreeSet<>();
+        }
+
         counters.add(requestedCounter);
 
         requestedCounters.put(flight, counters);
