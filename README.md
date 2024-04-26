@@ -7,7 +7,7 @@ This project involves the development of a thread-safe remote system for the all
 ### Prerequisites
 
 The following prerequisites are needed to run the server executable as well as the client applications:
-- Maven
+- Maven >= 3.9.6
 - Java 17
 
 ### Compiling
