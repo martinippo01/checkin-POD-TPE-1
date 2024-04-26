@@ -56,16 +56,24 @@ public class AirportAdminClientTest {
     }
 
     @Test
+    public void testAddCounterAndSectorWhenContiguos() {
+        // Create sector A and add 1 counter
+        airportAdminClient.addSector("A");
+        airportAdminClient.addCounters("A", 1);
+        airportAdminClient.addCounters("A", 2);
+    }
+
+    @Test
     public void testAddPassengerManifest() {
         // This csv is correct
         System.out.println("Case 1: All OK");
-        airportAdminClient.addPassengerManifest("/home/martinippo/Desktop/ITBA/POD/TPE1/grpc-com-tpe1/client/src/test/java/ar/edu/itba/pod/tpe1/client/passengersOk.csv");
+        airportAdminClient.addPassengerManifest("src/test/java/ar/edu/itba/pod/tpe1/client/passengersOk.csv");
         // Should fail, repeated booking code
         System.out.println("Case 2: Repeated booking");
-        airportAdminClient.addPassengerManifest("/home/martinippo/Desktop/ITBA/POD/TPE1/grpc-com-tpe1/client/src/test/java/ar/edu/itba/pod/tpe1/client/passengersErrorCase1.csv");
+        airportAdminClient.addPassengerManifest("src/test/java/ar/edu/itba/pod/tpe1/client/passengersErrorCase1.csv");
         // Should fail, same flight different airline
         System.out.println("Case 3: Same flight different airline");
-        airportAdminClient.addPassengerManifest("/home/martinippo/Desktop/ITBA/POD/TPE1/grpc-com-tpe1/client/src/test/java/ar/edu/itba/pod/tpe1/client/passengersErrorCase2.csv");
+        airportAdminClient.addPassengerManifest("src/test/java/ar/edu/itba/pod/tpe1/client/passengersErrorCase2.csv");
 
     }
 

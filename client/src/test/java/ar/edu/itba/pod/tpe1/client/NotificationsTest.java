@@ -1,56 +1,42 @@
 package ar.edu.itba.pod.tpe1.client;
 
-import ar.edu.itba.pod.tpe1.client.notifications.NotificationsClientMain;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class NotificationsTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(Client.class);
+    private static Logger logger = LoggerFactory.getLogger(Client.class);
 
     ManagedChannel channel;
-    NotificationsClientMain notificationsClient;
-
-    ManagedChannel channel2;
-    NotificationsClientMain notificationsClient2;
+    NotificationsClient notificationsClient;
+    AirportAdminClient airportAdminClient;
+    CounterReservationClient counterReservationClient;
 
     @Before
     public void setUp(){
-        String[] args = {
-                "-DserverAddress=localhost:50058", // -DserverAddress=10.6.0.1:50051
-                "-Daction=register",
-                "-Dairline=AmericanAirlines"
-        };
-        String[] args2 = {
-                "-DserverAddress=localhost:50058", // -DserverAddress=10.6.0.1:50051
-                "-Daction=unregister",
-                "-Dairline=AmericanAirlines"
-        };
-        notificationsClient = new NotificationsClientMain(args);
-        channel = notificationsClient.getChannel();
-
-        notificationsClient2 = new NotificationsClientMain(args2);
-        channel2 = notificationsClient2.getChannel();
-
-//        channel = ManagedChannelBuilder.forAddress("localhost", 50058)
-//                .usePlaintext()
-//                .build();
-//        notificationsClient = new NotificationsClient(channel);
+        channel = ManagedChannelBuilder.forAddress("localhost", 50058)
+                .usePlaintext()
+                .build();
+        notificationsClient = new NotificationsClient(channel);
+        airportAdminClient = new AirportAdminClient(channel);
+        counterReservationClient = new CounterReservationClient(channel);
     }
 
     @Test
     public void testRegisterAndUnregister() {
 
-
         // Thread 1
         Thread thread1 = new Thread(() -> {
             logger.info("Start register thread, register airline");
-            notificationsClient.executeAction();
-//            notificationsClient.registerNotifications("AmericanAirlines");
+            notificationsClient.registerNotifications("AmericanAirlines");
             logger.info("Airline registered");
         });
 
@@ -61,8 +47,7 @@ public class NotificationsTest {
                 logger.info("Sleep register thread");
                 Thread.sleep(500); // Sleep for 5 seconds
                 logger.info("Wake up register thread, try unregister airline");
-                notificationsClient2.executeAction();
-//                notificationsAction.unregisterNotifications("AmericanAirlines");
+                notificationsClient.unregisterNotifications("AmericanAirlines");
                 logger.info("Airline unregistered");
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -74,4 +59,47 @@ public class NotificationsTest {
         thread1.start();
         thread2.start();
     }
+
+    @Test
+    public void testRegisterFailAirlineDoesNotExist() {
+        notificationsClient.registerNotifications("AmericanAirlines");
+        logger.info("Airline registered");
+    }
+
+    @Test
+    public void testRegisterFailAirlineExists() {
+
+        airportAdminClient.addSector("A");
+        airportAdminClient.addCounters("A", 10);
+
+        airportAdminClient.addPassengerManifest("src/test/java/ar/edu/itba/pod/tpe1/client/passengersOk.csv");
+
+        Thread thread = new Thread(() -> {
+            notificationsClient.registerNotifications("AmericanAirlines");
+        });
+
+        thread.start();
+
+        try {
+            thread.start();
+        }catch (Exception e){
+            System.out.println("Error: " + e.getMessage());
+        }
+
+    }
+
+    @Test
+    public void testUnregisterFailAirlinesWasNotRegistered(){
+        try {
+            notificationsClient.unregisterNotifications("AmericanAirlines");
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testRegisterAndWaitForNotifications(){
+        notificationsClient.registerNotifications("AirCanada");
+    }
+
 }

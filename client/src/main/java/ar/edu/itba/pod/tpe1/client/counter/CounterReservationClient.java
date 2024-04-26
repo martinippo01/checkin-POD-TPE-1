@@ -3,6 +3,7 @@ package ar.edu.itba.pod.tpe1.client.counter;
 import counter.CounterReservationServiceGrpc;
 import counter.CounterReservationServiceOuterClass;
 import io.grpc.Channel;
+import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 
 import java.util.List;
@@ -32,7 +33,7 @@ public class CounterReservationClient {
                 System.out.printf("%s         %s\n", sector.getName(), ranges);
             });
         } catch (StatusRuntimeException e) {
-            System.err.println("RPC failed: " + e.getStatus());
+            System.out.println("Failed: " + e.getStatus().asRuntimeException());
         }
     }
 
@@ -58,7 +59,15 @@ public class CounterReservationClient {
                 System.out.println(line);
             });
         } catch (StatusRuntimeException e) {
-            System.err.println("RPC failed: " + e.getStatus());
+            if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
+                System.out.println("Error: The specified sector '" + sectorName + "' does not exist.");
+            } else if (e.getStatus().getCode() == Status.Code.INVALID_ARGUMENT) {
+                System.out.println("Error: The counter range must be positive");
+            } else {
+                System.out.println("Failed: " + e.getStatus().asRuntimeException());
+            }
+        } catch (Exception e) {
+            System.out.println("RPC failed: " + e);
         }
     }
 
@@ -70,8 +79,14 @@ public class CounterReservationClient {
                 .setCounterCount(counterCount)
                 .build();
         try {
-            CounterReservationServiceOuterClass.BasicResponse response = blockingStub.assignCounters(request);
-            System.out.println(response.getMessage());
+            CounterReservationServiceOuterClass.AssignCounterResponse response = blockingStub.assignCounters(request);
+            if(!(response.getIsPending())) {
+                String airlines = String.join("|", flights);
+                System.out.println(counterCount + " counters (" + response.getCounterFrom() + "-" + String.valueOf(response.getCounterFrom() + counterCount - 1) + ") in Sector C are now checking in passengers from " +
+                        airlineName + " " + airlines + " flights\n");
+            } else {
+                System.out.println(counterCount + " counters in Sector " + sectorName +" is pending with " + response.getPendingAhead() + " other pendings ahead\n");
+            }
         } catch (StatusRuntimeException e) {
             System.err.println("RPC failed: " + e.getStatus());
         }
@@ -84,10 +99,21 @@ public class CounterReservationClient {
                 .setAirlineName(airlineName)
                 .build();
         try {
-            CounterReservationServiceOuterClass.BasicResponse response = blockingStub.freeCounters(request);
-            System.out.println(response.getMessage());
+            CounterReservationServiceOuterClass.FreeCounterResponse response = blockingStub.freeCounters(request);
+            String range = " on counters " + response.getRangeStart() + "-" + response.getRangeEnd();
+            System.out.println("Ended check-in for flights " + String.join("|", response.getFlightNumbersList()) + range + " in Sector " + response.getSectorName());
         } catch (StatusRuntimeException e) {
-            System.err.println("RPC failed: " + e.getStatus());
+            if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
+                System.out.println("Error: The specified sector '" + sectorName + "' does not exist.");
+            } else if (e.getStatus().getCode() == Status.Code.INVALID_ARGUMENT) {
+                System.out.println("Error: The specified counter range starting at " + fromVal + " does not exist in sector '" + sectorName + "'.");
+            } else if (e.getStatus().getCode() == Status.Code.PERMISSION_DENIED) {
+                System.out.println("Error: The counter range cannot be freed as it is not assigned to '" + airlineName + "'.");
+            } else if (e.getStatus().getCode() == Status.Code.FAILED_PRECONDITION) {
+                System.out.println("Error: Cannot free counters as there are passengers waiting to be attended.");
+            }
+        } catch (Exception e) {
+           System.out.println("RPC failed: " + e);
         }
     }
 
@@ -123,7 +149,11 @@ public class CounterReservationClient {
                         assignment.getCounterCount(), assignment.getAirlineName(), flights);
             });
         } catch (StatusRuntimeException e) {
-            System.err.println("RPC failed: " + e.getStatus());
+            if (e.getStatus().getCode() == Status.Code.INVALID_ARGUMENT) {
+                System.out.println("Error: The specified sector '" + sectorName + "' does not exist.");
+            }
+        } catch(Exception e) {
+            System.err.println("RPC failed: " + e.getMessage());
         }
     }
 }

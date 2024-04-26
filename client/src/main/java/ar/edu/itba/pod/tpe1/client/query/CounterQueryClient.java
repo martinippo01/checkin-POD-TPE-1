@@ -7,6 +7,8 @@ import airport.CounterServiceOuterClass.QueryCheckInsRequest;
 import airport.CounterServiceOuterClass.QueryCheckInsResponse;
 import airport.CounterServiceOuterClass.CounterInfo;
 import airport.CounterServiceOuterClass.CheckInRecord;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 
 public class CounterQueryClient {
     private final CounterServiceGrpc.CounterServiceBlockingStub blockingStub;
@@ -16,27 +18,34 @@ public class CounterQueryClient {
     }
 
     public void queryCounters(String sector) {
-        QueryCountersRequest request = QueryCountersRequest.newBuilder()
-                .setSector(sector)
-                .build();
-        QueryCountersResponse response = blockingStub.queryCounters(request);
-        if (response.getCountersCount() == 0) {
-            System.out.println("No counters found for the specified sector.");
-            return;
+        try {
+            QueryCountersRequest request = QueryCountersRequest.newBuilder()
+                    .setSector(sector)
+                    .build();
+            QueryCountersResponse response = blockingStub.queryCounters(request);
+            printCounterQueryResponse(response);
+        } catch (StatusRuntimeException e) {
+            if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
+                System.out.println("Sector  Counters  Airline          Flights             People");
+                System.out.println("###############################################################");
+            } else if (e.getStatus().getCode() == Status.Code.FAILED_PRECONDITION) {
+                System.out.println("No counters found, please add counters to the sector. Optional -DoutPath= file skipped");
+            }
+        } catch (Exception e) {
+            System.err.println("RPC failed: " + e.getMessage());
         }
-        printCounterQueryResponse(response);
     }
 
     private void printCounterQueryResponse(QueryCountersResponse response) {
-        System.out.println("   Sector  Counters  Airline          Flights             People");
-        System.out.println("   ###############################################################");
+        System.out.println("Sector  Counters  Airline          Flights             People");
+        System.out.println("###############################################################");
         for (CounterInfo counter : response.getCountersList()) {
             String flights = String.join("|", counter.getFlightsList());
             if (flights.isEmpty()) flights = "-";
             String airline = counter.getAirline().isEmpty() ? "-" : counter.getAirline();
             System.out.printf("   %-7s %-9s %-16s %-17s %-4d%n",
                     counter.getSector(),
-                    "(" + counter.getRange() + ")",
+                    counter.getRange() ,
                     airline,
                     flights,
                     counter.getWaitingPeople());
