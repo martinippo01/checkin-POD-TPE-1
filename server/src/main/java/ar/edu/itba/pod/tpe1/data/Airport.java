@@ -20,6 +20,8 @@ public class Airport {
 
     // Key: Flight - Value: An airline that
     private final ConcurrentHashMap<Flight, Airline> flights = new ConcurrentHashMap<>();
+
+    // Every checkin, where CheckIn contains the status of the check in info.
     private final ConcurrentHashMap<Booking, CheckIn> checkIns = new ConcurrentHashMap<>();
 
     private final Set<Airline> airlines = Collections.synchronizedSet(new HashSet<>());
@@ -203,7 +205,48 @@ public class Airport {
     }
 
     public List<CounterServiceOuterClass.CheckInRecord> queryCheckIns(String sector, String airline) {
-        return new ArrayList<>();
+
+        // TODO: sync
+        // TODO: Test
+
+        // Check that there's at least one checkin with status DONE
+        Iterator<Booking> bookingIterator = checkIns.keySet().iterator();
+        boolean thereCheckIns = false;
+        while(bookingIterator.hasNext() && !thereCheckIns){
+            Booking booking = bookingIterator.next();
+            if(checkIns.get(booking).getStatus() == CheckInStatus.DONE)
+                thereCheckIns = true;
+        }
+        if(!thereCheckIns)
+            throw new IllegalArgumentException("No check-ins have been made yet");
+
+
+        boolean filterBySector = !sector.isEmpty();
+        boolean filterByAirline = !airline.isEmpty();
+        List<CounterServiceOuterClass.CheckInRecord> out = new ArrayList<>();
+
+        for(Booking booking : checkIns.keySet()){
+            CounterServiceOuterClass.CheckInRecord.Builder checkInRecordBuilder = CounterServiceOuterClass.CheckInRecord.newBuilder();
+            CheckIn checkIn = checkIns.get(booking);
+            // To add to the list should be a DONE checkin, also match the airline (if specified) nad match the sector (if specified)
+            // Remember property A => B <=> !A or B
+            if(checkIn.getStatus() == CheckInStatus.DONE // CheckIn is DONE
+                    && (!filterByAirline || airline.equals(flights.get(checkIn.getFlight()).getName())) // If specified, checkin belongs to the same Airline
+                    && (!filterBySector || sector.equals(checkIn.getSector().getName())) // If specified, checkin belongs to the same Sector
+            ){
+                out.add(checkInRecordBuilder
+                        .setBookingCode(booking.getBookingCode())
+                        .setAirline(flights.get(checkIn.getFlight()).getName())
+                        .setCounter(checkIn.getCounterWhereCheckInWasDone())
+                        .setSector(checkIn.getSector().getName())
+                        .setFlight(checkIn.getFlight().getFlightCode())
+                        .build()
+                );
+            }
+        }
+
+
+        return out;
     }
 
     public Map<Sector, List<RangeCounter>> getSectors() {
