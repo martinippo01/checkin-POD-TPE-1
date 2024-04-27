@@ -55,7 +55,7 @@ public class CounterQueryClientTest {
 
         // Add passengers
         System.out.println("Case 1: All OK");
-        airportAdminClient.addPassengerManifest("/Users/marcoscilipoti/Documents/1Q 2024/POD/checkin-POD-TPE-1/client/src/test/java/ar/edu/itba/pod/tpe1/client/passengersOk.csv");
+        airportAdminClient.addPassengerManifest("src/test/java/ar/edu/itba/pod/tpe1/client/passengersOk.csv");
 
         List<String> flights = new ArrayList<>();
         flights.add("AC987");

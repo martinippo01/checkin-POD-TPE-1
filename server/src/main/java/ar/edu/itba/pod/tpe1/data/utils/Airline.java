@@ -1,10 +1,14 @@
 package ar.edu.itba.pod.tpe1.data.utils;
 
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Airline {
 
     private final String name;
+
+    // Counters assigned to each flight. Many Flights may share the same RequestedRangeCounter
+    private ConcurrentHashMap<Flight, TreeSet<RequestedRangeCounter>> requestedCounters = new ConcurrentHashMap<>();
 
     public Airline(final String name) {
         this.name = name;
@@ -14,7 +18,29 @@ public class Airline {
         return name;
     }
 
-    public String toString(){
+    public SortedSet<RequestedRangeCounter> getRequestedCounters(Flight flight) {
+        if (requestedCounters == null) {
+            return null;
+        }
+        return requestedCounters.get(flight);
+    }
+
+    public void addRequestedCounters(List<Flight> flights, RequestedRangeCounter requestedCounter) {
+        flights.forEach(flight -> addRequestedCounters(flight, requestedCounter));
+    }
+
+    public void addRequestedCounters(Flight flight, RequestedRangeCounter requestedCounter) {
+        TreeSet<RequestedRangeCounter> counters = requestedCounters.get(flight);
+        if (counters == null) {
+            counters = new TreeSet<>();
+        }
+
+        counters.add(requestedCounter);
+
+        requestedCounters.put(flight, counters);
+    }
+
+    public String toString() {
         return name;
     }
 

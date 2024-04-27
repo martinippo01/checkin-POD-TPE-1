@@ -3,22 +3,15 @@ package ar.edu.itba.pod.tpe1.data.utils;
 import java.util.Objects;
 
 public class Booking {
-
     private final String bookingCode;
-    private final Flight flight;
 
-    public Booking(String bookingCode, Flight flight) {
+    public Booking(String bookingCode) {
         this.bookingCode = bookingCode;
-        this.flight = flight;
     }
 
     public String getBookingCode() {
         return bookingCode;
     }
-    public Flight getFlight() {
-        return flight;
-    }
-
 
     @Override
     public boolean equals(Object o) {

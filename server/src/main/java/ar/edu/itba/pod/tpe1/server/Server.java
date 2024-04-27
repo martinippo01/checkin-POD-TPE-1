@@ -1,9 +1,6 @@
 package ar.edu.itba.pod.tpe1.server;
 
-import ar.edu.itba.pod.tpe1.servant.AirportAdminServant;
-import ar.edu.itba.pod.tpe1.servant.CounterQueryServant;
-import ar.edu.itba.pod.tpe1.servant.CounterReservationService;
-import ar.edu.itba.pod.tpe1.servant.NotificationsServant;
+import ar.edu.itba.pod.tpe1.servant.*;
 import io.grpc.ServerBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +18,7 @@ public class Server {
         io.grpc.Server server = ServerBuilder.forPort(port)
                 .addService(new AirportAdminServant())
                 .addService(new CounterQueryServant())
+                .addService(new PassengerCheckInServant())
                 .addService(new NotificationsServant())
                 .addService(new CounterReservationService())
                 .build();
