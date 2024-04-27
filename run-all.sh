@@ -25,14 +25,22 @@ fi
 sh adminClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=addSector -Dsector=C
 #rta:
 #  Sector C added successfully
+sh adminClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=addSector -Dsector=A
+sh adminClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=addSector -Dsector=D
+sh adminClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=addSector -Dsector=Z
+
 
 #1.2
+sh adminClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=addCounters -Dsector=A -Dcounters=1
 sh adminClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=addCounters -Dsector=C -Dcounters=3
 #rta:
 #  3 new counters (2-4) in Sector C added successfully
+sh adminClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=addCounters -Dsector=D -Dcounters=2
+sh adminClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=addCounters -Dsector=C -Dcounters=2
+
 
 #1.3
-sh adminClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=manifest -DinPath=../manifest.csv
+sh adminClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=manifest -DinPath=/manifest.csv
 #rta:
 #  Booking ABC123 for AirCanada AC987 added successfully
 #  ...
@@ -124,8 +132,8 @@ sh eventsClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=unregister -Dairli
 #  AmericanAirlines unregistered successfully for events
 
 #5.1
-sh queryClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=queryCounters -DoutPath=../query1.txt
-cat ../query1.txt
+sh queryClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=queryCounters -DoutPath=/query1.txt
+cat query1.txt
 #rta:
 #  $> cat ../query1.txt
 #     Sector  Counters  Airline          Flights             People
@@ -136,8 +144,8 @@ cat ../query1.txt
 #     C       (7-8)     -                -                   -
 #     D       (5-6)     -                -                   -
 
-sh queryClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=queryCounters -DoutPath=../query1.txt -Dsector=C
-cat ../query1.txt
+sh queryClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=queryCounters -DoutPath=/query1.txt -Dsector=C
+cat query1.txt
 #rta:
 #  $> cat ../query1.txt
 #     Sector  Counters  Airline          Flights             People
@@ -146,16 +154,16 @@ cat ../query1.txt
 #     C       (4-4)     -                -                   -
 #     C       (7-8)     -                -                   -
 
-sh queryClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=queryCounters -DoutPath=../query1.txt -Dsector=Z
-cat ../query1.txt
+sh queryClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=queryCounters -DoutPath=/query1.txt -Dsector=Z
+cat query1.txt
 #rta:
 #  $> cat ../query1.txt
 #     Sector  Counters  Airline          Flights             People
 #     ###############################################################
 
 #5.2
-sh queryClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=checkins -DoutPath=../query2.txt
-cat ../query2.txt
+sh queryClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=checkins -DoutPath=/query2.txt
+cat query2.txt
 #rta:
 #  $> cat ../query2.txt
 #     Sector  Counter   Airline           Flight     Booking
@@ -164,8 +172,8 @@ cat ../query2.txt
 #     C       3         AmericanAirlines  AA123      XYZ999
 #     A       1         AirCanada         AC989      XYZ123
 
-sh queryClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=checkins -DoutPath=../query2.txt -Dsector=C
-cat ../query2.txt
+sh queryClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=checkins -DoutPath=/query2.txt -Dsector=C
+cat query2.txt
 #rta:
 #  $> cat ../query2.txt
 #     Sector  Counter   Airline           Flight     Booking
@@ -173,15 +181,15 @@ cat ../query2.txt
 #     C       2         AmericanAirlines  AA123      ABC321
 #     C       3         AmericanAirlines  AA123      XYZ999
 
-sh queryClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=checkins -DoutPath=../query2.txt -Dairline=AirCanada
-cat ../query2.txt
+sh queryClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=checkins -DoutPath=/query2.txt -Dairline=AirCanada
+cat query2.txt
 #rta:
 #   Sector  Counter   Airline           Flight     Booking
 #   ###############################################################
 #   A       1         AirCanada         AC989      XYZ123
 
-sh queryClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=checkins -DoutPath=../query2.txt -Dairline=AirCanada
-cat ../query2.txt
+sh queryClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=checkins -DoutPath=/query2.txt -Dairline=AirCanada
+cat query2.txt
 #rta:
 #   Sector  Counter   Airline           Flight     Booking
 #   ###############################################################
