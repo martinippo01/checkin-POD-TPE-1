@@ -11,6 +11,8 @@ import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.security.spec.ECField;
+
 public class NotificationsServant extends NotificationsServiceGrpc.NotificationsServiceImplBase {
 
     // Logger
@@ -80,18 +82,18 @@ public class NotificationsServant extends NotificationsServiceGrpc.Notifications
         logger.info("Airline: {} requested to be removed from notifications service", airline.getName());
 
         // Unregister the airline
-        boolean success = notifications.unregisterAirline(airline);
-
-        if(success){
-            // In case the airline was registered, and now is not. Response goes empty
-            responseObserver.onNext(NotificationsServiceOuterClass.RemoveNotificationsResponse.newBuilder().build());
-            responseObserver.onCompleted();
-            logger.info("Airline: {} successfully unregistered to notifications service", airline.getName());
-        } else{
-            // In case the airline was not registered, send the error.
+        try {
+            notifications.unregisterAirline(airline);
+        }catch (Exception e){
             logger.error("Airline: {} failed to unregister to notifications service", airline.getName());
-            responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription("Airline is not registered").asRuntimeException());
+            responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException());
+            return;
         }
+
+        // In case the airline was registered, and now is not. Response goes empty
+        responseObserver.onNext(NotificationsServiceOuterClass.RemoveNotificationsResponse.newBuilder().build());
+        responseObserver.onCompleted();
+        logger.info("Airline: {} successfully unregistered to notifications service", airline.getName());
     }
 
     private NotificationsServiceOuterClass.RegisterNotificationsResponse buildNotificationProto(Notification notification){

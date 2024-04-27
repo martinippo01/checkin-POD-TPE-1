@@ -45,8 +45,7 @@ public class Notifications {
 
     public boolean unregisterAirline(Airline airline){
         if(!notifications.containsKey(airline))
-            return false;
-        // TODO: Check if the addition should be .add or .put
+            throw new IllegalArgumentException("Airline " + airline + " not registered.");
         // Add to the queue a poisson pill, so when producer consumes it, will stop taking form the queue
         notifications.get(airline).add(new Notification.Builder().setPoisonPill().build());
         logger.info("Airline {} unregistered", airline.getName());
