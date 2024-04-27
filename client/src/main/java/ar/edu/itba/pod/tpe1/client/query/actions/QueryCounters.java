@@ -21,8 +21,8 @@ import static ar.edu.itba.pod.tpe1.client.Arguments.SECTOR;
 public final class QueryCounters extends CounterQueryAction {
     private CounterServiceGrpc.CounterServiceBlockingStub blockingStub;
 
-    public QueryCounters(List<String> actionArguments) {
-        super(actionArguments);
+    public QueryCounters(List<String> actionArguments, List<String> optionalActionArguments) {
+        super(actionArguments, optionalActionArguments);
     }
 
     private void printCounterQueryResponse(QueryCountersResponse response, String outPath) {
