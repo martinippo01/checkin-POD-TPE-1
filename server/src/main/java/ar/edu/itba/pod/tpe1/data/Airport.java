@@ -54,7 +54,7 @@ public class Airport {
         Sector sector = new Sector(sectorName);
         synchronized (lock) {
             if (sectors.putIfAbsent(sector, new ArrayList<>()) != null)
-                return;
+                throw new IllegalArgumentException("Sector " + sectorName + " already exists");
 
             pendingRequestedCounters.put(sector, new ConcurrentLinkedQueue<>());
         }
@@ -64,9 +64,10 @@ public class Airport {
 
         Sector sector = Sector.fromName(sectorName);
         synchronized (lock){
-            if (count <= 0 || !sectors.containsKey(sector)) {
-                throw new IllegalStateException("Invalid number of counters (must be positive)/sector does not exist.");
-            }
+            if (count <= 0)
+                throw new IllegalArgumentException("Invalid number of counters (must be positive).");
+            if(!sectors.containsKey(sector))
+                throw new IllegalArgumentException("Sector " + sectorName + " does not exist.");
             int firstId = counterId.getAndAdd(count);
 
             // Se which is the last counter number of the sector, and in that case expand the RangeCounter

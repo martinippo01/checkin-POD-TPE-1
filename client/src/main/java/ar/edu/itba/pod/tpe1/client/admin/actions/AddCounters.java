@@ -39,7 +39,7 @@ public class AddCounters extends AirportAdminAction {
             if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
                 System.err.println("Failed to add counters to sector: ");
             } else {
-                System.err.println("Failed to add counters to sector. Status: " + e.getStatus().getCode().name());
+                System.err.println("Failed to add counters to sector: " + e.getMessage());
             }
         } catch (Exception e) {
             System.err.println("RPC failed: " + e.getMessage());

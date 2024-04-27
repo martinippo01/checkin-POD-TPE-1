@@ -34,7 +34,7 @@ public class AddSector extends AirportAdminAction {
             if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
                 System.err.println("Failed to add sector: ");
             } else {
-                System.err.println("Failed to add sector. Status: " + e.getStatus().getCode().name());
+                System.err.println("Failed to add sector: " + e.getMessage());
             }
         } catch (Exception e) {
             System.err.println("RPC failed: " + e.getMessage());
