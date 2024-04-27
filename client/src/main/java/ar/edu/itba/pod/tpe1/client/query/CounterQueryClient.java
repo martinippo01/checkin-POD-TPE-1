@@ -1,80 +1,47 @@
 package ar.edu.itba.pod.tpe1.client.query;
-import io.grpc.Channel;
-import airport.CounterServiceGrpc;
-import airport.CounterServiceOuterClass.QueryCountersRequest;
-import airport.CounterServiceOuterClass.QueryCountersResponse;
-import airport.CounterServiceOuterClass.QueryCheckInsRequest;
-import airport.CounterServiceOuterClass.QueryCheckInsResponse;
-import airport.CounterServiceOuterClass.CounterInfo;
-import airport.CounterServiceOuterClass.CheckInRecord;
-import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
 
-public class CounterQueryClient {
-    private final CounterServiceGrpc.CounterServiceBlockingStub blockingStub;
+import ar.edu.itba.pod.tpe1.client.Arguments;
+import ar.edu.itba.pod.tpe1.client.Client;
+import ar.edu.itba.pod.tpe1.client.Util;
+import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-    public CounterQueryClient(Channel channel) {
-        blockingStub = CounterServiceGrpc.newBlockingStub(channel);
+import java.io.IOException;
+
+import static ar.edu.itba.pod.tpe1.client.query.CounterQueryActions.counterQueryActionsFromString;
+
+public class CounterQueryClient extends Client {
+    private static final Logger logger = LoggerFactory.getLogger(CounterQueryClient.class);
+
+    public CounterQueryClient(String[] args) {
+        super(args);
     }
 
-    public void queryCounters(String sector) {
-        try {
-            QueryCountersRequest request = QueryCountersRequest.newBuilder()
-                    .setSector(sector)
-                    .build();
-            QueryCountersResponse response = blockingStub.queryCounters(request);
-            printCounterQueryResponse(response);
-        } catch (StatusRuntimeException e) {
-            if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
-                System.out.println("Sector  Counters  Airline          Flights             People");
-                System.out.println("###############################################################");
-            } else if (e.getStatus().getCode() == Status.Code.FAILED_PRECONDITION) {
-                System.out.println("No counters found, please add counters to the sector. Optional -DoutPath= file skipped");
-            }
-        } catch (Exception e) {
-            System.err.println("RPC failed: " + e.getMessage());
-        }
+    @Override
+    public void executeAction() {
+        CounterQueryActions action = counterQueryActionsFromString(getActionArgument()).orElseThrow(() -> {
+                    logger.error("Provided action '{}' doesn't exist.", Arguments.SERVER_ADDRESS.getArgument());
+                    return new IllegalArgumentException(Util.EXCEPTION_MESSAGE_UNEXPECTED_ARGUMENT + Arguments.ACTION.getArgument());
+                }
+        );
+
+        action.getAction().setArguments(getArguments());
+        action.getAction().run(getChannel());
     }
 
-    private void printCounterQueryResponse(QueryCountersResponse response) {
-        System.out.println("Sector  Counters  Airline          Flights             People");
-        System.out.println("###############################################################");
-        for (CounterInfo counter : response.getCountersList()) {
-            String flights = String.join("|", counter.getFlightsList());
-            if (flights.isEmpty()) flights = "-";
-            String airline = counter.getAirline().isEmpty() ? "-" : counter.getAirline();
-            System.out.printf("   %-7s %-9s %-16s %-17s %-4d%n",
-                    counter.getSector(),
-                    counter.getRange() ,
-                    airline,
-                    flights,
-                    counter.getWaitingPeople());
-        }
-    }
-
-    public void queryCheckIns(String sector, String airline) {
-        QueryCheckInsRequest request = QueryCheckInsRequest.newBuilder()
-                .setSector(sector)
-                .setAirline(airline)
-                .build();
-        QueryCheckInsResponse response = blockingStub.queryCheckIns(request);
-        if (response.getCheckInsCount() == 0) {
-            System.out.println("No check-ins found for the specified criteria.");
-            return;
-        }
-        printCheckInsQueryResponse(response);
-    }
-
-    private void printCheckInsQueryResponse(QueryCheckInsResponse response) {
-        System.out.println("   Sector  Counter   Airline           Flight     Booking");
-        System.out.println("   ###############################################################");
-        for (CheckInRecord record : response.getCheckInsList()) {
-            System.out.printf("   %-7s %-9d %-17s %-9s %-6s%n",
-                    record.getSector(),
-                    record.getCounter(),
-                    record.getAirline(),
-                    record.getFlight(),
-                    record.getBookingCode());
+    public static void main(String[] args) {
+        try (Client client = new CounterQueryClient(args)) {
+            client.executeAction();
+        } catch (IllegalArgumentException e) {
+            System.err.println(Util.ERROR_MESSAGE_INVALID_ARGUMENT);
+            System.exit(1);
+        } catch (ServerUnavailableException e) {
+            System.err.println(Util.ERROR_MESSAGE_SERVER_UNAVAILABLE);
+            System.exit(2);
+        } catch (IOException e) {
+            System.err.println(Util.ERROR_MESSAGE_IO);
+            System.exit(3);
         }
     }
 }

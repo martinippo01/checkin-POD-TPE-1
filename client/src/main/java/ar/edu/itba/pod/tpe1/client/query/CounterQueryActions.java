@@ -3,7 +3,6 @@ package ar.edu.itba.pod.tpe1.client.query;
 import ar.edu.itba.pod.tpe1.client.Action;
 import ar.edu.itba.pod.tpe1.client.query.actions.CheckIns;
 import ar.edu.itba.pod.tpe1.client.query.actions.Counters;
-import ar.edu.itba.pod.tpe1.client.query.actions.History;
 import ar.edu.itba.pod.tpe1.client.query.actions.QueryCounters;
 
 import java.util.List;
@@ -26,12 +25,7 @@ public enum CounterQueryActions {
     CHECKINS(
             "checkins",
             new CheckIns(List.of(OUT_PATH.getArgument()), List.of(SECTOR.getArgument(), AIRLINE.getArgument()))
-    ),
-    HISTORY(
-            "history",
-            new History(List.of(OUT_PATH.getArgument(), SECTOR.getArgument(), COUNTER.getArgument()))
     );
-
 
     private final String actionName;
     private final Action action;
