@@ -54,7 +54,7 @@ public class CounterReservationService extends CounterReservationServiceGrpc.Cou
     @Override
     public void queryCounterRange(CounterReservationServiceOuterClass.CounterRangeRequest request, StreamObserver<CounterReservationServiceOuterClass.CounterRangeResponse> responseObserver) {
         try {
-            logger.info("Requesting counter range from airport with sector: {}, from: {}, to: {}", request.getSectorName(), request.getFromVal(), request.getToVal();
+            logger.info("Requesting counter range from airport with sector: {}, from: {}, to: {}", request.getSectorName(), request.getFromVal(), request.getToVal());
             CounterReservationServiceOuterClass.CounterRangeResponse.Builder response = CounterReservationServiceOuterClass.CounterRangeResponse.newBuilder();
             List<RequestedRangeCounter> counters = airport.listCounters(request.getSectorName(), request.getFromVal(), request.getToVal());
 
@@ -110,7 +110,7 @@ public class CounterReservationService extends CounterReservationServiceGrpc.Cou
     @Override
     public void freeCounters(CounterReservationServiceOuterClass.FreeCounterRequest request, StreamObserver<CounterReservationServiceOuterClass.FreeCounterResponse> responseObserver) {
         try {
-            logger.info("Freeing counters from airport with sector: {}, from: {}, airline: {}", request.getSectorName(), request.getFromVal(), request.getAirlineName();
+            logger.info("Freeing counters from airport with sector: {}, from: {}, airline: {}", request.getSectorName(), request.getFromVal(), request.getAirlineName());
             FreeCounterResult result = airport.freeCounters(request.getSectorName(), request.getFromVal(), request.getAirlineName());
             CounterReservationServiceOuterClass.FreeCounterResponse response = CounterReservationServiceOuterClass.FreeCounterResponse.newBuilder()
                     .setSectorName(result.getSectorName())
@@ -125,16 +125,16 @@ public class CounterReservationService extends CounterReservationServiceGrpc.Cou
             logger.error("ClassNotFoundException freeing counters: {}", e.getMessage());
             responseObserver.onError(io.grpc.Status.NOT_FOUND.withDescription(e.getMessage()).asRuntimeException());
         } catch (IllegalArgumentException e) {
-            logger.error("IllegalArgumentException freeing counters: {}", e.getMessage();
+            logger.error("IllegalArgumentException freeing counters: {}", e.getMessage());
             responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException());
         }  catch (IllegalCallerException e) {
-            logger.error("IllegalCallerException freeing counters: {}", e.getMessage();
+            logger.error("IllegalCallerException freeing counters: {}", e.getMessage());
             responseObserver.onError(Status.PERMISSION_DENIED.withDescription(e.getMessage()).asRuntimeException());
         } catch (IllegalStateException e) {
-            logger.error("IllegalStateException freeing counters: {}", e.getMessage();
+            logger.error("IllegalStateException freeing counters: {}", e.getMessage());
             responseObserver.onError(Status.FAILED_PRECONDITION.withDescription(e.getMessage()).asRuntimeException());
         } catch (Exception e) {
-            logger.error("Undefined Exception freeing counters: {}", e.getMessage();
+            logger.error("Undefined Exception freeing counters: {}", e.getMessage());
             responseObserver.onError(Status.UNKNOWN.withDescription(e.getMessage()).asRuntimeException());
         }
     }
@@ -152,7 +152,7 @@ public class CounterReservationService extends CounterReservationServiceGrpc.Cou
     @Override
     public void listPendingAssignments(CounterReservationServiceOuterClass.PendingAssignmentsRequest request, StreamObserver<CounterReservationServiceOuterClass.PendingAssignmentsResponse> responseObserver) {
         try {
-            logger.info("Listing pending assignments from airport with sector: {}", request.getSectorName();
+            logger.info("Listing pending assignments from airport with sector: {}", request.getSectorName());
             CounterReservationServiceOuterClass.PendingAssignmentsResponse.Builder response = CounterReservationServiceOuterClass.PendingAssignmentsResponse.newBuilder();
             List<RequestedRangeCounter> requestedRangeCounters = airport.listPendingRequestedCounters(request.getSectorName());
 
