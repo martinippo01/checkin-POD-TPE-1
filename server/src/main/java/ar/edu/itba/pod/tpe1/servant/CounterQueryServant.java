@@ -34,7 +34,14 @@ public class CounterQueryServant extends CounterServiceGrpc.CounterServiceImplBa
 
     @Override
     public void queryCheckIns(CounterServiceOuterClass.QueryCheckInsRequest req, StreamObserver<CounterServiceOuterClass.QueryCheckInsResponse> responseObserver) {
-        List<CounterServiceOuterClass.CheckInRecord> results = airport.queryCheckIns(req.getSector(), req.getAirline());
+
+        List<CounterServiceOuterClass.CheckInRecord> results;
+        try {
+            results = airport.queryCheckIns(req.getSector(), req.getAirline());
+        }catch (IllegalArgumentException e){
+            responseObserver.onError(io.grpc.Status.NOT_FOUND.withDescription(e.getMessage()).asRuntimeException());
+            return;
+        }
 
         CounterServiceOuterClass.QueryCheckInsResponse.Builder responseBuilder
                 = CounterServiceOuterClass.QueryCheckInsResponse
