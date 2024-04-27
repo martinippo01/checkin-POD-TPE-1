@@ -27,7 +27,13 @@ public class RemoveNotifications extends NotificationsAction {
 
     private NotificationsServiceOuterClass.RemoveNotificationsResponse notificationsResponse(
             NotificationsServiceOuterClass.RemoveNotificationsRequest request) {
-        return blockingStub.removeNotifications(request);
+        NotificationsServiceOuterClass.RemoveNotificationsResponse response = null;
+        try {
+            response = blockingStub.removeNotifications(request);
+        }catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+        return response;
     }
 
     @Override

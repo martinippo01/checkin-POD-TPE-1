@@ -8,8 +8,6 @@ import io.grpc.ManagedChannel;
 import java.util.List;
 
 public final class Counters extends CounterQueryAction {
-    private CounterServiceGrpc.CounterServiceBlockingStub blockingStub;
-
     public Counters(List<String> actionArguments) {
         super(actionArguments);
     }
