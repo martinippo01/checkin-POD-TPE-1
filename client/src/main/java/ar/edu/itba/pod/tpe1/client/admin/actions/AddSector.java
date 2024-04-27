@@ -5,6 +5,8 @@ import airport.AirportService;
 import ar.edu.itba.pod.tpe1.client.admin.AirportAdminAction;
 import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
 import io.grpc.ManagedChannel;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 
 import java.util.List;
 
@@ -23,13 +25,19 @@ public class AddSector extends AirportAdminAction {
 
         String sectorName = getArguments().get(SECTOR.getArgument());
 
-        AirportService.SectorRequest request = AirportService.SectorRequest.newBuilder().setSectorName(sectorName).build();
-        AirportService.SectorResponse response = blockingStub.addSector(request);
-        // TODO: Check Response in Servant
-        // if (response.getStatus() == AirportService.ResponseStatus.SUCCESS) {
-        //     System.out.println("Sector " + response.getSectorName() + " added successfully");
-        // } else {
-        //     System.out.println("Failed to add sector: " + response.getSectorName());
-        // }
+        try {
+            AirportService.SectorRequest request = AirportService.SectorRequest.newBuilder().setSectorName(sectorName).build();
+            AirportService.SectorResponse response = blockingStub.addSector(request);
+
+            System.out.println("Sector " + response.getSectorName() + " added successfully");
+        } catch (StatusRuntimeException e) {
+            if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
+                System.err.println("Failed to add sector: ");
+            } else {
+                System.err.println("Failed to add sector. Status: " + e.getStatus().getCode().name());
+            }
+        } catch (Exception e) {
+            System.err.println("RPC failed: " + e.getMessage());
+        }
     }
 }

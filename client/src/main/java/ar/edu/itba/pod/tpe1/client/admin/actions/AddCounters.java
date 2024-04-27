@@ -5,6 +5,8 @@ import airport.AirportService;
 import ar.edu.itba.pod.tpe1.client.admin.AirportAdminAction;
 import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
 import io.grpc.ManagedChannel;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 
 import java.util.List;
 
@@ -25,16 +27,22 @@ public class AddCounters extends AirportAdminAction {
         String sectorName = getArguments().get(SECTOR.getArgument());
         int counterCount = Integer.parseInt(getArguments().get(COUNTERS.getArgument()));
 
-        AirportService.CounterRequest request = AirportService.CounterRequest.newBuilder()
-                .setSectorName(sectorName)
-                .setCounterCount(counterCount)
-                .build();
-        AirportService.CounterResponse response = blockingStub.addCounters(request);
-        // TODO: Check Response in Servant
-        // if (response.getStatus() == AirportService.ResponseStatus.SUCCESS) {
-        //     System.out.println(counterCount + " new counters (" + response.getFirstCounterId() + "-" + response.getLastCounterId() + ") in Sector " + response.getSectorName() + " added successfully");
-        // } else {
-        //     System.out.println("Failed to add counters to sector: " + sectorName);
-        // }
+        try {
+            AirportService.CounterRequest request = AirportService.CounterRequest.newBuilder()
+                    .setSectorName(sectorName)
+                    .setCounterCount(counterCount)
+                    .build();
+            AirportService.CounterResponse response = blockingStub.addCounters(request);
+
+            System.out.println(counterCount + " new counters (" + response.getFirstCounterId() + "-" + response.getLastCounterId() + ") in Sector " + response.getSectorName() + " added successfully");
+        } catch (StatusRuntimeException e) {
+            if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
+                System.err.println("Failed to add counters to sector: ");
+            } else {
+                System.err.println("Failed to add counters to sector. Status: " + e.getStatus().getCode().name());
+            }
+        } catch (Exception e) {
+            System.err.println("RPC failed: " + e.getMessage());
+        }
     }
 }
