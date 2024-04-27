@@ -9,6 +9,7 @@
 
 COMPILED_DIR="grpc-com-tpe1-client-2024.1Q"
 SERVER_ADDRESS="localhost:50058"
+MANIFEST_FILE="$(pwd)/manifest.csv"
 
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 if ! pushd "${SCRIPT_DIR}" &> /dev/null; then
@@ -32,7 +33,7 @@ bash adminClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=addCounters -Dsec
 #  3 new counters (2-4) in Sector C added successfully
 
 #1.3
-bash adminClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=manifest -DinPath=../manifest.csv
+bash adminClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=manifest -DinPath="$MANIFEST_FILE"
 #rta:
 #  Booking ABC123 for AirCanada AC987 added successfully
 #  ...
