@@ -37,7 +37,7 @@ public class AirportAdminServant extends AirportAdminServiceGrpc.AirportAdminSer
                     .build());
             responseObserver.onCompleted();
         } catch (IllegalArgumentException e) {
-            responseObserver.onError(Status.FAILED_PRECONDITION.withDescription(e.getMessage()).asRuntimeException());
+            responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException());
         } catch (Exception e) {
             responseObserver.onError(Status.INTERNAL.withDescription(e.getMessage()).asRuntimeException());
         }
@@ -53,8 +53,6 @@ public class AirportAdminServant extends AirportAdminServiceGrpc.AirportAdminSer
             responseObserver.onCompleted();
         } catch (IllegalArgumentException e) {
             responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException());
-        } catch (IllegalCallerException e) {
-            responseObserver.onError(Status.PERMISSION_DENIED.withDescription(e.getMessage()).asRuntimeException());
         } catch (Exception e) {
             responseObserver.onError(Status.INTERNAL.withDescription(e.getMessage()).asRuntimeException());
         }

@@ -24,7 +24,7 @@ public class Notifications {
     private final ConcurrentHashMap<Airline, BlockingQueue<Notification>> notifications = new ConcurrentHashMap<>();
 
     private static Notifications instance = null;
-    private static Airport airport = Airport.getInstance();
+
 
     public Notifications() {}
 
@@ -36,8 +36,8 @@ public class Notifications {
     }
 
     public boolean registerAirline(Airline airline){
-        if(notifications.containsKey(airline) || airport.airlineExists(airline))
-            return false;
+        if(notifications.containsKey(airline))
+            throw new IllegalArgumentException("Airline " + airline + " already registered.");
         notifications.put(airline, new LinkedBlockingQueue<>());
         logger.info("Airline {} registered", airline.getName());
         return true;
@@ -45,8 +45,7 @@ public class Notifications {
 
     public boolean unregisterAirline(Airline airline){
         if(!notifications.containsKey(airline))
-            return false;
-        // TODO: Check if the addition should be .add or .put
+            throw new IllegalArgumentException("Airline " + airline + " not registered.");
         // Add to the queue a poisson pill, so when producer consumes it, will stop taking form the queue
         notifications.get(airline).add(new Notification.Builder().setPoisonPill().build());
         logger.info("Airline {} unregistered", airline.getName());
