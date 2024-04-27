@@ -48,7 +48,7 @@ public class Manifest extends AirportAdminAction {
             if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
                 System.err.println("Failed to add booking: ");
             } else {
-                System.err.println("Failed to add booking. Status: " + e.getStatus().getCode().name());
+                System.err.println("Failed to add booking: " + e.getMessage());
             }
         } catch (IOException e) {
             System.err.println("Error reading the file: " + filePath);

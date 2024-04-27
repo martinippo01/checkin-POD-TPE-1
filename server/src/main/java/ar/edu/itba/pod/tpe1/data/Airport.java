@@ -109,14 +109,14 @@ public class Airport {
 
         synchronized (lock) {
             if (bookingCodes.containsKey(booking)) { // In case the booking already exists, it fails
-                throw new IllegalArgumentException("Booking code already exists.");
+                throw new IllegalArgumentException("Booking code " + bookingCode + " already exists.");
             }
 
             // In case the flight exists
             if (flights.containsKey(flight)) {
                 // Check if it belongs to other airline, in that case it fails
                 if (!flights.get(flight).equals(airline))
-                    throw new IllegalCallerException("The flight is already registered to another airline.");
+                    throw new IllegalArgumentException("The flight " + flightCode +  " is already registered to airline " + flights.get(flight) + ".");
             }
 
             // If absent, put the flight and mark as it is not assigned yet
