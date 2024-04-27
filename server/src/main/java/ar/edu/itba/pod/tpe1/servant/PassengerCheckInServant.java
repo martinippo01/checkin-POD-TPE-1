@@ -27,9 +27,15 @@ public class PassengerCheckInServant extends CheckinServiceImplBase {
 
     @Override
     public void passengerStatus(PassengerStatusRequest request, StreamObserver<PassengerStatusResponse> responseObserver) {
-        PassengerStatusResponse.Builder response = airport.getCheckIn(request.getBookingCode());
+        try {
+            PassengerStatusResponse.Builder response = airport.getCheckIn(request.getBookingCode());
 
-        responseObserver.onNext(response.build());
-        responseObserver.onCompleted();
+            responseObserver.onNext(response.build());
+            responseObserver.onCompleted();
+        } catch (IllegalArgumentException e) {
+            responseObserver.onError(io.grpc.Status.NOT_FOUND.withDescription(e.getMessage()).asRuntimeException());
+        } catch (Exception e) {
+            responseObserver.onError(io.grpc.Status.INTERNAL.withDescription(e.getMessage()).asRuntimeException());
+        }
     }
 }
