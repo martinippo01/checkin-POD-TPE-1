@@ -11,6 +11,7 @@ public class AirportAdminServant extends AirportAdminServiceGrpc.AirportAdminSer
 
     private final Airport airport = Airport.getInstance();
 
+
     @Override
     public void addSector(AirportService.SectorRequest req, StreamObserver<AirportService.SectorResponse> responseObserver) {
         try {
