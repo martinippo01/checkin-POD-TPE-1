@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 public class PassengerCheckInServant extends CheckinServiceImplBase {
 
     private final Airport airport = Airport.getInstance();
-    private static final Logger logger = LoggerFactory.getLogger(NotificationsServant.class);
+    private static final Logger logger = LoggerFactory.getLogger(PassengerCheckInServant.class);
 
     @Override
     public void fetchCounter(FetchCounterRequest request, StreamObserver<FetchCounterResponse> responseObserver) {

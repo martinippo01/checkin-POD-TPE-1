@@ -17,7 +17,7 @@ public class CounterReservationService extends CounterReservationServiceGrpc.Cou
 
     Airport airport = Airport.getInstance();
 
-    private static final Logger logger = LoggerFactory.getLogger(NotificationsServant.class);
+    private static final Logger logger = LoggerFactory.getLogger(CounterReservationService.class);
 
     @Override
     public void listSectors(CounterReservationServiceOuterClass.SectorRequest request, StreamObserver<CounterReservationServiceOuterClass.SectorResponse> responseObserver) {

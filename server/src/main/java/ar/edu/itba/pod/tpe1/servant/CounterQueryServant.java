@@ -13,7 +13,7 @@ import java.util.List;
 public class CounterQueryServant extends CounterServiceGrpc.CounterServiceImplBase {
 
     private final Airport airport = Airport.getInstance();
-    private static final Logger logger = LoggerFactory.getLogger(NotificationsServant.class);
+    private static final Logger logger = LoggerFactory.getLogger(CounterQueryServant.class);
 
     @Override
     public void queryCounters(CounterServiceOuterClass.QueryCountersRequest req, StreamObserver<CounterServiceOuterClass.QueryCountersResponse> responseObserver) {

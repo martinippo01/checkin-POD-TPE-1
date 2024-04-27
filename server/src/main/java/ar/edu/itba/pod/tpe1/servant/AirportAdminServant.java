@@ -6,11 +6,14 @@ import ar.edu.itba.pod.tpe1.data.Airport;
 import ar.edu.itba.pod.tpe1.data.utils.RangeCounter;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AirportAdminServant extends AirportAdminServiceGrpc.AirportAdminServiceImplBase {
 
     private final Airport airport = Airport.getInstance();
 
+    private static final Logger logger = LoggerFactory.getLogger(AirportAdminServant.class);
 
     @Override
     public void addSector(AirportService.SectorRequest req, StreamObserver<AirportService.SectorResponse> responseObserver) {
