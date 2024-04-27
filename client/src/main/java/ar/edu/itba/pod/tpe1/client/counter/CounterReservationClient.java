@@ -1,6 +1,5 @@
-package ar.edu.itba.pod.tpe1.client;
+package ar.edu.itba.pod.tpe1.client.counter;
 
-import airport.AirportService;
 import counter.CounterReservationServiceGrpc;
 import counter.CounterReservationServiceOuterClass;
 import io.grpc.Channel;
