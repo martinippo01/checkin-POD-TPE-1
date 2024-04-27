@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 public class Server {
-    private static Logger logger = LoggerFactory.getLogger(Server.class);
+    private static final Logger logger = LoggerFactory.getLogger(Server.class);
 
     public static void main(String[] args) throws InterruptedException, IOException {
         logger.info(" Server Starting ...");
@@ -23,7 +23,7 @@ public class Server {
                 .addService(new CounterReservationService())
                 .build();
         server.start();
-        logger.info("Server started, listening on " + port);
+        logger.info("Server started, listening on {}", port);
         server.awaitTermination();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             logger.info("Shutting down gRPC server since JVM is shutting down");
