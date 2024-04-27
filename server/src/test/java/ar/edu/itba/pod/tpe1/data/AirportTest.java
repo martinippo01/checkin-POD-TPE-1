@@ -44,13 +44,14 @@ public class AirportTest {
     }
 
     @Test
-    public void test_performCheckIn_singlePassenger() {
+    public void test_performCheckIn_singlePassenger() throws Exception {
         // Add to queue
         PassengerCheckinResponse passengerCheckinResponse = airport.addToCheckInQueue(bookingCode, sectorName, 1).build();
         assertEquals(CheckinStatus.CHECKIN_STATUS_ADDED_TO_QUEUE, passengerCheckinResponse.getStatus());
 
         // Perform check-in
         CheckInCountersResponse checkInDone = airport.performCheckIn(sectorName, 1, airlineName).build();
+
         assertEquals(CheckInCountersStatus.CHECK_IN_COUNTERS_STATUS_CHECKIN_DONE, checkInDone.getStatus());
         assertEquals(3, checkInDone.getDataCount());
 
