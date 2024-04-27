@@ -12,7 +12,7 @@ public class PassengerCheckInServant extends CheckinServiceImplBase {
 
     @Override
     public void fetchCounter(FetchCounterRequest request, StreamObserver<FetchCounterResponse> responseObserver) {
-        try {//
+        try {
             FetchCounterResponse.Builder response = airport.listAssignedCounters(request.getBookingCode());
 
             responseObserver.onNext(response.build());
