@@ -15,7 +15,7 @@ fi
 
 readonly PATH_TO_CODE_BASE="$(pwd)"
 readonly JAVA_OPTS="-Djava.rmi.server.codebase=file://$PATH_TO_CODE_BASE/lib/jars/grpc-com-tpe1-client-2024.1Q.jar"
-readonly MAIN_CLASS="ar.edu.itba.pod.tpe1.client.CounterReservationClient"
+readonly MAIN_CLASS="ar.edu.itba.pod.tpe1.client.counter.CounterReservationClient"
 
 java "$JAVA_OPTS" -cp 'lib/jars/*' "$MAIN_CLASS" "$@"
 
