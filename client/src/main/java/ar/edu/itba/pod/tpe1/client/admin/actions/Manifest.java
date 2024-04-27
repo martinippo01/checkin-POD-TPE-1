@@ -41,7 +41,7 @@ public class Manifest extends AirportAdminAction {
                             .build();
                     AirportService.AddPassengerResponse response = blockingStub.addPassenger(request);
 
-                    System.out.println("Booking " + response.getBookingCode() + " added successfully");
+                    System.out.println("Booking " + response.getBookingCode() + " for " + parts[2] + " added successfully");
                 }
             }
         } catch (StatusRuntimeException e) {
