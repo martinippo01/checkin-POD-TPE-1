@@ -7,10 +7,10 @@ import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class NotificationsClientMain extends Client {
-    private static final Logger logger = LoggerFactory.getLogger(NotificationsClientMain.class);
+public class NotificationsClient extends Client {
+    private static final Logger logger = LoggerFactory.getLogger(NotificationsClient.class);
 
-    public NotificationsClientMain(String[] args) {
+    public NotificationsClient(String[] args) {
         super(args);
     }
 
@@ -29,14 +29,7 @@ public class NotificationsClientMain extends Client {
     }
 
     public static void main(String[] args) {
-//        String[] test = {
-//                "-DserverAddress=localhost:50058", // -DserverAddress=10.6.0.1:50051
-//                "-Daction=register",
-//                "-Dairline=AmericanAirlines"
-//        };
-//
-//        try (Client client = new NotificationsClientMain(test)) {
-        try (Client client = new NotificationsClientMain(args)) {
+        try (Client client = new NotificationsClient(args)) {
             client.executeAction();
         } catch (IllegalArgumentException e) {
             System.err.println(Util.ERROR_MESSAGE_INVALID_ARGUMENT);
