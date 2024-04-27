@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 #
 #
 # Ignore SC2155: Declare and assign separately to avoid masking return values.
@@ -7,10 +7,10 @@
 
 # Enter script directory before sourcing anything
 
-readonly COMPILED_DIR="grpc-com-tpe1-client-2024.1Q"
-readonly COMPILED_TAR="grpc-com-tpe1-client-2024.1Q-bin.tar.gz"
+COMPILED_DIR="grpc-com-tpe1-client-2024.1Q"
+COMPILED_TAR="grpc-com-tpe1-client-2024.1Q-bin.tar.gz"
 
-readonly SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
+SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 if ! pushd "${SCRIPT_DIR}" &> /dev/null; then
     >&2 echo "Script directory not found (??): '$SCRIPT_DIR'"
     exit 1
