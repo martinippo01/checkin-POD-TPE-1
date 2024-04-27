@@ -54,7 +54,7 @@ public class Airport {
         Sector sector = new Sector(sectorName);
         synchronized (lock) {
             if (sectors.putIfAbsent(sector, new ArrayList<>()) != null)
-                return;
+                throw new IllegalArgumentException("Sector " + sectorName + " already exists");
 
             pendingRequestedCounters.put(sector, new ConcurrentLinkedQueue<>());
         }
@@ -64,9 +64,10 @@ public class Airport {
 
         Sector sector = Sector.fromName(sectorName);
         synchronized (lock){
-            if (count <= 0 || !sectors.containsKey(sector)) {
-                throw new IllegalStateException("Invalid number of counters (must be positive)/sector does not exist.");
-            }
+            if (count <= 0)
+                throw new IllegalArgumentException("Invalid number of counters (must be positive).");
+            if(!sectors.containsKey(sector))
+                throw new IllegalArgumentException("Sector " + sectorName + " does not exist.");
             int firstId = counterId.getAndAdd(count);
 
             // Se which is the last counter number of the sector, and in that case expand the RangeCounter
@@ -108,14 +109,14 @@ public class Airport {
 
         synchronized (lock) {
             if (bookingCodes.containsKey(booking)) { // In case the booking already exists, it fails
-                throw new IllegalArgumentException("Booking code already exists.");
+                throw new IllegalArgumentException("Booking code " + bookingCode + " already exists.");
             }
 
             // In case the flight exists
             if (flights.containsKey(flight)) {
                 // Check if it belongs to other airline, in that case it fails
                 if (!flights.get(flight).equals(airline))
-                    throw new IllegalCallerException("The flight is already registered to another airline.");
+                    throw new IllegalArgumentException("The flight " + flightCode +  " is already registered to airline " + flights.get(flight) + ".");
             }
 
             // If absent, put the flight and mark as it is not assigned yet

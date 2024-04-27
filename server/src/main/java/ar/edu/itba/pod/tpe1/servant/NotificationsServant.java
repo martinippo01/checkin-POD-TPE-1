@@ -11,6 +11,8 @@ import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.security.spec.ECField;
+
 public class NotificationsServant extends NotificationsServiceGrpc.NotificationsServiceImplBase {
 
     // Logger
@@ -29,18 +31,24 @@ public class NotificationsServant extends NotificationsServiceGrpc.Notifications
             logger.info("Airline: {} requested register to notifications service", req.getAirline());
             Airline airline = new Airline(req.getAirline());
 
-            // First register the airline
-            boolean success = notifications.registerAirline(airline);
-            if (success) {
-                logger.info("Airline: {} successfully registered to notifications service", airline.getName());
-                responseObserver.onNext(buildNotificationProto(new Notification.Builder().setNotificationType(NotificationsServiceOuterClass.NotificationType.SUCCESSFUL_REGISTER).build()));
-            } else {
-                // TODO: evaluate there are no passengers waiting
-                // Mainly, evaluate the case when the airline exists, but there's no expected passengers
-                logger.error("Airline: {} failed to register to notifications service", airline.getName());
-                responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription("Failed to register airline " + req.getAirline()).asRuntimeException());
+            // Check that the airline exists at the airport
+            if(!airport.airlineExists(airline)){
+                logger.error("Airline: {} failed to register to notifications service, it is not registered at the airport", airline.getName());
+                responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Airline does not exists at the airport").asRuntimeException());
                 return;
             }
+
+            // First register the airline
+            try {
+                notifications.registerAirline(airline);
+            }catch (Exception e){
+                logger.error("Airline: {} failed to register to notifications service, it is already registered", airline.getName());
+                responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException());
+                return;
+            }
+
+            logger.info("Airline: {} successfully registered to notifications service", airline.getName());
+            responseObserver.onNext(buildNotificationProto(new Notification.Builder().setNotificationType(NotificationsServiceOuterClass.NotificationType.SUCCESSFUL_REGISTER).build()));
 
             // Stream the notifications
             Notification notification;
@@ -74,18 +82,18 @@ public class NotificationsServant extends NotificationsServiceGrpc.Notifications
         logger.info("Airline: {} requested to be removed from notifications service", airline.getName());
 
         // Unregister the airline
-        boolean success = notifications.unregisterAirline(airline);
-
-        if(success){
-            // In case the airline was registered, and now is not. Response goes empty
-            responseObserver.onNext(NotificationsServiceOuterClass.RemoveNotificationsResponse.newBuilder().build());
-            responseObserver.onCompleted();
-            logger.info("Airline: {} successfully unregistered to notifications service", airline.getName());
-        } else{
-            // In case the airline was not registered, send the error.
+        try {
+            notifications.unregisterAirline(airline);
+        }catch (Exception e){
             logger.error("Airline: {} failed to unregister to notifications service", airline.getName());
-            responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription("Airline is not registered").asRuntimeException());
+            responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException());
+            return;
         }
+
+        // In case the airline was registered, and now is not. Response goes empty
+        responseObserver.onNext(NotificationsServiceOuterClass.RemoveNotificationsResponse.newBuilder().build());
+        responseObserver.onCompleted();
+        logger.info("Airline: {} successfully unregistered to notifications service", airline.getName());
     }
 
     private NotificationsServiceOuterClass.RegisterNotificationsResponse buildNotificationProto(Notification notification){
