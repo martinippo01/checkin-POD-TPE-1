@@ -1,17 +1,17 @@
 package ar.edu.itba.pod.tpe1.client.checkin.actions;
 
+import ar.edu.itba.pod.tpe1.CheckinServiceGrpc;
+import ar.edu.itba.pod.tpe1.PassengerStatusRequest;
+import ar.edu.itba.pod.tpe1.PassengerStatusResponse;
 import ar.edu.itba.pod.tpe1.client.checkin.CheckInAction;
 import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
-import checkin.CheckinServiceGrpc;
-import checkin.CheckinServiceOuterClass.PassengerStatusRequest;
-import checkin.CheckinServiceOuterClass.PassengerStatusResponse;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 
 import java.util.List;
 
-import static ar.edu.itba.pod.tpe1.client.Arguments.*;
+import static ar.edu.itba.pod.tpe1.client.Arguments.BOOKING;
 
 public final class PassengerStatus extends CheckInAction {
     private CheckinServiceGrpc.CheckinServiceBlockingStub blockingStub;
@@ -23,8 +23,6 @@ public final class PassengerStatus extends CheckInAction {
     private PassengerStatusRequest createRequest() {
         return PassengerStatusRequest.newBuilder()
                 .setBookingCode(getArguments().get(BOOKING.getArgument()))
-                .setSectorName(getArguments().get(SECTOR.getArgument()))
-                .setCounterNumber(Integer.parseInt(getArguments().get(COUNTER.getArgument())))
                 .build();
     }
 
