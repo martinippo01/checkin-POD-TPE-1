@@ -31,7 +31,7 @@ public class CounterQueryServant extends CounterServiceGrpc.CounterServiceImplBa
             logger.error("IllegalArgumentException querying counters by sector: {}", e.getMessage());
             responseObserver.onError(io.grpc.Status.NOT_FOUND.withDescription(e.getMessage()).asRuntimeException());
         } catch (IllegalStateException e) {
-            logger.error("IllegalStateException querying counters by sector: {}", e.getMessage();
+            logger.error("IllegalStateException querying counters by sector: {}", e.getMessage());
             responseObserver.onError(Status.FAILED_PRECONDITION.withDescription(e.getMessage()).asRuntimeException());
         } catch (Exception e) {
             logger.error("Unexpected Exception querying counters by sector: {}", e.getMessage());
@@ -41,7 +41,6 @@ public class CounterQueryServant extends CounterServiceGrpc.CounterServiceImplBa
 
     @Override
     public void queryCheckIns(CounterServiceOuterClass.QueryCheckInsRequest req, StreamObserver<CounterServiceOuterClass.QueryCheckInsResponse> responseObserver) {
-
         try {
             logger.info("Querying check-ins by sector: {} and airline: {}", req.getSector(), req.getAirline());
             List<CounterServiceOuterClass.CheckInRecord> results = airport.queryCheckIns(req.getSector(), req.getAirline());
@@ -59,7 +58,5 @@ public class CounterQueryServant extends CounterServiceGrpc.CounterServiceImplBa
             logger.error("Unexpected Exception querying check-ins by sector: {} and airline: {}", req.getSector(), req.getAirline());
             responseObserver.onError(io.grpc.Status.INTERNAL.withDescription(e.getMessage()).asRuntimeException());
         }
-
-
     }
 }
