@@ -21,6 +21,8 @@ public final class ListPendingAssignments extends CounterReservationAction {
 
     @Override
     public void run(ManagedChannel channel) throws ServerUnavailableException {
+        blockingStub = CounterReservationServiceGrpc.newBlockingStub(channel);
+
         String sectorName = getArguments().get(SECTOR.getArgument());
 
         CounterReservationServiceOuterClass.PendingAssignmentsRequest request = CounterReservationServiceOuterClass.PendingAssignmentsRequest.newBuilder()

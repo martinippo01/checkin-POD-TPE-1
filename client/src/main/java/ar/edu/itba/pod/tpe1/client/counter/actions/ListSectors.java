@@ -18,6 +18,8 @@ public final class ListSectors extends CounterReservationAction {
 
     @Override
     public void run(ManagedChannel channel) throws ServerUnavailableException {
+        blockingStub = CounterReservationServiceGrpc.newBlockingStub(channel);
+
         CounterReservationServiceOuterClass.SectorRequest request = CounterReservationServiceOuterClass.SectorRequest.newBuilder().build();
         try {
             CounterReservationServiceOuterClass.SectorResponse response = blockingStub.listSectors(request);

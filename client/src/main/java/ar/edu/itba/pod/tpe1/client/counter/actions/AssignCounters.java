@@ -1,5 +1,6 @@
 package ar.edu.itba.pod.tpe1.client.counter.actions;
 
+import airport.CounterServiceGrpc;
 import ar.edu.itba.pod.tpe1.client.counter.CounterReservationAction;
 import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
 import counter.CounterReservationServiceGrpc;
@@ -25,6 +26,8 @@ public final class AssignCounters extends CounterReservationAction {
 
     @Override
     public void run(ManagedChannel channel) throws ServerUnavailableException {
+        blockingStub = CounterReservationServiceGrpc.newBlockingStub(channel);
+
         String sectorName = getArguments().get(SECTOR.getArgument());
         List<String> flights = parseFlightsArgument(getArguments().get(FLIGHTS.getArgument()));
         String airlineName = getArguments().get(AIRLINE.getArgument());

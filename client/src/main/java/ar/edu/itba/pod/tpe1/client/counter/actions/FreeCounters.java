@@ -21,6 +21,8 @@ public final class FreeCounters extends CounterReservationAction {
 
     @Override
     public void run(ManagedChannel channel) throws ServerUnavailableException {
+        blockingStub = CounterReservationServiceGrpc.newBlockingStub(channel);
+
         String sectorName = getArguments().get(SECTOR.getArgument());
         int fromVal = Integer.parseInt(getArguments().get(COUNTER_FROM.getArgument()));
         String airlineName = getArguments().get(AIRLINE.getArgument());

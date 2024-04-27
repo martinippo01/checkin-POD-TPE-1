@@ -20,7 +20,7 @@ public enum CounterQueryActions {
     ),
     QUERY_COUNTERS(
             "queryCounters",
-            new QueryCounters(List.of(OUT_PATH.getArgument(), SECTOR.getArgument()))
+            new QueryCounters(List.of(OUT_PATH.getArgument()), List.of(SECTOR.getArgument()))
     ),
     CHECKINS(
             "checkins",

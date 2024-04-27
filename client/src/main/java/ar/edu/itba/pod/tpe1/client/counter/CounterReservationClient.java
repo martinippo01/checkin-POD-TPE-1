@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 import static ar.edu.itba.pod.tpe1.client.checkin.CheckInActions.checkInActionsFromString;
+import static ar.edu.itba.pod.tpe1.client.counter.CounterReservationActions.counterReservationActionsFromString;
 
 public class CounterReservationClient extends Client {
     private static final Logger logger = LoggerFactory.getLogger(CounterReservationClient.class);
@@ -21,8 +22,8 @@ public class CounterReservationClient extends Client {
 
     @Override
     public void executeAction() throws ServerUnavailableException {
-        CheckInActions action = checkInActionsFromString(getActionArgument()).orElseThrow(() -> {
-                    logger.error("Provided action '{}' doesn't exist.", Arguments.SERVER_ADDRESS.getArgument());
+        CounterReservationActions action = counterReservationActionsFromString(getActionArgument()).orElseThrow(() -> {
+                    logger.error("Provided action '{}' doesn't exist.", getActionArgument());
                     return new IllegalArgumentException(Util.EXCEPTION_MESSAGE_UNEXPECTED_ARGUMENT + Arguments.ACTION.getArgument());
                 }
         );

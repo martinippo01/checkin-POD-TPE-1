@@ -21,7 +21,7 @@ public class CounterQueryClient extends Client {
     @Override
     public void executeAction() {
         CounterQueryActions action = counterQueryActionsFromString(getActionArgument()).orElseThrow(() -> {
-                    logger.error("Provided action '{}' doesn't exist.", Arguments.SERVER_ADDRESS.getArgument());
+                    logger.error("Provided action '{}' doesn't exist.", getActionArgument());
                     return new IllegalArgumentException(Util.EXCEPTION_MESSAGE_UNEXPECTED_ARGUMENT + Arguments.ACTION.getArgument());
                 }
         );
