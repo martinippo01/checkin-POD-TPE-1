@@ -34,13 +34,6 @@ public final class CheckInClient extends Client {
     }
 
     public static void main(String[] args) {
-//        String[] test = {
-//                "-DserverAddress=localhost:50058", // -DserverAddress=10.6.0.1:50051
-//                "-Daction=fetchCounter",
-//                "-Dbooking=XYZ345"
-//        };
-//
-//        try (Client client = new CheckInClient(test)) {
         try (Client client = new CheckInClient(args)) {
             client.executeAction();
         } catch (IllegalArgumentException e) {
