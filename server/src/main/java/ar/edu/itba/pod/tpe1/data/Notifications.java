@@ -24,7 +24,7 @@ public class Notifications {
     private final ConcurrentHashMap<Airline, BlockingQueue<Notification>> notifications = new ConcurrentHashMap<>();
 
     private static Notifications instance = null;
-    private static Airport airport = Airport.getInstance();
+
 
     public Notifications() {}
 
@@ -36,8 +36,8 @@ public class Notifications {
     }
 
     public boolean registerAirline(Airline airline){
-        if(notifications.containsKey(airline) || airport.airlineExists(airline))
-            return false;
+        if(notifications.containsKey(airline))
+            throw new IllegalArgumentException("Airline " + airline + " already registered.");
         notifications.put(airline, new LinkedBlockingQueue<>());
         logger.info("Airline {} registered", airline.getName());
         return true;

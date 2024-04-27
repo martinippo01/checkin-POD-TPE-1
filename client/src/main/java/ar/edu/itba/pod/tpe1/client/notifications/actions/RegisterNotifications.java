@@ -28,13 +28,20 @@ public final class RegisterNotifications extends NotificationsAction {
 
     private NotificationsServiceOuterClass.RegisterNotificationsResponse notificationsResponse(
             NotificationsServiceOuterClass.RegisterNotificationsRequest request) {
-        Iterator<NotificationsServiceOuterClass.RegisterNotificationsResponse> response = blockingStub.registerNotifications(request);
+        try {
+            Iterator<NotificationsServiceOuterClass.RegisterNotificationsResponse> response = blockingStub.registerNotifications(request);
+            while (response.hasNext()) {
+                NotificationsServiceOuterClass.RegisterNotificationsResponse registerNotificationsResponse;
 
-        while (response.hasNext()) {
-            NotificationsServiceOuterClass.RegisterNotificationsResponse registerNotificationsResponse = response.next();
-            // TODO: Will we print from here? Or modularize somewhere else?
-            System.out.println(registerNotificationsResponse.getNotificationType());
-            System.out.println(registerNotificationsResponse);
+                registerNotificationsResponse = response.next();
+
+                // TODO: Will we print from here? Or modularize somewhere else?
+                System.out.println(registerNotificationsResponse.getNotificationType());
+                System.out.println(registerNotificationsResponse);
+            }
+        }catch (Exception e) {
+            System.err.println(e.getMessage());
+            return null;
         }
 
         return null; // TODO: Return something?

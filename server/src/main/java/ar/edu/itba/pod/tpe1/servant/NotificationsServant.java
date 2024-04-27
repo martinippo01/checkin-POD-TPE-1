@@ -29,18 +29,24 @@ public class NotificationsServant extends NotificationsServiceGrpc.Notifications
             logger.info("Airline: {} requested register to notifications service", req.getAirline());
             Airline airline = new Airline(req.getAirline());
 
-            // First register the airline
-            boolean success = notifications.registerAirline(airline);
-            if (success) {
-                logger.info("Airline: {} successfully registered to notifications service", airline.getName());
-                responseObserver.onNext(buildNotificationProto(new Notification.Builder().setNotificationType(NotificationsServiceOuterClass.NotificationType.SUCCESSFUL_REGISTER).build()));
-            } else {
-                // TODO: evaluate there are no passengers waiting
-                // Mainly, evaluate the case when the airline exists, but there's no expected passengers
-                logger.error("Airline: {} failed to register to notifications service", airline.getName());
-                responseObserver.onError(io.grpc.Status.INVALID_ARGUMENT.withDescription("Failed to register airline " + req.getAirline()).asRuntimeException());
+            // Check that the airline exists at the airport
+            if(!airport.airlineExists(airline)){
+                logger.error("Airline: {} failed to register to notifications service, it is not registered at the airport", airline.getName());
+                responseObserver.onError(Status.INVALID_ARGUMENT.withDescription("Airline does not exists at the airport").asRuntimeException());
                 return;
             }
+
+            // First register the airline
+            try {
+                notifications.registerAirline(airline);
+            }catch (Exception e){
+                logger.error("Airline: {} failed to register to notifications service, it is already registered", airline.getName());
+                responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException());
+                return;
+            }
+
+            logger.info("Airline: {} successfully registered to notifications service", airline.getName());
+            responseObserver.onNext(buildNotificationProto(new Notification.Builder().setNotificationType(NotificationsServiceOuterClass.NotificationType.SUCCESSFUL_REGISTER).build()));
 
             // Stream the notifications
             Notification notification;
