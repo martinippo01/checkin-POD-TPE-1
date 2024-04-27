@@ -36,10 +36,14 @@ So, for running any of them, one must `cd` into this directory first:
 cd "client/target/grpc-com-tpe1-client-2024.1Q/"
 ```
 
-And then the desired `*Client.sh`
-
+Give all Client scripts execution permission:
 ```bash
-bash adminClient.sh -DserverAddress="localhost:50058" -Daction=addSector -Dsector=C
+chmod +x *Client.sh
+```
+
+And finally run the desired `*Client.sh` like the following:
+```bash
+./adminClient.sh -DserverAddress="localhost:50058" -Daction=addSector -Dsector=C
 ```
 
 
