@@ -35,12 +35,12 @@ public final class ListCounters extends CounterReservationAction {
                 .build();
         try {
             CounterRangeResponse response = blockingStub.queryCounterRange(request);
-            if (response.getCountersList().isEmpty()) {
-                System.out.println("No counters found in the specified range.");
-                return;
-            }
             System.out.println("Counters  Airline          Flights             People");
             System.out.println("##########################################################");
+            if (response.getCountersList().isEmpty()) {
+                return;
+            }
+
             response.getCountersList().forEach(counter -> {
                 String flights = String.join("|", counter.getFlightsList());
                 String line = String.format("(%d-%d)     %s %s   %d",
