@@ -33,7 +33,8 @@ public final class RegisterNotifications extends NotificationsAction {
                 System.out.printf("%s registered successfully for events\n", getArguments().get(AIRLINE.getArgument()));
                 break;
             case COUNTERS_ASSIGNED:
-                System.out.printf("2 counters (%d-%d) in Sector %s are now checking in passengers from %s flights\n",
+                System.out.printf("%d counters (%d-%d) in Sector %s are now checking in passengers from %s flights\n",
+                        response.getCounterTo() - response.getCounterFrom() + 1,
                         response.getCounterFrom(), response.getCounterTo(), response.getSector(), String.join("|", response.getFlightsList()));
                 break;
             case NEW_BOOKING_IN_QUEUE:
@@ -50,11 +51,11 @@ public final class RegisterNotifications extends NotificationsAction {
                 break;
             case COUNTERS_PENDING:
                 System.out.printf("%d counters in Sector %s for flights %s is pending with %d other pendings ahead\n",
-                        (response.getCounterTo() - response.getCounterFrom() + 1), response.getSector(), String.join("|", response.getFlightsList()), response.getPendingAhead());
+                        response.getCounter(), response.getSector(), String.join("|", response.getFlightsList()), response.getPendingAhead());
                 break;
             case COUNTERS_UPDATE:
                 System.out.printf("%d counters in Sector %s for flights %s were updated with %d other pendings ahead\n",
-                        (response.getCounterTo() - response.getCounterFrom() + 1), response.getSector(), String.join("|", response.getFlightsList()), response.getPendingAhead());
+                        response.getCounter(), response.getSector(), String.join("|", response.getFlightsList()), response.getPendingAhead());
                 break;
             default:
                 System.out.println("Unhandled notification type.");

@@ -1,6 +1,9 @@
 booking;flight;airline
 ABC123;AC987;AirCanada
 ABC124;AC988;AirCanada
+ABC126;AC989;AirCanada
 ABC125;AC987;AirCanada
 XYZ234;AA123;AmericanAirlines
+XYZ345;AA124;AmericanAirlines
+XYZ456;AA125;AmericanAirlines
 FLY213;FO523;FlyBondi

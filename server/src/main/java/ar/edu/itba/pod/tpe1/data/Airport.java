@@ -358,7 +358,8 @@ public class Airport {
             if (assigned == null) {
                 pendingRequestedCounters.putIfAbsent(sector, new ConcurrentLinkedQueue<>());
                 pendingRequestedCounters.get(sector).add(new RequestedRangeCounter(validFlights, airline, true, count, sector));
-                notifications.notifyCountersPending(airline, count, sectorName, validFlights, 0); // TODO: send proper pending ahead
+                int pendingAhead = pendingRequestedCounters.get(sector).size() - 1;
+                notifications.notifyCountersPending(airline, count, sectorName, validFlights, pendingAhead); // TODO: send proper pending ahead
                 return null;
             } else {
                 airline.addRequestedCounters(validFlights, assigned);
@@ -441,19 +442,37 @@ public class Airport {
 
     private void tryToAssignPendings(Sector sector) {
 
+        List<RequestedRangeCounter> toDelete = new ArrayList<>();
+        int current = 0, deleted = 0;
         for (RequestedRangeCounter reqRangeCounter : pendingRequestedCounters.get(sector)) {
+            current++;
             RequestedRangeCounter assigned = findSpaceForRange(sector, reqRangeCounter.getFlights(), reqRangeCounter.getAirline(), reqRangeCounter.getRequestedRange());
             if (assigned != null) {
-                pendingRequestedCounters.get(sector).remove(reqRangeCounter); // If it was assigned, remove it from the queue
+                deleted++;
+                // Add requested to be deleted from queue later
+                toDelete.add(reqRangeCounter);
                 // Notify the counters where assigned
                 notifications.notifyCountersAssigned(assigned.getCounterFrom(), assigned.getCounterTo(), sector.getName(), assigned.getFlights(), assigned.getAirline());
-            } else {
-                // TODO: aca??
+                // Notify the one was behind that they have moved up the queue
+                notifyPendingBehind(pendingRequestedCounters.get(sector), current, deleted);
             }
         }
+        // Delete every request that was pending and got assigned
+        for (RequestedRangeCounter reqRangeCounter : toDelete) {
+            pendingRequestedCounters.get(sector).remove(reqRangeCounter);
+        }
 
-        // TODO: for each that checks who i need to send a notification that has moved up the queue
+    }
 
+    private void notifyPendingBehind(Collection<RequestedRangeCounter> rangeCounters, int current, int deleted){
+        int pos = 0;
+        for(RequestedRangeCounter rangeCounter : rangeCounters){
+            pos++;
+            if(pos > current) {
+                notifications.notifyCountersPendingUpdate(rangeCounter.getAirline(), rangeCounter.getRequestedRange(), rangeCounter.getSector().getName(), rangeCounter.getFlights(), pos - deleted - 1);
+                System.out.println(current - deleted);
+            }
+        }
     }
 
     public boolean airlineExists(Airline airline) {
