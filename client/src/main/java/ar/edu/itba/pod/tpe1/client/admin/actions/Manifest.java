@@ -42,7 +42,7 @@ public class Manifest extends AirportAdminAction {
                             .build();
                     AddPassengerResponse response = blockingStub.addPassenger(request);
 
-                    System.out.println("Booking " + response.getBookingCode() + " for " + parts[2] + " added successfully");
+                    System.out.println("Booking " + response.getBookingCode() + " for " + parts[2] + " "+ parts[1] + " added successfully");
                 }
             }
         } catch (StatusRuntimeException e) {
