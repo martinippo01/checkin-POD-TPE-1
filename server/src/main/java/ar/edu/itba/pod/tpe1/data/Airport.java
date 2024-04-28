@@ -1,9 +1,9 @@
 package ar.edu.itba.pod.tpe1.data;
 
-import ar.edu.itba.pod.tpe1.*;
 import ar.edu.itba.pod.tpe1.data.utils.*;
-import ar.edu.itba.pod.tpe1.protos.CounterService.CounterInfo;
+import ar.edu.itba.pod.tpe1.protos.CheckInService.*;
 import ar.edu.itba.pod.tpe1.protos.CounterService.CheckInRecord;
+import ar.edu.itba.pod.tpe1.protos.CounterService.CounterInfo;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -63,10 +63,10 @@ public class Airport {
     public RangeCounter addCounters(String sectorName, int count) {
 
         Sector sector = Sector.fromName(sectorName);
-        synchronized (lock){
+        synchronized (lock) {
             if (count <= 0)
                 throw new IllegalArgumentException("Invalid number of counters (must be positive).");
-            if(!sectors.containsKey(sector))
+            if (!sectors.containsKey(sector))
                 throw new IllegalArgumentException("Sector " + sectorName + " does not exist.");
             int firstId = counterId.getAndAdd(count);
 
@@ -116,7 +116,7 @@ public class Airport {
             if (flights.containsKey(flight)) {
                 // Check if it belongs to other airline, in that case it fails
                 if (!flights.get(flight).equals(airline))
-                    throw new IllegalArgumentException("The flight " + flightCode +  " is already registered to airline " + flights.get(flight) + ".");
+                    throw new IllegalArgumentException("The flight " + flightCode + " is already registered to airline " + flights.get(flight) + ".");
             }
 
             // If absent, put the flight and mark as it is not assigned yet
@@ -323,7 +323,7 @@ public class Airport {
             }
 
 
-            if(rangeCounterFound.getWaitingQueueLength() != 0)
+            if (rangeCounterFound.getWaitingQueueLength() != 0)
                 throw new IllegalStateException("Cannot free counters as there are passengers waiting to be attended.");
 
             // Attempt to assign from the queue when a sector was freed
@@ -343,7 +343,7 @@ public class Airport {
             throw new IllegalArgumentException();
         }
         Airline airline = new Airline(airlineName);
-        synchronized (lock){
+        synchronized (lock) {
             // Validate that the flights are correct
             List<Flight> validFlights = checkFlights(sector, airline, flightsToReserve);
 
@@ -605,8 +605,8 @@ public class Airport {
         );
         Set<RequestedRangeCounter> requestedRangeCounters;
         // TODO: Check if it really needs lock
-        synchronized (lock){
-             requestedRangeCounters = airline.getRequestedCounters(flight);
+        synchronized (lock) {
+            requestedRangeCounters = airline.getRequestedCounters(flight);
             if (requestedRangeCounters == null || requestedRangeCounters.isEmpty()) {
                 // TODO: aca @Santi?
                 throw new IllegalStateException("No counters assigned for the flight.");
@@ -643,7 +643,7 @@ public class Airport {
 //            return response.setStatus(CheckinStatus.CHECKIN_STATUS_INVALID_SECTOR_ID);
         }
 
-        synchronized (lock){
+        synchronized (lock) {
             RequestedRangeCounter requestedRangeCounter = rangeCounterBySector(sector, counterNumber);
             if (requestedRangeCounter == null) {
                 // TODO: aca @Santi?
@@ -656,11 +656,11 @@ public class Airport {
 //            return response.setStatus(CheckinStatus.CHECKIN_STATUS_INVALID_FLIGHT_COUNTER_NUMBER);
             }
 
-        CheckIn currentCheckIn = checkIns.get(booking);
-        if (currentCheckIn.getStatus().equals(CheckInStatus.QUEUE)) {
-            // Already queued
-            // TODO: aca @Santi?
-            throw new IllegalStateException("Passenger already in queue.");
+            CheckIn currentCheckIn = checkIns.get(booking);
+            if (currentCheckIn.getStatus().equals(CheckInStatus.QUEUE)) {
+                // Already queued
+                // TODO: aca @Santi?
+                throw new IllegalStateException("Passenger already in queue.");
 //            return response.setStatus(CheckinStatus.CHECKIN_STATUS_PASSENGER_ALREADY_IN_QUEUE)
 //                    .setData(
 //                            CountersInformation.newBuilder()
@@ -672,9 +672,9 @@ public class Airport {
 //                                    .setPeopleInQueue(requestedRangeCounter.getWaitingQueueLength())
 //                                    .build()
 //                    );
-        } else if (currentCheckIn.getStatus().equals(CheckInStatus.DONE)) {
-            // TODO: aca @Santi?
-            throw new IllegalStateException("Passenger already checked in.");
+            } else if (currentCheckIn.getStatus().equals(CheckInStatus.DONE)) {
+                // TODO: aca @Santi?
+                throw new IllegalStateException("Passenger already checked in.");
 //            return response.setStatus(CheckinStatus.CHECKIN_STATUS_CHECKIN_ALREADY_DONE)
 //                    .setData(
 //                            CountersInformation.newBuilder()
@@ -686,7 +686,7 @@ public class Airport {
 //                                    .setPeopleInQueue(requestedRangeCounter.getWaitingQueueLength())
 //                                    .build()
 //                    );
-        }
+            }
 
             checkIns.replace(booking, currentCheckIn, new CheckIn(CheckInStatus.QUEUE, flight, requestedRangeCounter, sector));
 

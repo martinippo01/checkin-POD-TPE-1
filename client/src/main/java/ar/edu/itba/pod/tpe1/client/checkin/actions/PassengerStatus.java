@@ -1,10 +1,10 @@
 package ar.edu.itba.pod.tpe1.client.checkin.actions;
 
-import ar.edu.itba.pod.tpe1.CheckinServiceGrpc;
-import ar.edu.itba.pod.tpe1.PassengerStatusRequest;
-import ar.edu.itba.pod.tpe1.PassengerStatusResponse;
 import ar.edu.itba.pod.tpe1.client.checkin.CheckInAction;
 import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
+import ar.edu.itba.pod.tpe1.protos.CheckInService.CheckinServiceGrpc;
+import ar.edu.itba.pod.tpe1.protos.CheckInService.PassengerStatusRequest;
+import ar.edu.itba.pod.tpe1.protos.CheckInService.PassengerStatusResponse;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;

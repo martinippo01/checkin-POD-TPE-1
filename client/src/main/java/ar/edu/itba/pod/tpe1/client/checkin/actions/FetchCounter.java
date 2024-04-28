@@ -1,10 +1,10 @@
 package ar.edu.itba.pod.tpe1.client.checkin.actions;
 
-import ar.edu.itba.pod.tpe1.CheckinServiceGrpc;
-import ar.edu.itba.pod.tpe1.FetchCounterRequest;
-import ar.edu.itba.pod.tpe1.FetchCounterResponse;
 import ar.edu.itba.pod.tpe1.client.checkin.CheckInAction;
 import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
+import ar.edu.itba.pod.tpe1.protos.CheckInService.CheckinServiceGrpc;
+import ar.edu.itba.pod.tpe1.protos.CheckInService.FetchCounterRequest;
+import ar.edu.itba.pod.tpe1.protos.CheckInService.FetchCounterResponse;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
