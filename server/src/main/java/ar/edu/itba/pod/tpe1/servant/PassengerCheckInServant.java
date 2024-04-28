@@ -3,6 +3,7 @@ package ar.edu.itba.pod.tpe1.servant;
 import ar.edu.itba.pod.tpe1.CheckinServiceGrpc.CheckinServiceImplBase;
 import ar.edu.itba.pod.tpe1.*;
 import ar.edu.itba.pod.tpe1.data.Airport;
+import counter.CounterReservationServiceOuterClass;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
@@ -64,6 +65,21 @@ public class PassengerCheckInServant extends CheckinServiceImplBase {
         } catch (Exception e) {
             logger.error("Unexpected Exception checking passenger status for booking code: {}", e.getMessage());
             responseObserver.onError(io.grpc.Status.INTERNAL.withDescription(e.getMessage()).asRuntimeException());
+        }
+    }
+
+    @Override
+    public void performCheckIn(CheckInCountersRequest request, StreamObserver<CheckInCountersResponse> responseObserver) {
+        try{
+            logger.info("Performing Check-In for Airline: {} at sector: {} from counter: {}", request.getAirlineName(), request.getSectorName(), request.getCounterNumber());
+            CheckInCountersResponse.Builder responseBuilder = airport.performCheckIn(request.getSectorName(), request.getCounterNumber(), request.getAirlineName());
+
+            responseObserver.onNext(responseBuilder.build());
+            responseObserver.onCompleted();
+        }catch(IllegalArgumentException e){
+            logger.error("IllegalArgumentException performing Check-In for Airline: {} at sector: {} from counter: {}", request.getAirlineName(), request.getSectorName(), request.getCounterNumber());
+        }catch(Exception e){
+            logger.error("Unexpected Exception performing Check-In for Airline: {} at sector: {} from counter: {}", request.getAirlineName(), request.getSectorName(), request.getCounterNumber());
         }
     }
 }

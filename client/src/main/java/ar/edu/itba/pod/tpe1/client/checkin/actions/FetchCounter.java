@@ -38,6 +38,7 @@ public final class FetchCounter extends CheckInAction {
         try {
             FetchCounterRequest request = createRequest();
             FetchCounterResponse response = fetchResponse(request);
+            System.out.println(response);
         } catch (StatusRuntimeException e) {
             if (e.getStatus().equals(Status.INVALID_ARGUMENT)) {
                 throw new IllegalArgumentException(e);
