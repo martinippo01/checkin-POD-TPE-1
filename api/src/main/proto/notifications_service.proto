@@ -1,5 +1,9 @@
 syntax = "proto3";
 
+option java_multiple_files = true;
+option java_package = "ar.edu.itba.pod.tpe1.protos.NotificationsService";
+option java_outer_classname = "NotificationsServiceProtos";
+
 package airport;
 
 // Define different type of notifications that can be sent

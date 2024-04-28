@@ -1,9 +1,10 @@
 package ar.edu.itba.pod.tpe1.client.notifications.actions;
 
-import airport.NotificationsServiceGrpc;
-import airport.NotificationsServiceOuterClass;
 import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
 import ar.edu.itba.pod.tpe1.client.notifications.NotificationsAction;
+import ar.edu.itba.pod.tpe1.protos.NotificationsService.NotificationsServiceGrpc;
+import ar.edu.itba.pod.tpe1.protos.NotificationsService.RegisterNotificationsRequest;
+import ar.edu.itba.pod.tpe1.protos.NotificationsService.RegisterNotificationsResponse;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -20,18 +21,18 @@ public final class RegisterNotifications extends NotificationsAction {
         super(actionArguments);
     }
 
-    private NotificationsServiceOuterClass.RegisterNotificationsRequest createRequest() {
-        return NotificationsServiceOuterClass.RegisterNotificationsRequest.newBuilder()
+    private RegisterNotificationsRequest createRequest() {
+        return RegisterNotificationsRequest.newBuilder()
                 .setAirline(getArguments().get(AIRLINE.getArgument()))
                 .build();
     }
 
-    private NotificationsServiceOuterClass.RegisterNotificationsResponse notificationsResponse(
-            NotificationsServiceOuterClass.RegisterNotificationsRequest request) {
+    private RegisterNotificationsResponse notificationsResponse(
+            RegisterNotificationsRequest request) {
         try {
-            Iterator<NotificationsServiceOuterClass.RegisterNotificationsResponse> response = blockingStub.registerNotifications(request);
+            Iterator<RegisterNotificationsResponse> response = blockingStub.registerNotifications(request);
             while (response.hasNext()) {
-                NotificationsServiceOuterClass.RegisterNotificationsResponse registerNotificationsResponse;
+                RegisterNotificationsResponse registerNotificationsResponse;
 
                 registerNotificationsResponse = response.next();
 
@@ -39,7 +40,7 @@ public final class RegisterNotifications extends NotificationsAction {
                 System.out.println(registerNotificationsResponse.getNotificationType());
                 System.out.println(registerNotificationsResponse);
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             System.err.println(e.getMessage());
             return null;
         }
@@ -52,8 +53,8 @@ public final class RegisterNotifications extends NotificationsAction {
         blockingStub = NotificationsServiceGrpc.newBlockingStub(channel);
 
         try {
-            NotificationsServiceOuterClass.RegisterNotificationsRequest request = createRequest();
-            NotificationsServiceOuterClass.RegisterNotificationsResponse response = notificationsResponse(request);
+            RegisterNotificationsRequest request = createRequest();
+            RegisterNotificationsResponse response = notificationsResponse(request);
         } catch (StatusRuntimeException e) {
             if (e.getStatus().equals(Status.INVALID_ARGUMENT)) {
                 throw new IllegalArgumentException(e);
