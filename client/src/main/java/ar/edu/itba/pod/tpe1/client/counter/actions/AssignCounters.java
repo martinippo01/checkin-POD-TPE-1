@@ -6,6 +6,7 @@ import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
 import counter.CounterReservationServiceGrpc;
 import counter.CounterReservationServiceOuterClass;
 import io.grpc.ManagedChannel;
+import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 
 import java.util.Arrays;
@@ -49,7 +50,11 @@ public final class AssignCounters extends CounterReservationAction {
                 System.out.println(counterCount + " counters in Sector " + sectorName + " is pending with " + response.getPendingAhead() + " other pendings ahead\n");
             }
         } catch (StatusRuntimeException e) {
-            System.err.println("RPC failed: " + e.getStatus());
+            if (e.getStatus().getCode() == Status.Code.INVALID_ARGUMENT) {
+                System.out.println(e.getMessage());
+            }
+        } catch (Exception e) {
+            System.err.println("RPC failed: " + e.getMessage());
         }
     }
 }
