@@ -1,11 +1,9 @@
 package ar.edu.itba.pod.tpe1.data;
 
-import airport.NotificationsServiceOuterClass;
 import ar.edu.itba.pod.tpe1.data.utils.Airline;
 import ar.edu.itba.pod.tpe1.data.utils.Flight;
 import ar.edu.itba.pod.tpe1.data.utils.Notification;
-import ar.edu.itba.pod.tpe1.data.utils.Sector;
-import ar.edu.itba.pod.tpe1.servant.NotificationsServant;
+import ar.edu.itba.pod.tpe1.protos.NotificationsService.NotificationType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +11,6 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.stream.Collectors;
 
 
 public class Notifications {
@@ -26,25 +23,26 @@ public class Notifications {
     private static Notifications instance = null;
 
 
-    public Notifications() {}
+    public Notifications() {
+    }
 
-    public static synchronized Notifications getInstance(){
-        if(instance == null){
+    public static synchronized Notifications getInstance() {
+        if (instance == null) {
             instance = new Notifications();
         }
         return instance;
     }
 
-    public boolean registerAirline(Airline airline){
-        if(notifications.containsKey(airline))
+    public boolean registerAirline(Airline airline) {
+        if (notifications.containsKey(airline))
             throw new IllegalArgumentException("Airline " + airline + " already registered.");
         notifications.put(airline, new LinkedBlockingQueue<>());
         logger.info("Airline {} registered", airline.getName());
         return true;
     }
 
-    public boolean unregisterAirline(Airline airline){
-        if(!notifications.containsKey(airline))
+    public boolean unregisterAirline(Airline airline) {
+        if (!notifications.containsKey(airline))
             throw new IllegalArgumentException("Airline " + airline + " not registered.");
         // Add to the queue a poisson pill, so when producer consumes it, will stop taking form the queue
         notifications.get(airline).add(new Notification.Builder().setPoisonPill().build());
@@ -52,12 +50,12 @@ public class Notifications {
         return true;
     }
 
-    public void removeAirline(Airline airline){
+    public void removeAirline(Airline airline) {
         notifications.remove(airline);
     }
 
     public void notifyAirline(Airline airline, Notification notification) {
-        if(!notifications.containsKey(airline))
+        if (!notifications.containsKey(airline))
             return;
 //        try {
 //            notifications.get(airline).put(notification);
@@ -69,7 +67,7 @@ public class Notifications {
     }
 
     public Notification getNotification(Airline airline) throws InterruptedException {
-        if(!notifications.containsKey(airline))
+        if (!notifications.containsKey(airline))
             // This can happen if the airline got unregistered, or it never was registered
             return null;
         // I'll block if there are no elementes in queue
@@ -79,19 +77,19 @@ public class Notifications {
 
     }
 
-    public void notifyCountersAssigned(int from, int to, String sector, List<Flight> flights, Airline airline){
+    public void notifyCountersAssigned(int from, int to, String sector, List<Flight> flights, Airline airline) {
         notifyAirline(airline, new Notification.Builder()
                 .setAirline(airline)
                 .setSector(sector)
                 .setFlights(flights.stream().map(Flight::getFlightCode).toList())
                 .setCounterFrom(from)
                 .setCounterTo(to)
-                .setNotificationType(NotificationsServiceOuterClass.NotificationType.COUNTERS_ASSIGNED)
+                .setNotificationType(NotificationType.COUNTERS_ASSIGNED)
                 .build()
         );
     }
 
-    public void notifyPassengerEnteredQueue(Airline airline, String bookingCode, String flight, int counterFrom, int counterTo, String sector){
+    public void notifyPassengerEnteredQueue(Airline airline, String bookingCode, String flight, int counterFrom, int counterTo, String sector) {
         notifyAirline(airline, new Notification.Builder()
                 .setBooking(bookingCode)
                 .setFlight(flight)
@@ -99,52 +97,52 @@ public class Notifications {
                 .setCounterFrom(counterFrom)
                 .setCounterTo(counterTo)
                 .setSector(sector)
-                .setNotificationType(NotificationsServiceOuterClass.NotificationType.NEW_BOOKING_IN_QUEUE)
+                .setNotificationType(NotificationType.NEW_BOOKING_IN_QUEUE)
                 .build()
         );
     }
 
-    public void notifyCheckIn(Airline airline, String bookingCode, String flight, int counter){
+    public void notifyCheckIn(Airline airline, String bookingCode, String flight, int counter) {
         notifyAirline(airline, new Notification.Builder()
                 .setAirline(airline)
                 .setBooking(bookingCode)
                 .setFlight(flight)
                 .setCounter(counter)
-                .setNotificationType(NotificationsServiceOuterClass.NotificationType.CHECK_IN_SUCCESSFUL)
+                .setNotificationType(NotificationType.CHECK_IN_SUCCESSFUL)
                 .build()
         );
     }
 
-    public void notifyCountersRemoved(Airline airline, List<Flight> flights, int counterFrom, int counterTo, String sector){
+    public void notifyCountersRemoved(Airline airline, List<Flight> flights, int counterFrom, int counterTo, String sector) {
         notifyAirline(airline, new Notification.Builder()
                 .setAirline(airline)
                 .setFlights(flights.stream().map(Flight::getFlightCode).toList())
                 .setCounterFrom(counterFrom)
                 .setCounterTo(counterTo)
                 .setSector(sector)
-                .setNotificationType(NotificationsServiceOuterClass.NotificationType.COUNTERS_REMOVED)
+                .setNotificationType(NotificationType.COUNTERS_REMOVED)
                 .build()
         );
     }
 
-    public void notifyCountersPending(Airline airline, int count, String sector, List<Flight> flights, int pendingAhead){
+    public void notifyCountersPending(Airline airline, int count, String sector, List<Flight> flights, int pendingAhead) {
         notifyAirline(airline, new Notification.Builder()
                 .setCounter(count)
                 .setSector(sector)
                 .setFlights(flights.stream().map(Flight::getFlightCode).toList())
                 .setPendingAhead(pendingAhead)
-                .setNotificationType(NotificationsServiceOuterClass.NotificationType.COUNTERS_PENDING)
+                .setNotificationType(NotificationType.COUNTERS_PENDING)
                 .build()
         );
     }
 
-    public void notifyCountersPendingUpdate(Airline airline, int count, String sector, List<Flight> flights, int pendingAhead){
+    public void notifyCountersPendingUpdate(Airline airline, int count, String sector, List<Flight> flights, int pendingAhead) {
         notifyAirline(airline, new Notification.Builder()
                 .setCounter(count)
                 .setSector(sector)
                 .setFlights(flights.stream().map(Flight::getFlightCode).toList())
                 .setPendingAhead(pendingAhead)
-                .setNotificationType(NotificationsServiceOuterClass.NotificationType.COUNTERS_UPDATE)
+                .setNotificationType(NotificationType.COUNTERS_UPDATE)
                 .build()
         );
     }

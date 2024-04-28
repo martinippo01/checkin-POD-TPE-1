@@ -1,9 +1,10 @@
 package ar.edu.itba.pod.tpe1.client.notifications.actions;
 
-import airport.NotificationsServiceGrpc;
-import airport.NotificationsServiceOuterClass;
 import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
 import ar.edu.itba.pod.tpe1.client.notifications.NotificationsAction;
+import ar.edu.itba.pod.tpe1.protos.NotificationsService.NotificationsServiceGrpc;
+import ar.edu.itba.pod.tpe1.protos.NotificationsService.RegisterNotificationsRequest;
+import ar.edu.itba.pod.tpe1.protos.NotificationsService.RegisterNotificationsResponse;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -20,13 +21,13 @@ public final class RegisterNotifications extends NotificationsAction {
         super(actionArguments);
     }
 
-    private NotificationsServiceOuterClass.RegisterNotificationsRequest createRequest() {
-        return NotificationsServiceOuterClass.RegisterNotificationsRequest.newBuilder()
+    private RegisterNotificationsRequest createRequest() {
+        return RegisterNotificationsRequest.newBuilder()
                 .setAirline(getArguments().get(AIRLINE.getArgument()))
                 .build();
     }
 
-    private void handleNotification(NotificationsServiceOuterClass.RegisterNotificationsResponse response) {
+    private void handleNotification(RegisterNotificationsResponse response) {
         switch (response.getNotificationType()) {
             case SUCCESSFUL_REGISTER:
                 System.out.printf("%s registered successfully for events\n", response.getAirline());
@@ -61,10 +62,10 @@ public final class RegisterNotifications extends NotificationsAction {
         }
     }
 
-    private void notificationsResponse(NotificationsServiceOuterClass.RegisterNotificationsRequest request) {
-        Iterator<NotificationsServiceOuterClass.RegisterNotificationsResponse> response = blockingStub.registerNotifications(request);
+    private void notificationsResponse(RegisterNotificationsRequest request) {
+        Iterator<RegisterNotificationsResponse> response = blockingStub.registerNotifications(request);
         while (response.hasNext()) {
-            NotificationsServiceOuterClass.RegisterNotificationsResponse registerNotificationsResponse;
+            RegisterNotificationsResponse registerNotificationsResponse;
 
             registerNotificationsResponse = response.next();
             handleNotification(registerNotificationsResponse);
@@ -76,7 +77,7 @@ public final class RegisterNotifications extends NotificationsAction {
         blockingStub = NotificationsServiceGrpc.newBlockingStub(channel);
 
         try {
-            NotificationsServiceOuterClass.RegisterNotificationsRequest request = createRequest();
+            RegisterNotificationsRequest request = createRequest();
             notificationsResponse(request);
         } catch (StatusRuntimeException e) {
             if (e.getStatus().getCode() == Status.Code.UNAVAILABLE) {

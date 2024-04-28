@@ -1,16 +1,16 @@
 package ar.edu.itba.pod.tpe1.client.checkin.actions;
 
-import ar.edu.itba.pod.tpe1.*;
 import ar.edu.itba.pod.tpe1.client.checkin.CheckInAction;
 import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
+import ar.edu.itba.pod.tpe1.protos.CheckInService.*;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 
 import java.util.List;
 
-import static ar.edu.itba.pod.tpe1.PassengerStatus.PASSENGER_STATUS_COUNTERS_NOT_ASSIGNED;
-import static ar.edu.itba.pod.tpe1.PassengerStatus.PASSENGER_STATUS_INVALID_BOOKING_CODE;
+import static ar.edu.itba.pod.tpe1.protos.CheckInService.PassengerStatus.PASSENGER_STATUS_COUNTERS_NOT_ASSIGNED;
+import static ar.edu.itba.pod.tpe1.protos.CheckInService.PassengerStatus.PASSENGER_STATUS_INVALID_BOOKING_CODE;
 import static ar.edu.itba.pod.tpe1.client.Arguments.BOOKING;
 
 public final class PassengerStatus extends CheckInAction {

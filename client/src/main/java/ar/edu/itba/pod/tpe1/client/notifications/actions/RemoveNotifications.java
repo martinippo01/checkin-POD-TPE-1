@@ -1,9 +1,10 @@
 package ar.edu.itba.pod.tpe1.client.notifications.actions;
 
-import airport.NotificationsServiceGrpc;
-import airport.NotificationsServiceOuterClass;
 import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
 import ar.edu.itba.pod.tpe1.client.notifications.NotificationsAction;
+import ar.edu.itba.pod.tpe1.protos.NotificationsService.NotificationsServiceGrpc;
+import ar.edu.itba.pod.tpe1.protos.NotificationsService.RemoveNotificationsRequest;
+import ar.edu.itba.pod.tpe1.protos.NotificationsService.RemoveNotificationsResponse;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -19,14 +20,13 @@ public class RemoveNotifications extends NotificationsAction {
         super(actionArguments);
     }
 
-    private NotificationsServiceOuterClass.RemoveNotificationsRequest createRequest() {
-        return NotificationsServiceOuterClass.RemoveNotificationsRequest.newBuilder()
+    private RemoveNotificationsRequest createRequest() {
+        return RemoveNotificationsRequest.newBuilder()
                 .setAirline(getArguments().get(AIRLINE.getArgument()))
                 .build();
     }
 
-    private NotificationsServiceOuterClass.RemoveNotificationsResponse notificationsResponse(
-            NotificationsServiceOuterClass.RemoveNotificationsRequest request) {
+    private RemoveNotificationsResponse notificationsResponse(RemoveNotificationsRequest request) {
         return blockingStub.removeNotifications(request);
     }
 
@@ -35,8 +35,8 @@ public class RemoveNotifications extends NotificationsAction {
         blockingStub = NotificationsServiceGrpc.newBlockingStub(channel);
 
         try {
-            NotificationsServiceOuterClass.RemoveNotificationsRequest request = createRequest();
-            NotificationsServiceOuterClass.RemoveNotificationsResponse response = notificationsResponse(request);
+            RemoveNotificationsRequest request = createRequest();
+            RemoveNotificationsResponse response = notificationsResponse(request);
         } catch (StatusRuntimeException e) {
             if (e.getStatus().getCode() == Status.Code.UNAVAILABLE) {
                 throw new ServerUnavailableException();

@@ -2,8 +2,9 @@ package ar.edu.itba.pod.tpe1.client.counter.actions;
 
 import ar.edu.itba.pod.tpe1.client.counter.CounterReservationAction;
 import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
-import counter.CounterReservationServiceGrpc;
-import counter.CounterReservationServiceOuterClass;
+import ar.edu.itba.pod.tpe1.protos.CounterReservation.CounterReservationServiceGrpc;
+import ar.edu.itba.pod.tpe1.protos.CounterReservation.PendingAssignmentsRequest;
+import ar.edu.itba.pod.tpe1.protos.CounterReservation.PendingAssignmentsResponse;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -25,11 +26,11 @@ public final class ListPendingAssignments extends CounterReservationAction {
 
         String sectorName = getArguments().get(SECTOR.getArgument());
 
-        CounterReservationServiceOuterClass.PendingAssignmentsRequest request = CounterReservationServiceOuterClass.PendingAssignmentsRequest.newBuilder()
+        PendingAssignmentsRequest request = PendingAssignmentsRequest.newBuilder()
                 .setSectorName(sectorName)
                 .build();
         try {
-            CounterReservationServiceOuterClass.PendingAssignmentsResponse response = blockingStub.listPendingAssignments(request);
+            PendingAssignmentsResponse response = blockingStub.listPendingAssignments(request);
             if (response.getAssignmentsList().isEmpty()) {
                 System.out.println("No pending assignments.");
                 return;

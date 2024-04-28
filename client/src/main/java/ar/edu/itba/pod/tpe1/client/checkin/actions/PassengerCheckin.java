@@ -1,6 +1,6 @@
 package ar.edu.itba.pod.tpe1.client.checkin.actions;
 
-import ar.edu.itba.pod.tpe1.*;
+import ar.edu.itba.pod.tpe1.protos.CheckInService.*;
 import ar.edu.itba.pod.tpe1.client.checkin.CheckInAction;
 import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
 import io.grpc.ManagedChannel;
@@ -83,5 +83,4 @@ public final class PassengerCheckin extends CheckInAction {
                 break;
         }
     }
-
 }

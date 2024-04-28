@@ -1,11 +1,11 @@
 package ar.edu.itba.pod.tpe1.client.counter.actions;
 
-import ar.edu.itba.pod.tpe1.BookingInformation;
-import ar.edu.itba.pod.tpe1.CheckInCountersRequest;
-import ar.edu.itba.pod.tpe1.CheckInCountersResponse;
-import ar.edu.itba.pod.tpe1.CheckinServiceGrpc;
 import ar.edu.itba.pod.tpe1.client.counter.CounterReservationAction;
 import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
+import ar.edu.itba.pod.tpe1.protos.CheckInService.BookingInformation;
+import ar.edu.itba.pod.tpe1.protos.CheckInService.CheckInCountersRequest;
+import ar.edu.itba.pod.tpe1.protos.CheckInService.CheckInCountersResponse;
+import ar.edu.itba.pod.tpe1.protos.CheckInService.CheckinServiceGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;

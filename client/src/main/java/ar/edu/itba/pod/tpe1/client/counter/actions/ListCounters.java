@@ -2,8 +2,9 @@ package ar.edu.itba.pod.tpe1.client.counter.actions;
 
 import ar.edu.itba.pod.tpe1.client.counter.CounterReservationAction;
 import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
-import counter.CounterReservationServiceGrpc;
-import counter.CounterReservationServiceOuterClass;
+import ar.edu.itba.pod.tpe1.protos.CounterReservation.CounterRangeRequest;
+import ar.edu.itba.pod.tpe1.protos.CounterReservation.CounterRangeResponse;
+import ar.edu.itba.pod.tpe1.protos.CounterReservation.CounterReservationServiceGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -27,13 +28,13 @@ public final class ListCounters extends CounterReservationAction {
         int fromVal = Integer.parseInt(getArguments().get(COUNTER_FROM.getArgument()));
         int toVal = Integer.parseInt(getArguments().get(COUNTER_TO.getArgument()));
 
-        CounterReservationServiceOuterClass.CounterRangeRequest request = CounterReservationServiceOuterClass.CounterRangeRequest.newBuilder()
+        CounterRangeRequest request = CounterRangeRequest.newBuilder()
                 .setSectorName(sectorName)
                 .setFromVal(fromVal)
                 .setToVal(toVal)
                 .build();
         try {
-            CounterReservationServiceOuterClass.CounterRangeResponse response = blockingStub.queryCounterRange(request);
+            CounterRangeResponse response = blockingStub.queryCounterRange(request);
             if (response.getCountersList().isEmpty()) {
                 System.out.println("No counters found in the specified range.");
                 return;

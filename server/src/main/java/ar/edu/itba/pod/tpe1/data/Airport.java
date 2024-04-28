@@ -1,9 +1,9 @@
 package ar.edu.itba.pod.tpe1.data;
 
-import airport.CounterServiceOuterClass;
-import ar.edu.itba.pod.tpe1.*;
 import ar.edu.itba.pod.tpe1.data.utils.*;
-import counter.CounterReservationServiceOuterClass;
+import ar.edu.itba.pod.tpe1.protos.CheckInService.*;
+import ar.edu.itba.pod.tpe1.protos.CounterService.CheckInRecord;
+import ar.edu.itba.pod.tpe1.protos.CounterService.CounterInfo;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -63,10 +63,10 @@ public class Airport {
     public RangeCounter addCounters(String sectorName, int count) {
 
         Sector sector = Sector.fromName(sectorName);
-        synchronized (lock){
+        synchronized (lock) {
             if (count <= 0)
                 throw new IllegalArgumentException("Invalid number of counters (must be positive).");
-            if(!sectors.containsKey(sector))
+            if (!sectors.containsKey(sector))
                 throw new IllegalArgumentException("Sector " + sectorName + " does not exist.");
             int firstId = counterId.getAndAdd(count);
 
@@ -116,7 +116,7 @@ public class Airport {
             if (flights.containsKey(flight)) {
                 // Check if it belongs to other airline, in that case it fails
                 if (!flights.get(flight).equals(airline))
-                    throw new IllegalArgumentException("The flight " + flightCode +  " is already registered to airline " + flights.get(flight) + ".");
+                    throw new IllegalArgumentException("The flight " + flightCode + " is already registered to airline " + flights.get(flight) + ".");
             }
 
             // If absent, put the flight and mark as it is not assigned yet
@@ -129,17 +129,17 @@ public class Airport {
         }
     }
 
-    public List<CounterServiceOuterClass.CounterInfo> queryCountersBySector(String sectorName) throws RuntimeException {
+    public List<CounterInfo> queryCountersBySector(String sectorName) throws RuntimeException {
         //This
         if (sectors.isEmpty()) {
             throw new IllegalStateException("There are no sectors registered at the airport.");
         }
-        List<CounterServiceOuterClass.CounterInfo> out = new ArrayList<>();
+        List<CounterInfo> out = new ArrayList<>();
         synchronized (lock) {
             // In case there's no specified sector, print every sector and then return
             if (!sectorName.isEmpty()) {
                 return queryCounters(sectorName, false).stream().map(
-                        requestedRangeCounter -> CounterServiceOuterClass.CounterInfo.newBuilder()
+                        requestedRangeCounter -> CounterInfo.newBuilder()
                                 .setSector(requestedRangeCounter.getCounterFrom() + "-" + requestedRangeCounter.getCounterTo())
                                 .setAirline(requestedRangeCounter.getAirline().getName())
                                 .addAllFlights(requestedRangeCounter.getFlights().stream().map(Flight::getFlightCode).toList())
@@ -154,7 +154,7 @@ public class Airport {
                 List<RequestedRangeCounter> requestedRangeCounters = queryCounters(sectorName2, true);
 
                 for (RequestedRangeCounter requestedRangeCounter : requestedRangeCounters) {
-                    CounterServiceOuterClass.CounterInfo counterInfo = CounterServiceOuterClass.CounterInfo.newBuilder()
+                    CounterInfo counterInfo = CounterInfo.newBuilder()
                             .setSector(requestedRangeCounter.getCounterFrom() + "-" + requestedRangeCounter.getCounterTo())
                             .setAirline(requestedRangeCounter.getAirline().getName())
                             .addAllFlights(requestedRangeCounter.getFlights().stream().map(Flight::getFlightCode).toList())
@@ -200,9 +200,9 @@ public class Airport {
         return containsAssignedRangeCounter ? out : new ArrayList<>();
     }
 
-    public List<CounterServiceOuterClass.CheckInRecord> queryCheckIns(String sector, String airline) {
+    public List<CheckInRecord> queryCheckIns(String sector, String airline) {
         // TODO: Test
-        List<CounterServiceOuterClass.CheckInRecord> out = new ArrayList<>();
+        List<CheckInRecord> out = new ArrayList<>();
         // Check that there's at least one checkin with status DONE
         synchronized (lock) {
             Iterator<Booking> bookingIterator = checkIns.keySet().iterator();
@@ -220,7 +220,7 @@ public class Airport {
             boolean filterByAirline = !airline.isEmpty();
 
             for (Booking booking : checkIns.keySet()) {
-                CounterServiceOuterClass.CheckInRecord.Builder checkInRecordBuilder = CounterServiceOuterClass.CheckInRecord.newBuilder();
+                CheckInRecord.Builder checkInRecordBuilder = CheckInRecord.newBuilder();
                 CheckIn checkIn = checkIns.get(booking);
                 // To add to the list should be a DONE checkin, also match the airline (if specified) nad match the sector (if specified)
                 // Remember property A => B <=> !A or B
@@ -323,7 +323,7 @@ public class Airport {
             }
 
 
-            if(rangeCounterFound.getWaitingQueueLength() != 0)
+            if (rangeCounterFound.getWaitingQueueLength() != 0)
                 throw new IllegalStateException("Cannot free counters as there are passengers waiting to be attended.");
 
             // Attempt to assign from the queue when a sector was freed
@@ -343,7 +343,7 @@ public class Airport {
             throw new IllegalArgumentException();
         }
         Airline airline = new Airline(airlineName);
-        synchronized (lock){
+        synchronized (lock) {
             // Validate that the flights are correct
             List<Flight> validFlights = checkFlights(sector, airline, flightsToReserve);
 
@@ -596,8 +596,8 @@ public class Airport {
         );
         Set<RequestedRangeCounter> requestedRangeCounters;
         // TODO: Check if it really needs lock
-        synchronized (lock){
-             requestedRangeCounters = airline.getRequestedCounters(flight);
+        synchronized (lock) {
+            requestedRangeCounters = airline.getRequestedCounters(flight);
             if (requestedRangeCounters == null || requestedRangeCounters.isEmpty()) {
                 // TODO: aca @Santi?
                 throw new IllegalStateException("No counters assigned for the flight.");
@@ -633,7 +633,7 @@ public class Airport {
 //            return response.setStatus(CheckinStatus.CHECKIN_STATUS_INVALID_SECTOR_ID);
         }
 
-        synchronized (lock){
+        synchronized (lock) {
             RequestedRangeCounter requestedRangeCounter = rangeCounterBySector(sector, counterNumber);
             if (requestedRangeCounter == null) {
                 // TODO: aca @Santi?
@@ -646,11 +646,11 @@ public class Airport {
 //            return response.setStatus(CheckinStatus.CHECKIN_STATUS_INVALID_FLIGHT_COUNTER_NUMBER);
             }
 
-        CheckIn currentCheckIn = checkIns.get(booking);
-        if (currentCheckIn.getStatus().equals(CheckInStatus.QUEUE)) {
-            // Already queued
-            // TODO: aca @Santi?
-            throw new IllegalStateException("Passenger already in queue.");
+            CheckIn currentCheckIn = checkIns.get(booking);
+            if (currentCheckIn.getStatus().equals(CheckInStatus.QUEUE)) {
+                // Already queued
+                // TODO: aca @Santi?
+                throw new IllegalStateException("Passenger already in queue.");
 //            return response.setStatus(CheckinStatus.CHECKIN_STATUS_PASSENGER_ALREADY_IN_QUEUE)
 //                    .setData(
 //                            CountersInformation.newBuilder()
@@ -662,9 +662,9 @@ public class Airport {
 //                                    .setPeopleInQueue(requestedRangeCounter.getWaitingQueueLength())
 //                                    .build()
 //                    );
-        } else if (currentCheckIn.getStatus().equals(CheckInStatus.DONE)) {
-            // TODO: aca @Santi?
-            throw new IllegalStateException("Passenger already checked in.");
+            } else if (currentCheckIn.getStatus().equals(CheckInStatus.DONE)) {
+                // TODO: aca @Santi?
+                throw new IllegalStateException("Passenger already checked in.");
 //            return response.setStatus(CheckinStatus.CHECKIN_STATUS_CHECKIN_ALREADY_DONE)
 //                    .setData(
 //                            CountersInformation.newBuilder()
@@ -676,7 +676,7 @@ public class Airport {
 //                                    .setPeopleInQueue(requestedRangeCounter.getWaitingQueueLength())
 //                                    .build()
 //                    );
-        }
+            }
 
             checkIns.replace(booking, currentCheckIn, new CheckIn(CheckInStatus.QUEUE, flight, requestedRangeCounter, sector));
 

@@ -1,6 +1,6 @@
 package ar.edu.itba.pod.tpe1.data.utils;
 
-import airport.NotificationsServiceOuterClass;
+import ar.edu.itba.pod.tpe1.protos.NotificationsService.NotificationType;
 
 import java.util.Collections;
 import java.util.List;
@@ -8,7 +8,7 @@ import java.util.Objects;
 
 public class Notification {
     private final boolean poissonPill;
-    private final NotificationsServiceOuterClass.NotificationType notificationType;
+    private final NotificationType notificationType;
     private final Airline airline;
     private final int counterFrom;
     private final int counterTo;
@@ -35,7 +35,7 @@ public class Notification {
         this.pending_ahead = builder.pending_ahead;
     }
 
-    public NotificationsServiceOuterClass.NotificationType getNotificationType() {
+    public NotificationType getNotificationType() {
         return notificationType;
     }
 
@@ -100,7 +100,7 @@ public class Notification {
 
     public static class Builder {
         private boolean poisonPill;
-        private NotificationsServiceOuterClass.NotificationType notificationType;
+        private NotificationType notificationType;
         private Airline airline;
         private int counterFrom;
         private int counterTo;
@@ -115,7 +115,7 @@ public class Notification {
         public Builder() {
             this.poisonPill = false;
             // set defaults
-            this.notificationType = NotificationsServiceOuterClass.NotificationType.SUCCESSFUL_REGISTER;
+            this.notificationType = NotificationType.SUCCESSFUL_REGISTER;
             this.airline = new Airline("");
             this.counterFrom = -1;
             this.counterTo = -1;
@@ -128,7 +128,10 @@ public class Notification {
             this.pending_ahead = -1;
         }
 
-        public Builder setNotificationType(NotificationsServiceOuterClass.NotificationType notificationType) {this.notificationType = notificationType; return this;}
+        public Builder setNotificationType(NotificationType notificationType) {
+            this.notificationType = notificationType;
+            return this;
+        }
 
         public Builder setPoisonPill() {
             poisonPill = true;
@@ -145,7 +148,7 @@ public class Notification {
             return this;
         }
 
-        public Builder setCounterTo(int counterTo){
+        public Builder setCounterTo(int counterTo) {
             this.counterTo = counterTo;
             return this;
         }

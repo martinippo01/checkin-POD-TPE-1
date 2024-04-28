@@ -2,8 +2,9 @@ package ar.edu.itba.pod.tpe1.client.counter.actions;
 
 import ar.edu.itba.pod.tpe1.client.counter.CounterReservationAction;
 import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
-import counter.CounterReservationServiceGrpc;
-import counter.CounterReservationServiceOuterClass;
+import ar.edu.itba.pod.tpe1.protos.CounterReservation.CounterReservationServiceGrpc;
+import ar.edu.itba.pod.tpe1.protos.CounterReservation.FreeCounterRequest;
+import ar.edu.itba.pod.tpe1.protos.CounterReservation.FreeCounterResponse;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -27,13 +28,13 @@ public final class FreeCounters extends CounterReservationAction {
         int fromVal = Integer.parseInt(getArguments().get(COUNTER_FROM.getArgument()));
         String airlineName = getArguments().get(AIRLINE.getArgument());
 
-        CounterReservationServiceOuterClass.FreeCounterRequest request = CounterReservationServiceOuterClass.FreeCounterRequest.newBuilder()
+        FreeCounterRequest request = FreeCounterRequest.newBuilder()
                 .setSectorName(sectorName)
                 .setFromVal(fromVal)
                 .setAirlineName(airlineName)
                 .build();
         try {
-            CounterReservationServiceOuterClass.FreeCounterResponse response = blockingStub.freeCounters(request);
+            FreeCounterResponse response = blockingStub.freeCounters(request);
             String range = " on counters " + response.getRangeStart() + "-" + response.getRangeEnd();
             System.out.println("Ended check-in for flights " + String.join("|", response.getFlightNumbersList()) + range + " in Sector " + response.getSectorName());
         } catch (StatusRuntimeException e) {

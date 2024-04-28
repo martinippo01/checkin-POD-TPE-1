@@ -1,10 +1,11 @@
 package ar.edu.itba.pod.tpe1.client.query.actions;
 
-import airport.CounterServiceGrpc;
-import airport.CounterServiceOuterClass;
-import airport.CounterServiceOuterClass.*;
 import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
 import ar.edu.itba.pod.tpe1.client.query.CounterQueryAction;
+import ar.edu.itba.pod.tpe1.protos.CounterService.CounterInfo;
+import ar.edu.itba.pod.tpe1.protos.CounterService.CounterServiceGrpc;
+import ar.edu.itba.pod.tpe1.protos.CounterService.QueryCountersRequest;
+import ar.edu.itba.pod.tpe1.protos.CounterService.QueryCountersResponse;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -12,7 +13,6 @@ import io.grpc.StatusRuntimeException;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.List;
 
 import static ar.edu.itba.pod.tpe1.client.Arguments.OUT_PATH;

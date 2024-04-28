@@ -1,9 +1,11 @@
 package ar.edu.itba.pod.tpe1.client.query.actions;
 
-import airport.CounterServiceGrpc;
-import airport.CounterServiceOuterClass;
 import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
 import ar.edu.itba.pod.tpe1.client.query.CounterQueryAction;
+import ar.edu.itba.pod.tpe1.protos.CounterService.CheckInRecord;
+import ar.edu.itba.pod.tpe1.protos.CounterService.CounterServiceGrpc;
+import ar.edu.itba.pod.tpe1.protos.CounterService.QueryCheckInsRequest;
+import ar.edu.itba.pod.tpe1.protos.CounterService.QueryCheckInsResponse;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -21,11 +23,11 @@ public final class CheckIns extends CounterQueryAction {
         super(actionArguments, optionalActionArguments);
     }
 
-    private void printCheckInsQueryResponse(CounterServiceOuterClass.QueryCheckInsResponse response, String outPath) {
+    private void printCheckInsQueryResponse(QueryCheckInsResponse response, String outPath) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(outPath))) {
             writer.write("   Sector  Counter   Airline           Flight     Booking\n");
             writer.write("   ###############################################################\n");
-            for (CounterServiceOuterClass.CheckInRecord record : response.getCheckInsList()) {
+            for (CheckInRecord record : response.getCheckInsList()) {
                 writer.write(String.format("   %-7s %-9d %-17s %-9s %-6s%n",
                         record.getSector(),
                         record.getCounter(),
@@ -43,11 +45,11 @@ public final class CheckIns extends CounterQueryAction {
         CounterServiceGrpc.CounterServiceBlockingStub blockingStub = CounterServiceGrpc.newBlockingStub(channel);
 
         try {
-            CounterServiceOuterClass.QueryCheckInsRequest request = CounterServiceOuterClass.QueryCheckInsRequest.newBuilder()
+            QueryCheckInsRequest request = QueryCheckInsRequest.newBuilder()
                     .setSector(getArguments().getOrDefault(SECTOR.getArgument(), ""))
                     .setAirline(getArguments().getOrDefault(AIRLINE.getArgument(), ""))
                     .build();
-            CounterServiceOuterClass.QueryCheckInsResponse response = blockingStub.queryCheckIns(request);
+            QueryCheckInsResponse response = blockingStub.queryCheckIns(request);
             if (response.getCheckInsCount() == 0) {
                 System.out.println("No check-ins found for the specified criteria.");
                 return;

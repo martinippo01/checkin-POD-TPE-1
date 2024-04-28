@@ -1,9 +1,8 @@
 package ar.edu.itba.pod.tpe1.servant;
 
-import ar.edu.itba.pod.tpe1.CheckinServiceGrpc.CheckinServiceImplBase;
-import ar.edu.itba.pod.tpe1.*;
 import ar.edu.itba.pod.tpe1.data.Airport;
-import counter.CounterReservationServiceOuterClass;
+import ar.edu.itba.pod.tpe1.protos.CheckInService.CheckinServiceGrpc.CheckinServiceImplBase;
+import ar.edu.itba.pod.tpe1.protos.CheckInService.*;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;

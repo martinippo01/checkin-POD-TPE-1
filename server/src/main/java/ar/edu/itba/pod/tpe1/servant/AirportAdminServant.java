@@ -1,9 +1,8 @@
 package ar.edu.itba.pod.tpe1.servant;
 
-import airport.AirportAdminServiceGrpc;
-import airport.AirportService;
 import ar.edu.itba.pod.tpe1.data.Airport;
 import ar.edu.itba.pod.tpe1.data.utils.RangeCounter;
+import ar.edu.itba.pod.tpe1.protos.AirportService.*;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
@@ -16,11 +15,11 @@ public class AirportAdminServant extends AirportAdminServiceGrpc.AirportAdminSer
     private static final Logger logger = LoggerFactory.getLogger(AirportAdminServant.class);
 
     @Override
-    public void addSector(AirportService.SectorRequest req, StreamObserver<AirportService.SectorResponse> responseObserver) {
+    public void addSector(SectorRequest req, StreamObserver<SectorResponse> responseObserver) {
         try {
             logger.info("Adding sector: {}", req.getSectorName());
             airport.addSector(req.getSectorName());
-            responseObserver.onNext(AirportService.SectorResponse.newBuilder()
+            responseObserver.onNext(SectorResponse.newBuilder()
                     .setSectorName(req.getSectorName())
                     .build());
             responseObserver.onCompleted();
@@ -34,14 +33,14 @@ public class AirportAdminServant extends AirportAdminServiceGrpc.AirportAdminSer
     }
 
     @Override
-    public void addCounters(AirportService.CounterRequest req, StreamObserver<AirportService.CounterResponse> responseObserver) {
+    public void addCounters(CounterRequest req, StreamObserver<CounterResponse> responseObserver) {
         try {
             logger.info("Adding counters to sector: {}", req.getSectorName());
             RangeCounter counter = airport.addCounters(req.getSectorName(), req.getCounterCount());
-            responseObserver.onNext(AirportService.CounterResponse.newBuilder()
+            responseObserver.onNext(CounterResponse.newBuilder()
                     .setSectorName(req.getSectorName())
-                            .setLastCounterId(counter.getCounterTo())
-                            .setFirstCounterId(counter.getCounterFrom())
+                    .setLastCounterId(counter.getCounterTo())
+                    .setFirstCounterId(counter.getCounterFrom())
                     .build());
             responseObserver.onCompleted();
         } catch (IllegalArgumentException e) {
@@ -54,11 +53,11 @@ public class AirportAdminServant extends AirportAdminServiceGrpc.AirportAdminSer
     }
 
     @Override
-    public void addPassenger(AirportService.AddPassengerRequest req, StreamObserver<AirportService.AddPassengerResponse> responseObserver) {
+    public void addPassenger(AddPassengerRequest req, StreamObserver<AddPassengerResponse> responseObserver) {
         try {
             logger.info("Adding passenger to flight: {}", req.getFlightCode());
             airport.registerPassenger(req.getBookingCode(), req.getFlightCode(), req.getAirlineName());
-            responseObserver.onNext(AirportService.AddPassengerResponse.newBuilder()
+            responseObserver.onNext(AddPassengerResponse.newBuilder()
                     .setBookingCode(req.getBookingCode())
                     .build());
             responseObserver.onCompleted();
