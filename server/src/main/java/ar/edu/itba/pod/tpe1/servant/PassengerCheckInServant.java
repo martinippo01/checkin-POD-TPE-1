@@ -41,9 +41,8 @@ public class PassengerCheckInServant extends CheckinServiceImplBase {
         } catch (IllegalArgumentException e) {
             logger.error("IllegalArgumentException adding passenger to check-in queue for booking code: {}", e.getMessage());
             responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException());
-            // TODO: check this
-//        } catch (IllegalStateException e) {
-//            responseObserver.onError(io.grpc.Status.FAILED_PRECONDITION.withDescription(e.getMessage()).asRuntimeException());
+        } catch (IllegalStateException e) {
+            responseObserver.onError(Status.ALREADY_EXISTS.withDescription(e.getMessage()).asRuntimeException());
         } catch (Exception e) {
             logger.error("Unexpected Exception adding passenger to check-in queue for booking code: {}", e.getMessage());
             responseObserver.onError(io.grpc.Status.INTERNAL.withDescription(e.getMessage()).asRuntimeException());
@@ -77,8 +76,10 @@ public class PassengerCheckInServant extends CheckinServiceImplBase {
             responseObserver.onCompleted();
         }catch(IllegalArgumentException e){
             logger.error("IllegalArgumentException performing Check-In for Airline: {} at sector: {} from counter: {}", request.getAirlineName(), request.getSectorName(), request.getCounterNumber());
+            responseObserver.onError(Status.INVALID_ARGUMENT.withDescription(e.getMessage()).asRuntimeException());
         }catch(Exception e){
             logger.error("Unexpected Exception performing Check-In for Airline: {} at sector: {} from counter: {}", request.getAirlineName(), request.getSectorName(), request.getCounterNumber());
+            responseObserver.onError(io.grpc.Status.INTERNAL.withDescription(e.getMessage()).asRuntimeException());
         }
     }
 }

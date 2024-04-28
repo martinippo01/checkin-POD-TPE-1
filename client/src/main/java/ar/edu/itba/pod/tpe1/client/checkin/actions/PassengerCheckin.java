@@ -1,8 +1,8 @@
 package ar.edu.itba.pod.tpe1.client.checkin.actions;
 
-import ar.edu.itba.pod.tpe1.protos.CheckInService.*;
 import ar.edu.itba.pod.tpe1.client.checkin.CheckInAction;
 import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
+import ar.edu.itba.pod.tpe1.protos.CheckInService.*;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -54,6 +54,8 @@ public final class PassengerCheckin extends CheckInAction {
             }
         } catch (StatusRuntimeException e) {
             if (e.getStatus().equals(Status.INVALID_ARGUMENT)) {
+                System.err.println(e.getMessage());
+            } else if (e.getStatus().equals(Status.ALREADY_EXISTS)) {
                 System.err.println(e.getMessage());
             } else if (e.getStatus().getCode() == Status.Code.UNAVAILABLE) {
                 throw new ServerUnavailableException();

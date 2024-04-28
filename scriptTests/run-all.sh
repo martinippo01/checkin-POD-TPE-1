@@ -6,18 +6,23 @@
 #
 
 # Enter script directory before sourcing anything
-
-COMPILED_DIR="grpc-com-tpe1-client-2024.1Q"
-SERVER_ADDRESS="localhost:50058"
-MANIFEST_FILE="$(pwd)/manifest.csv"
-
 SCRIPT_DIR="$(dirname "${BASH_SOURCE[0]}")"
 if ! pushd "${SCRIPT_DIR}" &> /dev/null; then
     >&2 echo "Script directory not found (??): '$SCRIPT_DIR'"
     exit 1
 fi
 
-if ! pushd "$(pwd)/client/target/$COMPILED_DIR" &> /dev/null; then
+BOLD='\e[1m'
+BLUE='\e[34m'
+RED='\e[31m'
+NC='\e[0m'
+
+
+COMPILED_DIR="grpc-com-tpe1-client-2024.1Q"
+SERVER_ADDRESS="localhost:50058"
+MANIFEST_FILE="$(pwd)/manifest.csv"
+
+if ! pushd "$(pwd)/../client/target/$COMPILED_DIR" &> /dev/null; then
     >&2 echo "Client target directory not found."
     exit 1
 fi
@@ -116,6 +121,7 @@ bash passengerClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=passengerStat
 #   Booking ABC123 for flight AA123 from AmericanAirlines can check-in on counters (3-4) in Sector C
 
 #4.1
+echo -e "${BOLD}${BLUE}This script will freeze after registering for notifications. Press Ctrl+C to continue${NC}"
 bash eventsClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=register -Dairline=AmericanAirlines
 #rta:
 #  AmericanAirlines registered successfully for events
