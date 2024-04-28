@@ -1,9 +1,10 @@
 package ar.edu.itba.pod.tpe1.client.admin.actions;
 
-import airport.AirportAdminServiceGrpc;
-import airport.AirportService;
 import ar.edu.itba.pod.tpe1.client.admin.AirportAdminAction;
 import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
+import ar.edu.itba.pod.tpe1.protos.AirportService.AirportAdminServiceGrpc;
+import ar.edu.itba.pod.tpe1.protos.AirportService.SectorRequest;
+import ar.edu.itba.pod.tpe1.protos.AirportService.SectorResponse;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -26,8 +27,8 @@ public class AddSector extends AirportAdminAction {
         String sectorName = getArguments().get(SECTOR.getArgument());
 
         try {
-            AirportService.SectorRequest request = AirportService.SectorRequest.newBuilder().setSectorName(sectorName).build();
-            AirportService.SectorResponse response = blockingStub.addSector(request);
+            SectorRequest request = SectorRequest.newBuilder().setSectorName(sectorName).build();
+            SectorResponse response = blockingStub.addSector(request);
 
             System.out.println("Sector " + response.getSectorName() + " added successfully");
         } catch (StatusRuntimeException e) {

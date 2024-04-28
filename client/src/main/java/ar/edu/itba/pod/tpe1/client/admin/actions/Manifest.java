@@ -1,9 +1,10 @@
 package ar.edu.itba.pod.tpe1.client.admin.actions;
 
-import airport.AirportAdminServiceGrpc;
-import airport.AirportService;
 import ar.edu.itba.pod.tpe1.client.admin.AirportAdminAction;
 import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
+import ar.edu.itba.pod.tpe1.protos.AirportService.AddPassengerRequest;
+import ar.edu.itba.pod.tpe1.protos.AirportService.AddPassengerResponse;
+import ar.edu.itba.pod.tpe1.protos.AirportService.AirportAdminServiceGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -34,12 +35,12 @@ public class Manifest extends AirportAdminAction {
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(";");
                 if (parts.length == 3) {
-                    AirportService.AddPassengerRequest request = AirportService.AddPassengerRequest.newBuilder()
+                    AddPassengerRequest request = AddPassengerRequest.newBuilder()
                             .setBookingCode(parts[0])
                             .setFlightCode(parts[1])
                             .setAirlineName(parts[2])
                             .build();
-                    AirportService.AddPassengerResponse response = blockingStub.addPassenger(request);
+                    AddPassengerResponse response = blockingStub.addPassenger(request);
 
                     System.out.println("Booking " + response.getBookingCode() + " for " + parts[2] + " added successfully");
                 }

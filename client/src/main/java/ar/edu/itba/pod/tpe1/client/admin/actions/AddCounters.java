@@ -1,9 +1,10 @@
 package ar.edu.itba.pod.tpe1.client.admin.actions;
 
-import airport.AirportAdminServiceGrpc;
-import airport.AirportService;
 import ar.edu.itba.pod.tpe1.client.admin.AirportAdminAction;
 import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
+import ar.edu.itba.pod.tpe1.protos.AirportService.AirportAdminServiceGrpc;
+import ar.edu.itba.pod.tpe1.protos.AirportService.CounterRequest;
+import ar.edu.itba.pod.tpe1.protos.AirportService.CounterResponse;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -28,11 +29,11 @@ public class AddCounters extends AirportAdminAction {
         int counterCount = Integer.parseInt(getArguments().get(COUNTERS.getArgument()));
 
         try {
-            AirportService.CounterRequest request = AirportService.CounterRequest.newBuilder()
+            CounterRequest request = CounterRequest.newBuilder()
                     .setSectorName(sectorName)
                     .setCounterCount(counterCount)
                     .build();
-            AirportService.CounterResponse response = blockingStub.addCounters(request);
+            CounterResponse response = blockingStub.addCounters(request);
 
             System.out.println(counterCount + " new counters (" + response.getFirstCounterId() + "-" + response.getLastCounterId() + ") in Sector " + response.getSectorName() + " added successfully");
         } catch (StatusRuntimeException e) {
