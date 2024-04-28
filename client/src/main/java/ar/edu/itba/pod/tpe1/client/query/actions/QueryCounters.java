@@ -50,11 +50,12 @@ public final class QueryCounters extends CounterQueryAction {
         blockingStub = CounterServiceGrpc.newBlockingStub(channel);
 
         try {
+
             QueryCountersRequest request = QueryCountersRequest.newBuilder()
-                    .setSector(getArguments().getOrDefault(SECTOR.getArgument(), ""))
+                    .setSector(getArguments().get(SECTOR.getArgument()))
                     .build();
             QueryCountersResponse response = blockingStub.queryCounters(request);
-            printCounterQueryResponse(response, getArguments().getOrDefault(OUT_PATH.getArgument(), ""));
+            printCounterQueryResponse(response, getArguments().get(OUT_PATH.getArgument()));
         } catch (StatusRuntimeException e) {
             if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
                 System.err.println("Sector  Counters  Airline          Flights             People");

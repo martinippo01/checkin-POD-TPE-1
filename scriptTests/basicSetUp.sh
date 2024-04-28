@@ -33,6 +33,10 @@ bash counterClient.sh -DserverAddress="$ADDRESS" -Daction=checkinCounters -Dsect
 # Query the check ins that have been made
 bash queryClient.sh -DserverAddress="$ADDRESS" -Daction=checkins -DoutPath=./should_not_exist.txt
 
+# Query counter
+echo "Querying counters"
+bash queryClient.sh -DserverAddress="$ADDRESS" -Daction=queryCounters -DoutPath=./counters.txt -Dsector=C
+
 # Add a passenger in queue
 bash passengerClient.sh -DserverAddress="$ADDRESS" -Daction=passengerCheckin -Dbooking="$BOOKING" -Dsector="A" -Dcounter="$COUNTER_FROM"
 
