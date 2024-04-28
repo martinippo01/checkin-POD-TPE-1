@@ -519,6 +519,14 @@ public class Airport {
                         queuedCheckIn,
                         performedCheckIn);
 
+
+                notifications.notifyCheckIn(
+                        flights.get(performedCheckIn.getFlight()),
+                        pendingCheckIn.getBookingCode(),
+                        performedCheckIn.getFlight().getFlightCode(),
+                        performedCheckIn.getCounterWhereCheckInWasDone()
+                );
+
                 checkInCountersInformation.add(
                         CheckInCounterInformation.newBuilder()
                                 .setStatus(CheckInCounterStatus.CHECK_IN_COUNTER_STATUS_SUCCESS)
@@ -614,9 +622,7 @@ public class Airport {
 
         Booking booking = new Booking(bookingCode);
         if (!bookingCodes.containsKey(booking)) {
-            // TODO: aca @Santi?
             throw new IllegalArgumentException("Invalid booking code.");
-//            return response.setStatus(CheckinStatus.CHECKIN_STATUS_INVALID_BOOKING_CODE);
         }
 
         Flight flight = bookingCodes.get(booking);
@@ -628,28 +634,21 @@ public class Airport {
 
         Sector sector = new Sector(sectorName);
         if (!sectors.containsKey(sector)) {
-            // TODO: aca @Santi?
             throw new IllegalArgumentException("Invalid sector name.");
-//            return response.setStatus(CheckinStatus.CHECKIN_STATUS_INVALID_SECTOR_ID);
         }
 
         synchronized (lock) {
             RequestedRangeCounter requestedRangeCounter = rangeCounterBySector(sector, counterNumber);
             if (requestedRangeCounter == null) {
-                // TODO: aca @Santi?
                 throw new IllegalArgumentException("Invalid counter number.");
-//            return response.setStatus(CheckinStatus.CHECKIN_STATUS_INVALID_COUNTER_NUMBER);
             }
             if (!requestedRangeCounter.getFlights().contains(flight)) {
-                // TODO: aca @Santi?
                 throw new IllegalArgumentException("Invalid flight for the counter number.");
-//            return response.setStatus(CheckinStatus.CHECKIN_STATUS_INVALID_FLIGHT_COUNTER_NUMBER);
             }
 
             CheckIn currentCheckIn = checkIns.get(booking);
             if (currentCheckIn.getStatus().equals(CheckInStatus.QUEUE)) {
                 // Already queued
-                // TODO: aca @Santi?
                 throw new IllegalStateException("Passenger already in queue.");
 //            return response.setStatus(CheckinStatus.CHECKIN_STATUS_PASSENGER_ALREADY_IN_QUEUE)
 //                    .setData(
@@ -663,7 +662,6 @@ public class Airport {
 //                                    .build()
 //                    );
             } else if (currentCheckIn.getStatus().equals(CheckInStatus.DONE)) {
-                // TODO: aca @Santi?
                 throw new IllegalStateException("Passenger already checked in.");
 //            return response.setStatus(CheckinStatus.CHECKIN_STATUS_CHECKIN_ALREADY_DONE)
 //                    .setData(
@@ -681,6 +679,15 @@ public class Airport {
             checkIns.replace(booking, currentCheckIn, new CheckIn(CheckInStatus.QUEUE, flight, requestedRangeCounter, sector));
 
             requestedRangeCounter.addBookingToWaitingQueue(booking);
+
+            notifications.notifyPassengerEnteredQueue(
+                    flights.get(flight),
+                    booking.getBookingCode(),
+                    flight.getFlightCode(),
+                    requestedRangeCounter.getCounterFrom(),
+                    requestedRangeCounter.getCounterTo(),
+                    sector.getName()
+            );
 
             return response.setStatus(CheckinStatus.CHECKIN_STATUS_ADDED_TO_QUEUE)
                     .setData(
