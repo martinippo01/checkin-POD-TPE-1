@@ -384,9 +384,13 @@ public class Airport {
 
             Airline registeredAirline = flights.getOrDefault(flight, null);
             // Check Flight exists and is registered to the same airline and was not assigned before
-            if (registeredAirline == null || !registeredAirline.equals(airline) || flightWasAssigned.get(flight)) { // Flight does not exist or Registered to a different airline
-                return null;
-            }
+            if (registeredAirline == null)
+                throw new IllegalArgumentException("Airline '" + airline + "' does not exist (for flight '" + flightCode + "').");
+            if (!registeredAirline.equals(airline))
+                throw new IllegalArgumentException("Flight '" + flightCode + "' does not match Airline '" + registeredAirline + "'.");
+            if (flightWasAssigned.get(flight))
+                throw new IllegalArgumentException("The flight '" + flightCode + "' is already assigned.");
+
 
             // For each sector of the airport
             for (Sector otherSector : sectors.keySet()) {
@@ -394,13 +398,13 @@ public class Airport {
                 for (RangeCounter rangeCounter : sectors.getOrDefault(otherSector, new ArrayList<>())) {
                     for (RequestedRangeCounter counter : rangeCounter.getAssignedRangeCounters()) {
                         if (counter.getFlights().contains(flight))
-                            return null;
+                            throw new IllegalArgumentException("The flight '" + flightCode + "' is already assigned at sector " + otherSector.getName() + ".");
                     }
                 }
                 // Check that there is no pending assignation with the flight
                 for (RequestedRangeCounter pendingAssignation : pendingRequestedCounters.get(sector)) {
                     if (pendingAssignation.getFlights().contains(flight))
-                        return null;
+                        throw new IllegalArgumentException("The flight '" + flightCode + "' is pending to be assigned.");
                 }
             }
 
