@@ -35,7 +35,7 @@ public final class FreeCounters extends CounterReservationAction {
                 .build();
         try {
             FreeCounterResponse response = blockingStub.freeCounters(request);
-            String range = " on counters " + response.getRangeStart() + "-" + response.getRangeEnd();
+            String range = " on counters (" + response.getRangeStart() + "-" + response.getRangeEnd() + ")";
             System.out.println("Ended check-in for flights " + String.join("|", response.getFlightNumbersList()) + range + " in Sector " + response.getSectorName());
         } catch (StatusRuntimeException e) {
             if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
