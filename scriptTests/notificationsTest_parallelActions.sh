@@ -45,6 +45,9 @@ bash queryClient.sh -DserverAddress="$ADDRESS" -Daction=checkins -DoutPath=./pro
 # Query the check ins that have been made
 bash queryClient.sh -DserverAddress="$ADDRESS" -Daction=checkins -DoutPath=./proper_check_in_filter_C.txt -Dsector=C
 
+# Free the counters for the airline
+bash counterClient.sh -DserverAddress="$ADDRESS" -Daction=freeCounters -Dsector="$SECTOR" -DcounterFrom="$COUNTER_FROM" -Dairline="$AIRLINE"
+
 # Unregister Airline from notifications
 bash eventsClient.sh -DserverAddress="$ADDRESS" -Daction=unregister -Dairline="$AIRLINE"
 
