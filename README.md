@@ -46,6 +46,9 @@ And finally run the desired `*Client.sh` like the following:
 ./adminClient.sh -DserverAddress="localhost:50058" -Daction=addSector -Dsector=C
 ```
 
+## Scrip tests
+For testing purposes only, there are custom made scripts in the directory `scripTests`.
+Follow the instructions in the README file present there in order to run them. 
 
 ## Team members
 
