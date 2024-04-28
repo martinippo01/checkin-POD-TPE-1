@@ -39,6 +39,8 @@ bash adminClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=manifest -DinPath
 #  ...
 
 #2.1
+bash adminClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=addSector -Dsector=Z
+bash adminClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=addSector -Dsector=D
 bash counterClient.sh -DserverAddress="$SERVER_ADDRESS" -Daction=listSectors
 #rta:
 #   Sectors   Counters

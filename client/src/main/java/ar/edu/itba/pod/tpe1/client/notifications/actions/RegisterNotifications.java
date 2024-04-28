@@ -56,9 +56,9 @@ public final class RegisterNotifications extends NotificationsAction {
             NotificationsServiceOuterClass.RegisterNotificationsResponse response = notificationsResponse(request);
         } catch (StatusRuntimeException e) {
             if (e.getStatus().equals(Status.INVALID_ARGUMENT)) {
-                throw new IllegalArgumentException(e);
+                System.err.println(e.getMessage());
             } else if (e.getStatus().equals(Status.UNAVAILABLE)) {
-                throw new ServerUnavailableException();
+                System.err.println(e.getMessage());
             }
         }
     }

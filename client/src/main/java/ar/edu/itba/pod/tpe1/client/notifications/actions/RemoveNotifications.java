@@ -45,9 +45,9 @@ public class RemoveNotifications extends NotificationsAction {
             NotificationsServiceOuterClass.RemoveNotificationsResponse response = notificationsResponse(request);
         } catch (StatusRuntimeException e) {
             if (e.getStatus().equals(Status.INVALID_ARGUMENT)) {
-                throw new IllegalArgumentException(e);
+                System.err.println(e.getMessage());
             } else if (e.getStatus().equals(Status.UNAVAILABLE)) {
-                throw new ServerUnavailableException();
+                System.err.println(e.getMessage());
             }
         }
     }
