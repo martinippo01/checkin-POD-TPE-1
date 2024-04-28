@@ -1,8 +1,6 @@
 package ar.edu.itba.pod.tpe1.client.checkin.actions;
 
-import ar.edu.itba.pod.tpe1.CheckinServiceGrpc;
-import ar.edu.itba.pod.tpe1.FetchCounterRequest;
-import ar.edu.itba.pod.tpe1.FetchCounterResponse;
+import ar.edu.itba.pod.tpe1.*;
 import ar.edu.itba.pod.tpe1.client.checkin.CheckInAction;
 import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
 import io.grpc.ManagedChannel;
@@ -38,7 +36,23 @@ public final class FetchCounter extends CheckInAction {
         try {
             FetchCounterRequest request = createRequest();
             FetchCounterResponse response = fetchResponse(request);
-            System.out.println(response);
+
+            if (response.getStatus() == CounterStatus.COUNTER_STATUS_COUNTERS_ASSIGNED) {
+                BookingInformation bookingInfo = response.getBooking();
+                CountersInformation countersInfo = response.getData(0);
+                CounterRange range = countersInfo.getCounters();
+                int firstCounter = range.getFirstCounterNumber();
+                int lastCounter = firstCounter + range.getNumberOfConsecutiveCounters() - 1;
+                String sector = countersInfo.getSectorName();
+                int queueLength = countersInfo.getPeopleInQueue();
+
+                System.out.printf("Flight %s from %s is now checking in at counters (%d-%d) in Sector %s with %d people in line%n",
+                        bookingInfo.getFlightCode(), bookingInfo.getAirlineName(), firstCounter, lastCounter, sector, queueLength);
+            } else if (response.getStatus() == CounterStatus.COUNTER_STATUS_COUNTERS_NOT_ASSIGNED) {
+                BookingInformation bookingInfo = response.getBooking();
+                System.out.printf("Flight %s from %s has no counters assigned yet%n",
+                        bookingInfo.getFlightCode(), bookingInfo.getAirlineName());
+            }
         } catch (StatusRuntimeException e) {
             if (e.getStatus().equals(Status.INVALID_ARGUMENT)) {
                 throw new IllegalArgumentException(e);
@@ -47,4 +61,5 @@ public final class FetchCounter extends CheckInAction {
             }
         }
     }
+
 }
