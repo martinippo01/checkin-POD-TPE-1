@@ -37,6 +37,7 @@ public class RemoveNotifications extends NotificationsAction {
         try {
             RemoveNotificationsRequest request = createRequest();
             RemoveNotificationsResponse response = notificationsResponse(request);
+            System.out.println(request.getAirline() + " unregistered successfully for events");
         } catch (StatusRuntimeException e) {
             if (e.getStatus().getCode() == Status.Code.UNAVAILABLE) {
                 throw new ServerUnavailableException();
