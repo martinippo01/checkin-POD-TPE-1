@@ -26,25 +26,17 @@ public final class RegisterNotifications extends NotificationsAction {
                 .build();
     }
 
-    private NotificationsServiceOuterClass.RegisterNotificationsResponse notificationsResponse(
-            NotificationsServiceOuterClass.RegisterNotificationsRequest request) {
-        try {
-            Iterator<NotificationsServiceOuterClass.RegisterNotificationsResponse> response = blockingStub.registerNotifications(request);
-            while (response.hasNext()) {
-                NotificationsServiceOuterClass.RegisterNotificationsResponse registerNotificationsResponse;
+    private void notificationsResponse(NotificationsServiceOuterClass.RegisterNotificationsRequest request) {
+        Iterator<NotificationsServiceOuterClass.RegisterNotificationsResponse> response = blockingStub.registerNotifications(request);
+        while (response.hasNext()) {
+            NotificationsServiceOuterClass.RegisterNotificationsResponse registerNotificationsResponse;
 
-                registerNotificationsResponse = response.next();
+            registerNotificationsResponse = response.next();
 
-                // TODO: Will we print from here? Or modularize somewhere else?
-                System.out.println(registerNotificationsResponse.getNotificationType());
-                System.out.println(registerNotificationsResponse);
-            }
-        }catch (Exception e) {
-            System.err.println(e.getMessage());
-            return null;
+            // TODO: Will we print from here? Or modularize somewhere else?
+            System.out.println(registerNotificationsResponse.getNotificationType());
+            System.out.println(registerNotificationsResponse);
         }
-
-        return null; // TODO: Return something?
     }
 
     @Override
@@ -53,13 +45,15 @@ public final class RegisterNotifications extends NotificationsAction {
 
         try {
             NotificationsServiceOuterClass.RegisterNotificationsRequest request = createRequest();
-            NotificationsServiceOuterClass.RegisterNotificationsResponse response = notificationsResponse(request);
+            notificationsResponse(request);
         } catch (StatusRuntimeException e) {
-            if (e.getStatus().equals(Status.INVALID_ARGUMENT)) {
-                System.err.println(e.getMessage());
-            } else if (e.getStatus().equals(Status.UNAVAILABLE)) {
+            if (e.getStatus().getCode() == Status.Code.UNAVAILABLE) {
+                throw new ServerUnavailableException();
+            } else if (e.getStatus().equals(Status.INVALID_ARGUMENT)) {
                 System.err.println(e.getMessage());
             }
+        } catch (Exception e) {
+            System.err.println("RPC failed: " + e.getMessage());
         }
     }
 }

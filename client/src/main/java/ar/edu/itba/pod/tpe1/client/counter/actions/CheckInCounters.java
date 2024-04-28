@@ -55,6 +55,8 @@ public final class CheckInCounters extends CounterReservationAction {
         } catch (StatusRuntimeException e) {
             if (e.getStatus().getCode() == Status.Code.INVALID_ARGUMENT) {
                 System.err.println(e.getMessage());
+            } else if (e.getStatus().getCode() == Status.Code.UNAVAILABLE) {
+                throw new ServerUnavailableException();
             }
         } catch (Exception e) {
             System.err.println("RPC failed: " + e.getMessage());

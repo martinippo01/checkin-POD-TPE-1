@@ -57,10 +57,12 @@ public final class QueryCounters extends CounterQueryAction {
             printCounterQueryResponse(response, getArguments().getOrDefault(OUT_PATH.getArgument(), ""));
         } catch (StatusRuntimeException e) {
             if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
-                System.out.println("Sector  Counters  Airline          Flights             People");
-                System.out.println("###############################################################");
+                System.err.println("Sector  Counters  Airline          Flights             People");
+                System.err.println("###############################################################");
             } else if (e.getStatus().getCode() == Status.Code.FAILED_PRECONDITION) {
-                System.out.println("No counters found, please add counters to the sector. Optional -DoutPath= file skipped");
+                System.err.println("No counters found, please add counters to the sector. Optional -DoutPath= file skipped");
+            } else if (e.getStatus().getCode() == Status.Code.UNAVAILABLE) {
+                throw new ServerUnavailableException();
             }
         } catch (Exception e) {
             System.err.println("RPC failed: " + e.getMessage());

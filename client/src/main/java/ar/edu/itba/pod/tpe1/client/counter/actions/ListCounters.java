@@ -49,14 +49,16 @@ public final class ListCounters extends CounterReservationAction {
             });
         } catch (StatusRuntimeException e) {
             if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
-                System.out.println("Error: The specified sector '" + sectorName + "' does not exist.");
+                System.err.println("Error: The specified sector '" + sectorName + "' does not exist.");
             } else if (e.getStatus().getCode() == Status.Code.INVALID_ARGUMENT) {
-                System.out.println("Error: The counter range must be positive");
+                System.err.println("Error: The counter range must be positive");
+            } else if (e.getStatus().getCode() == Status.Code.UNAVAILABLE) {
+                throw new ServerUnavailableException();
             } else {
-                System.out.println("Failed: " + e.getStatus().asRuntimeException());
+                System.err.println("Failed: " + e.getStatus().asRuntimeException());
             }
         } catch (Exception e) {
-            System.out.println("RPC failed: " + e);
+            System.err.println("RPC failed: " + e);
         }
     }
 }

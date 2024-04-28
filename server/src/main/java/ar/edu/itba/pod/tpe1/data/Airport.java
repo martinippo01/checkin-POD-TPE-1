@@ -581,10 +581,7 @@ public class Airport {
         Booking booking = new Booking(bookingCode);
 
         if (!bookingCodes.containsKey(booking)) {
-            // TODO: aca @Santi?
             throw new IllegalArgumentException("Invalid booking code.");
-//            response.setStatus(CounterStatus.COUNTER_STATUS_BOOKING_CODE_WITHOUT_AWAITING_PASSENGERS);
-//            return response;
         }
 
         Flight flight = bookingCodes.get(booking);
@@ -604,7 +601,6 @@ public class Airport {
             if (requestedRangeCounters == null || requestedRangeCounters.isEmpty()) {
                 // TODO: aca @Santi?
                 throw new IllegalStateException("No counters assigned for the flight.");
-//            return response.setStatus(CounterStatus.COUNTER_STATUS_COUNTERS_NOT_ASSIGNED);
             }
 
             List<CountersInformation> rangeCountersAsInformation = getRangeCountersAsInformation(flight, airline, requestedRangeCounters);

@@ -54,8 +54,8 @@ public final class PassengerCheckin extends CheckInAction {
             }
         } catch (StatusRuntimeException e) {
             if (e.getStatus().equals(Status.INVALID_ARGUMENT)) {
-                throw new IllegalArgumentException(e);
-            } else if (e.getStatus().equals(Status.UNAVAILABLE)) {
+                System.err.println(e.getMessage());
+            } else if (e.getStatus().getCode() == Status.Code.UNAVAILABLE) {
                 throw new ServerUnavailableException();
             }
         }

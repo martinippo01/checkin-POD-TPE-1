@@ -38,6 +38,8 @@ public class AddCounters extends AirportAdminAction {
         } catch (StatusRuntimeException e) {
             if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
                 System.err.println("Failed to add counters to sector: ");
+            } else if (e.getStatus().getCode() == Status.Code.UNAVAILABLE) {
+                throw new ServerUnavailableException();
             } else {
                 System.err.println("Failed to add counters to sector: " + e.getMessage());
             }

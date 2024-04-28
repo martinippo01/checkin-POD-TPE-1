@@ -38,16 +38,18 @@ public final class FreeCounters extends CounterReservationAction {
             System.out.println("Ended check-in for flights " + String.join("|", response.getFlightNumbersList()) + range + " in Sector " + response.getSectorName());
         } catch (StatusRuntimeException e) {
             if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
-                System.out.println("Error: The specified sector '" + sectorName + "' does not exist.");
+                System.err.println("Error: The specified sector '" + sectorName + "' does not exist.");
             } else if (e.getStatus().getCode() == Status.Code.INVALID_ARGUMENT) {
-                System.out.println("Error: The specified counter range starting at " + fromVal + " does not exist in sector '" + sectorName + "'.");
+                System.err.println("Error: The specified counter range starting at " + fromVal + " does not exist in sector '" + sectorName + "'.");
             } else if (e.getStatus().getCode() == Status.Code.PERMISSION_DENIED) {
-                System.out.println("Error: The counter range cannot be freed as it is not assigned to '" + airlineName + "'.");
+                System.err.println("Error: The counter range cannot be freed as it is not assigned to '" + airlineName + "'.");
             } else if (e.getStatus().getCode() == Status.Code.FAILED_PRECONDITION) {
-                System.out.println("Error: Cannot free counters as there are passengers waiting to be attended.");
+                System.err.println("Error: Cannot free counters as there are passengers waiting to be attended.");
+            } else if (e.getStatus().getCode() == Status.Code.UNAVAILABLE) {
+                throw new ServerUnavailableException();
             }
         } catch (Exception e) {
-            System.out.println("RPC failed: " + e);
+            System.err.println("RPC failed: " + e);
         }
     }
 }

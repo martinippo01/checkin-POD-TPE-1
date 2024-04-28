@@ -5,6 +5,7 @@ import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
 import counter.CounterReservationServiceGrpc;
 import counter.CounterReservationServiceOuterClass;
 import io.grpc.ManagedChannel;
+import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 
 import java.util.List;
@@ -36,7 +37,13 @@ public final class ListSectors extends CounterReservationAction {
                 System.out.printf("%s         %s\n", sector.getName(), ranges);
             });
         } catch (StatusRuntimeException e) {
-            System.out.println("Failed: " + e.getStatus().asRuntimeException());
+            if (e.getStatus().getCode() == Status.Code.UNAVAILABLE) {
+                throw new ServerUnavailableException();
+            } else {
+                System.err.println("Failed " + e.getStatus() + ": " + e.getMessage());
+            }
+        } catch (Exception e) {
+            System.err.println("RPC failed: " + e.getMessage());
         }
     }
 }

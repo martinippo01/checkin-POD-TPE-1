@@ -55,7 +55,9 @@ public final class CheckIns extends CounterQueryAction {
             printCheckInsQueryResponse(response, getArguments().get(OUT_PATH.getArgument()));
         } catch (StatusRuntimeException e) {
             if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
-                System.out.println(e.getMessage());
+                System.err.println(e.getMessage());
+            } else if (e.getStatus().getCode() == Status.Code.UNAVAILABLE) {
+                throw new ServerUnavailableException();
             }
         } catch (Exception e) {
             System.err.println("RPC failed: " + e.getMessage());

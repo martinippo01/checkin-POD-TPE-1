@@ -2,7 +2,6 @@ package ar.edu.itba.pod.tpe1.client.query;
 
 import ar.edu.itba.pod.tpe1.client.Action;
 import ar.edu.itba.pod.tpe1.client.query.actions.CheckIns;
-import ar.edu.itba.pod.tpe1.client.query.actions.Counters;
 import ar.edu.itba.pod.tpe1.client.query.actions.QueryCounters;
 
 import java.util.List;
@@ -14,10 +13,6 @@ import java.util.stream.Stream;
 import static ar.edu.itba.pod.tpe1.client.Arguments.*;
 
 public enum CounterQueryActions {
-    COUNTERS(
-            "counters",
-            new Counters(List.of(OUT_PATH.getArgument()))
-    ),
     QUERY_COUNTERS(
             "queryCounters",
             new QueryCounters(List.of(OUT_PATH.getArgument()), List.of(SECTOR.getArgument()))

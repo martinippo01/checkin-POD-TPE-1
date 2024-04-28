@@ -43,7 +43,9 @@ public final class ListPendingAssignments extends CounterReservationAction {
             });
         } catch (StatusRuntimeException e) {
             if (e.getStatus().getCode() == Status.Code.INVALID_ARGUMENT) {
-                System.out.println("Error: The specified sector '" + sectorName + "' does not exist.");
+                System.err.println("Error: The specified sector '" + sectorName + "' does not exist.");
+            } else if (e.getStatus().getCode() == Status.Code.UNAVAILABLE) {
+                throw new ServerUnavailableException();
             }
         } catch (Exception e) {
             System.err.println("RPC failed: " + e.getMessage());
