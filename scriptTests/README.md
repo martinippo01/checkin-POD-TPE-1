@@ -7,7 +7,7 @@ This directory contains the following tests (and the associated script)
   - `basicSetUp.sh`
 - **Check In Status**: Test the different states of check-in for a passenger
   - `checkInStatus.sh`
-- **Notifications 1**: Test that an airline can see notifications for events like, counters assigned and check-in events
+- **Notifications 1**: Test that an airline can see notifications for events like, counters assigned and check-in events.
 For this test, it is necessary to run the following scripts in order:
   - `notificationsTest.sh` 
   - `notificationsTest_parallelActions.sh`
