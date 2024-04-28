@@ -30,7 +30,7 @@ public final class RegisterNotifications extends NotificationsAction {
     private void handleNotification(RegisterNotificationsResponse response) {
         switch (response.getNotificationType()) {
             case SUCCESSFUL_REGISTER:
-                System.out.printf("%s registered successfully for events\n", response.getAirline());
+                System.out.printf("%s registered successfully for events\n", getArguments().get(AIRLINE.getArgument()));
                 break;
             case COUNTERS_ASSIGNED:
                 System.out.printf("2 counters (%d-%d) in Sector %s are now checking in passengers from %s flights\n",

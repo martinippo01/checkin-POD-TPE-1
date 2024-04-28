@@ -57,11 +57,6 @@ public class Notifications {
     public void notifyAirline(Airline airline, Notification notification) {
         if (!notifications.containsKey(airline))
             return;
-//        try {
-//            notifications.get(airline).put(notification);
-//        }catch (InterruptedException e){
-//            e.printStackTrace();
-//        }
         logger.info("Airline {} trying to add notification", airline.getName());
         notifications.get(airline).add(notification);
     }
@@ -71,10 +66,7 @@ public class Notifications {
             // This can happen if the airline got unregistered, or it never was registered
             return null;
         // I'll block if there are no elementes in queue
-
         return notifications.get(airline).take();
-
-
     }
 
     public void notifyCountersAssigned(int from, int to, String sector, List<Flight> flights, Airline airline) {
