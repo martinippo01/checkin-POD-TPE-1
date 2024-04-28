@@ -534,7 +534,12 @@ public class Airport {
 
             // Some counters didn't perform a check-in
             if (checkInCountersInformation.size() < requestedRangeCounter.getSize()) {
-                final int lastCounterWithCheckIn = checkInCountersInformation.get(checkInCountersInformation.size() - 1).getCounter();
+                final int lastCounterWithCheckIn;
+                if (checkInCountersInformation.isEmpty()) { // In case there were no check-ins at all
+                    lastCounterWithCheckIn = 0;
+                } else {
+                    lastCounterWithCheckIn = checkInCountersInformation.get(checkInCountersInformation.size() - 1).getCounter();
+                }
                 final int lastIdleCounter = requestedRangeCounter.getCounterTo() - lastCounterWithCheckIn + 1;
 
                 for (int i = lastCounterWithCheckIn; i < lastIdleCounter; i++) {
