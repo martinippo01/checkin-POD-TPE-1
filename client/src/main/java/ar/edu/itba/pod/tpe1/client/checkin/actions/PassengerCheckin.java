@@ -40,7 +40,7 @@ public final class PassengerCheckin extends CheckInAction {
 
             if (response.getStatus() == CheckinStatus.CHECKIN_STATUS_ADDED_TO_QUEUE) {
                 BookingInformation bookingInfo = response.getBooking();
-                CountersInformation countersInfo = response.getData();
+                CountersInformation countersInfo = response.getData();  // Assuming the response has the counters info as optional
                 CounterRange range = countersInfo.getCounters();
                 int firstCounter = range.getFirstCounterNumber();
                 int lastCounter = firstCounter + range.getNumberOfConsecutiveCounters() - 1;
@@ -63,12 +63,24 @@ public final class PassengerCheckin extends CheckInAction {
 
     private void handleCheckinErrors(CheckinStatus status) {
         switch (status) {
-            case CHECKIN_STATUS_INVALID_BOOKING_CODE -> System.out.println("Error: Invalid booking code.");
-            case CHECKIN_STATUS_INVALID_SECTOR_ID -> System.out.println("Error: Invalid sector ID.");
-            case CHECKIN_STATUS_INVALID_COUNTER_NUMBER -> System.out.println("Error: Invalid counter number.");
-            case CHECKIN_STATUS_PASSENGER_ALREADY_IN_QUEUE -> System.out.println("Error: Passenger already in queue.");
-            case CHECKIN_STATUS_CHECKIN_ALREADY_DONE -> System.out.println("Error: Check-in already completed for this passenger.");
-            default -> System.out.println("Error: An unknown error occurred.");
+            case CHECKIN_STATUS_INVALID_BOOKING_CODE:
+                System.out.println("Error: Invalid booking code.");
+                break;
+            case CHECKIN_STATUS_INVALID_SECTOR_ID:
+                System.out.println("Error: Invalid sector ID.");
+                break;
+            case CHECKIN_STATUS_INVALID_COUNTER_NUMBER:
+                System.out.println("Error: Invalid counter number.");
+                break;
+            case CHECKIN_STATUS_PASSENGER_ALREADY_IN_QUEUE:
+                System.out.println("Error: Passenger already in queue.");
+                break;
+            case CHECKIN_STATUS_CHECKIN_ALREADY_DONE:
+                System.out.println("Error: Check-in already completed for this passenger.");
+                break;
+            default:
+                System.out.println("Error: An unknown error occurred.");
+                break;
         }
     }
 

@@ -26,7 +26,42 @@ public final class RegisterNotifications extends NotificationsAction {
                 .build();
     }
 
-    private NotificationsServiceOuterClass.RegisterNotificationsResponse notificationsResponse(
+    private void handleNotification(NotificationsServiceOuterClass.RegisterNotificationsResponse response) {
+        switch (response.getNotificationType()) {
+            case SUCCESSFUL_REGISTER:
+                System.out.printf("%s registered successfully for events\n", response.getAirline());
+                break;
+            case COUNTERS_ASSIGNED:
+                System.out.printf("2 counters (%d-%d) in Sector %s are now checking in passengers from %s flights\n",
+                        response.getCounterFrom(), response.getCounterTo(), response.getSector(), String.join("|", response.getFlights()));
+                break;
+            case NEW_BOOKING_IN_QUEUE:
+                System.out.printf("Booking %s for flight %s from %s is now waiting to check-in on counters (%d-%d) in Sector %s with %d people in line\n",
+                        response.getBooking(), response.getFlight(), response.getAirline(), response.getCounterFrom(), response.getCounterTo(), response.getSector(), response.getPeopleAhead());
+                break;
+            case CHECK_IN_SUCCESSFUL:
+                System.out.printf("Check-in successful of %s for flight %s at counter %d in Sector %s\n",
+                        response.getBooking(), response.getFlight(), response.getCounter(), response.getSector());
+                break;
+            case COUNTERS_REMOVED:
+                System.out.printf("Ended check-in for flights %s on counters (%d-%d) from Sector %s\n",
+                        String.join("|", response.getFlights()), response.getCounterFrom(), response.getCounterTo(), response.getSector());
+                break;
+            case COUNTERS_PENDING:
+                System.out.printf("%d counters in Sector %s for flights %s is pending with %d other pendings ahead\n",
+                        (response.getCounterTo() - response.getCounterFrom() + 1), response.getSector(), String.join("|", response.getFlights()), response.getPendingAhead());
+                break;
+            case COUNTERS_UPDATE:
+                System.out.printf("%d counters in Sector %s for flights %s were updated with %d other pendings ahead\n",
+                        (response.getCounterTo() - response.getCounterFrom() + 1), response.getSector(), String.join("|", response.getFlights()), response.getPendingAhead());
+                break;
+            default:
+                System.out.println("Unhandled notification type.");
+                break;
+        }
+    }
+
+    private void notificationsResponse(
             NotificationsServiceOuterClass.RegisterNotificationsRequest request) {
         try {
             Iterator<NotificationsServiceOuterClass.RegisterNotificationsResponse> response = blockingStub.registerNotifications(request);
@@ -34,32 +69,18 @@ public final class RegisterNotifications extends NotificationsAction {
                 NotificationsServiceOuterClass.RegisterNotificationsResponse registerNotificationsResponse;
 
                 registerNotificationsResponse = response.next();
-
-                // TODO: Will we print from here? Or modularize somewhere else?
-                System.out.println(registerNotificationsResponse.getNotificationType());
-                System.out.println(registerNotificationsResponse);
+                handleNotification(registerNotificationsResponse);
             }
-        }catch (Exception e) {
-            System.err.println(e.getMessage());
-            return null;
-        }
 
-        return null; // TODO: Return something?
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
     }
 
     @Override
     public void run(ManagedChannel channel) throws ServerUnavailableException {
         blockingStub = NotificationsServiceGrpc.newBlockingStub(channel);
-
-        try {
-            NotificationsServiceOuterClass.RegisterNotificationsRequest request = createRequest();
-            NotificationsServiceOuterClass.RegisterNotificationsResponse response = notificationsResponse(request);
-        } catch (StatusRuntimeException e) {
-            if (e.getStatus().equals(Status.INVALID_ARGUMENT)) {
-                System.err.println(e.getMessage());
-            } else if (e.getStatus().equals(Status.UNAVAILABLE)) {
-                System.err.println(e.getMessage());
-            }
-        }
+        NotificationsServiceOuterClass.RegisterNotificationsRequest request = createRequest();
+        notificationsResponse(request);
     }
 }
