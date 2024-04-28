@@ -26,7 +26,6 @@ bash adminClient.sh -DserverAddress="$ADDRESS" -Daction=manifest -DinPath="$MANI
 
 # Assign counters to Flybondi, list the counters
 bash counterClient.sh -DserverAddress="$ADDRESS" -Daction=assignCounters -Dsector="$SECTOR" -Dflights="$FLIGHT" -Dairline="$AIRLINE" -DcounterCount="$COUNTERS"
-bash counterClient.sh -DserverAddress="$ADDRESS" -Daction=listSectors
 
 # Query counter
 echo "Querying counters"

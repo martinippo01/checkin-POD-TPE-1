@@ -41,6 +41,7 @@ public final class QueryCounters extends CounterQueryAction {
                         counter.getWaitingPeople()));
             }
         } catch (IOException e) {
+            System.err.println("Error writing to file" + outPath + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -50,20 +51,17 @@ public final class QueryCounters extends CounterQueryAction {
         blockingStub = CounterServiceGrpc.newBlockingStub(channel);
 
         try {
-
             QueryCountersRequest request = QueryCountersRequest.newBuilder()
-                    .setSector(getArguments().get(SECTOR.getArgument()))
+                    .setSector(getArguments().getOrDefault(SECTOR.getArgument(), ""))
                     .build();
             QueryCountersResponse response = blockingStub.queryCounters(request);
-            printCounterQueryResponse(response, getArguments().get(OUT_PATH.getArgument()));
+            printCounterQueryResponse(response, getArguments().getOrDefault(OUT_PATH.getArgument(), ""));
         } catch (StatusRuntimeException e) {
             if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
                 System.err.println("Sector  Counters  Airline          Flights             People");
                 System.err.println("###############################################################");
             } else if (e.getStatus().getCode() == Status.Code.FAILED_PRECONDITION) {
                 System.err.println("No counters found, please add counters to the sector. Optional -DoutPath= file skipped");
-            } else if (e.getStatus().getCode() == Status.Code.UNAVAILABLE) {
-                throw new ServerUnavailableException();
             }
         } catch (Exception e) {
             System.err.println("RPC failed: " + e.getMessage());
