@@ -5,6 +5,8 @@ import airport.CounterServiceOuterClass;
 import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
 import ar.edu.itba.pod.tpe1.client.query.CounterQueryAction;
 import io.grpc.ManagedChannel;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -40,15 +42,23 @@ public final class CheckIns extends CounterQueryAction {
     public void run(ManagedChannel channel) throws ServerUnavailableException {
         CounterServiceGrpc.CounterServiceBlockingStub blockingStub = CounterServiceGrpc.newBlockingStub(channel);
 
-        CounterServiceOuterClass.QueryCheckInsRequest request = CounterServiceOuterClass.QueryCheckInsRequest.newBuilder()
-                .setSector(getArguments().get(SECTOR.getArgument()))
-                .setAirline(getArguments().get(AIRLINE.getArgument()))
-                .build();
-        CounterServiceOuterClass.QueryCheckInsResponse response = blockingStub.queryCheckIns(request);
-        if (response.getCheckInsCount() == 0) {
-            System.out.println("No check-ins found for the specified criteria.");
-            return;
+        try {
+            CounterServiceOuterClass.QueryCheckInsRequest request = CounterServiceOuterClass.QueryCheckInsRequest.newBuilder()
+                    .setSector(getArguments().getOrDefault(SECTOR.getArgument(), ""))
+                    .setAirline(getArguments().getOrDefault(AIRLINE.getArgument(), ""))
+                    .build();
+            CounterServiceOuterClass.QueryCheckInsResponse response = blockingStub.queryCheckIns(request);
+            if (response.getCheckInsCount() == 0) {
+                System.out.println("No check-ins found for the specified criteria.");
+                return;
+            }
+            printCheckInsQueryResponse(response, getArguments().get(OUT_PATH.getArgument()));
+        } catch (StatusRuntimeException e) {
+            if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
+                System.out.println(e.getMessage());
+            }
+        } catch (Exception e) {
+            System.err.println("RPC failed: " + e.getMessage());
         }
-        printCheckInsQueryResponse(response, getArguments().get(OUT_PATH.getArgument()));
     }
 }
