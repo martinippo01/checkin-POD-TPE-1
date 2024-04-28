@@ -33,7 +33,7 @@ public final class RegisterNotifications extends NotificationsAction {
                 break;
             case COUNTERS_ASSIGNED:
                 System.out.printf("2 counters (%d-%d) in Sector %s are now checking in passengers from %s flights\n",
-                        response.getCounterFrom(), response.getCounterTo(), response.getSector(), String.join("|", response.getFlights()));
+                        response.getCounterFrom(), response.getCounterTo(), response.getSector(), String.join("|", response.getFlightsList()));
                 break;
             case NEW_BOOKING_IN_QUEUE:
                 System.out.printf("Booking %s for flight %s from %s is now waiting to check-in on counters (%d-%d) in Sector %s with %d people in line\n",
@@ -49,11 +49,11 @@ public final class RegisterNotifications extends NotificationsAction {
                 break;
             case COUNTERS_PENDING:
                 System.out.printf("%d counters in Sector %s for flights %s is pending with %d other pendings ahead\n",
-                        (response.getCounterTo() - response.getCounterFrom() + 1), response.getSector(), String.join("|", response.getFlights()), response.getPendingAhead());
+                        (response.getCounterTo() - response.getCounterFrom() + 1), response.getSector(), String.join("|", response.getFlightsList()), response.getPendingAhead());
                 break;
             case COUNTERS_UPDATE:
                 System.out.printf("%d counters in Sector %s for flights %s were updated with %d other pendings ahead\n",
-                        (response.getCounterTo() - response.getCounterFrom() + 1), response.getSector(), String.join("|", response.getFlights()), response.getPendingAhead());
+                        (response.getCounterTo() - response.getCounterFrom() + 1), response.getSector(), String.join("|", response.getFlightsList()), response.getPendingAhead());
                 break;
             default:
                 System.out.println("Unhandled notification type.");
@@ -62,13 +62,13 @@ public final class RegisterNotifications extends NotificationsAction {
     }
 
     private void notificationsResponse(NotificationsServiceOuterClass.RegisterNotificationsRequest request) {
-            Iterator<NotificationsServiceOuterClass.RegisterNotificationsResponse> response = blockingStub.registerNotifications(request);
-            while (response.hasNext()) {
-                NotificationsServiceOuterClass.RegisterNotificationsResponse registerNotificationsResponse;
+        Iterator<NotificationsServiceOuterClass.RegisterNotificationsResponse> response = blockingStub.registerNotifications(request);
+        while (response.hasNext()) {
+            NotificationsServiceOuterClass.RegisterNotificationsResponse registerNotificationsResponse;
 
-                registerNotificationsResponse = response.next();
-                handleNotification(registerNotificationsResponse);
-            }
+            registerNotificationsResponse = response.next();
+            handleNotification(registerNotificationsResponse);
+        }
     }
 
     @Override
