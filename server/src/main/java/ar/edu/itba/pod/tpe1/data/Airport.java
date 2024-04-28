@@ -482,31 +482,20 @@ public class Airport {
 
         Sector sector = new Sector(sectorName);
         if (!sectors.containsKey(sector)) {
-            // TODO: aca @Santi?
             throw new IllegalArgumentException("Invalid sector name.");
-//            return response.setStatus(CheckInCountersStatus.CHECK_IN_COUNTERS_STATUS_INVALID_SECTOR_NAME);
         }
         List<CheckInCounterInformation> checkInCountersInformation = new ArrayList<>();
         synchronized (lock) {
             RequestedRangeCounter requestedRangeCounter = rangeCounterBySector(sector, counterFrom);
             if (requestedRangeCounter == null) {
-                // TODO: aca @Santi?
                 throw new IllegalArgumentException("Invalid counter number.");
-//            return response.setStatus(CheckInCountersStatus.CHECK_IN_COUNTERS_STATUS_COUNTERS_NOT_ASSIGNED);
             }
 
             if (!requestedRangeCounter.getAirline().getName().equals(airlineName)) {
-                // TODO: aca @Santi?
                 throw new IllegalArgumentException("Invalid airline name.");
-//            return response.setStatus(CheckInCountersStatus.CHECK_IN_COUNTERS_STATUS_INVALID_AIRLINE_NAME);
             }
 
             int queueLength = requestedRangeCounter.getWaitingQueueLength();
-            if (queueLength == 0) {
-                // TODO: aca @Santi?
-                throw new IllegalStateException("No passengers in queue.");
-//            return response.setStatus(CheckInCountersStatus.CHECK_IN_COUNTERS_STATUS_EMPTY_QUEUE);
-            }
 
             int checkInsToPerform = Math.min(queueLength, requestedRangeCounter.getSize());
 
@@ -545,7 +534,12 @@ public class Airport {
 
             // Some counters didn't perform a check-in
             if (checkInCountersInformation.size() < requestedRangeCounter.getSize()) {
-                final int lastCounterWithCheckIn = checkInCountersInformation.get(checkInCountersInformation.size() - 1).getCounter();
+                final int lastCounterWithCheckIn;
+                if (checkInCountersInformation.isEmpty()) { // In case there were no check-ins at all
+                    lastCounterWithCheckIn = 0;
+                } else {
+                    lastCounterWithCheckIn = checkInCountersInformation.get(checkInCountersInformation.size() - 1).getCounter();
+                }
                 final int lastIdleCounter = requestedRangeCounter.getCounterTo() - lastCounterWithCheckIn + 1;
 
                 for (int i = lastCounterWithCheckIn; i < lastIdleCounter; i++) {

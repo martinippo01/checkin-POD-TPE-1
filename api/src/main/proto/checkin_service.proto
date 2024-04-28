@@ -12,6 +12,7 @@ service CheckinService {
   rpc FetchCounter(FetchCounterRequest) returns (FetchCounterResponse);
   rpc PassengerCheckin(PassengerCheckinRequest) returns (PassengerCheckinResponse);
   rpc PassengerStatus(PassengerStatusRequest) returns (PassengerStatusResponse);
+  rpc PerformCheckIn(CheckInCountersRequest) returns (CheckInCountersResponse);
 }
 
 // ********** Message Definitions **********
