@@ -45,7 +45,7 @@ public final class RegisterNotifications extends NotificationsAction {
                 break;
             case COUNTERS_REMOVED:
                 System.out.printf("Ended check-in for flights %s on counters (%d-%d) from Sector %s\n",
-                        String.join("|", response.getFlights()), response.getCounterFrom(), response.getCounterTo(), response.getSector());
+                        String.join("|", response.getFlightsList()), response.getCounterFrom(), response.getCounterTo(), response.getSector());
                 break;
             case COUNTERS_PENDING:
                 System.out.printf("%d counters in Sector %s for flights %s is pending with %d other pendings ahead\n",
