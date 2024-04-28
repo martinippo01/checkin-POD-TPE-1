@@ -9,10 +9,10 @@ package checkin;
 
 // ********** Service Definition **********
 service CheckinService {
-  rpc FetchCounter(FetchCounterRequest) returns (FetchCounterResponse);
-  rpc PassengerCheckin(PassengerCheckinRequest) returns (PassengerCheckinResponse);
-  rpc PassengerStatus(PassengerStatusRequest) returns (PassengerStatusResponse);
-  rpc PerformCheckIn(CheckInCountersRequest) returns (CheckInCountersResponse);
+  rpc FetchCounter(FetchCounterRequest) returns (FetchCounterResponse); // 3.1
+  rpc PassengerCheckin(PassengerCheckinRequest) returns (PassengerCheckinResponse); // 3.2
+  rpc PassengerStatus(PassengerStatusRequest) returns (PassengerStatusResponse); // 3.3
+  rpc PerformCheckIn(CheckInCountersRequest) returns (CheckInCountersResponse); // 2.5
 }
 
 // ********** Message Definitions **********
