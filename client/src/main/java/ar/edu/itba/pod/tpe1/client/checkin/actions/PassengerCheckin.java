@@ -40,7 +40,7 @@ public final class PassengerCheckin extends CheckInAction {
 
             if (response.getStatus() == CheckinStatus.CHECKIN_STATUS_ADDED_TO_QUEUE) {
                 BookingInformation bookingInfo = response.getBooking();
-                CountersInformation countersInfo = response.getData();  // Assuming the response has the counters info as optional
+                CountersInformation countersInfo = response.getData();
                 CounterRange range = countersInfo.getCounters();
                 int firstCounter = range.getFirstCounterNumber();
                 int lastCounter = firstCounter + range.getNumberOfConsecutiveCounters() - 1;
