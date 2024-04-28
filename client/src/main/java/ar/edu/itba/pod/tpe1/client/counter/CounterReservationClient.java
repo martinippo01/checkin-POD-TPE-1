@@ -3,14 +3,12 @@ package ar.edu.itba.pod.tpe1.client.counter;
 import ar.edu.itba.pod.tpe1.client.Arguments;
 import ar.edu.itba.pod.tpe1.client.Client;
 import ar.edu.itba.pod.tpe1.client.Util;
-import ar.edu.itba.pod.tpe1.client.checkin.CheckInActions;
 import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-import static ar.edu.itba.pod.tpe1.client.checkin.CheckInActions.checkInActionsFromString;
 import static ar.edu.itba.pod.tpe1.client.counter.CounterReservationActions.counterReservationActionsFromString;
 
 public class CounterReservationClient extends Client {

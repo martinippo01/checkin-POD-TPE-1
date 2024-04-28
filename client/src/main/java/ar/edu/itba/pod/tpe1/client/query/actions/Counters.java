@@ -1,6 +1,5 @@
 package ar.edu.itba.pod.tpe1.client.query.actions;
 
-import airport.CounterServiceGrpc;
 import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
 import ar.edu.itba.pod.tpe1.client.query.CounterQueryAction;
 import io.grpc.ManagedChannel;

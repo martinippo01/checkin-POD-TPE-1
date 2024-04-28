@@ -1,9 +1,9 @@
 package ar.edu.itba.pod.tpe1.data;
 
-import airport.CounterServiceOuterClass;
 import ar.edu.itba.pod.tpe1.*;
 import ar.edu.itba.pod.tpe1.data.utils.*;
-import counter.CounterReservationServiceOuterClass;
+import ar.edu.itba.pod.tpe1.protos.CounterService.CounterInfo;
+import ar.edu.itba.pod.tpe1.protos.CounterService.CheckInRecord;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -129,17 +129,17 @@ public class Airport {
         }
     }
 
-    public List<CounterServiceOuterClass.CounterInfo> queryCountersBySector(String sectorName) throws RuntimeException {
+    public List<CounterInfo> queryCountersBySector(String sectorName) throws RuntimeException {
         //This
         if (sectors.isEmpty()) {
             throw new IllegalStateException("There are no sectors registered at the airport.");
         }
-        List<CounterServiceOuterClass.CounterInfo> out = new ArrayList<>();
+        List<CounterInfo> out = new ArrayList<>();
         synchronized (lock) {
             // In case there's no specified sector, print every sector and then return
             if (!sectorName.isEmpty()) {
                 return queryCounters(sectorName, false).stream().map(
-                        requestedRangeCounter -> CounterServiceOuterClass.CounterInfo.newBuilder()
+                        requestedRangeCounter -> CounterInfo.newBuilder()
                                 .setSector(requestedRangeCounter.getCounterFrom() + "-" + requestedRangeCounter.getCounterTo())
                                 .setAirline(requestedRangeCounter.getAirline().getName())
                                 .addAllFlights(requestedRangeCounter.getFlights().stream().map(Flight::getFlightCode).toList())
@@ -154,7 +154,7 @@ public class Airport {
                 List<RequestedRangeCounter> requestedRangeCounters = queryCounters(sectorName2, true);
 
                 for (RequestedRangeCounter requestedRangeCounter : requestedRangeCounters) {
-                    CounterServiceOuterClass.CounterInfo counterInfo = CounterServiceOuterClass.CounterInfo.newBuilder()
+                    CounterInfo counterInfo = CounterInfo.newBuilder()
                             .setSector(requestedRangeCounter.getCounterFrom() + "-" + requestedRangeCounter.getCounterTo())
                             .setAirline(requestedRangeCounter.getAirline().getName())
                             .addAllFlights(requestedRangeCounter.getFlights().stream().map(Flight::getFlightCode).toList())
@@ -200,9 +200,9 @@ public class Airport {
         return containsAssignedRangeCounter ? out : new ArrayList<>();
     }
 
-    public List<CounterServiceOuterClass.CheckInRecord> queryCheckIns(String sector, String airline) {
+    public List<CheckInRecord> queryCheckIns(String sector, String airline) {
         // TODO: Test
-        List<CounterServiceOuterClass.CheckInRecord> out = new ArrayList<>();
+        List<CheckInRecord> out = new ArrayList<>();
         // Check that there's at least one checkin with status DONE
         synchronized (lock) {
             Iterator<Booking> bookingIterator = checkIns.keySet().iterator();
@@ -220,7 +220,7 @@ public class Airport {
             boolean filterByAirline = !airline.isEmpty();
 
             for (Booking booking : checkIns.keySet()) {
-                CounterServiceOuterClass.CheckInRecord.Builder checkInRecordBuilder = CounterServiceOuterClass.CheckInRecord.newBuilder();
+                CheckInRecord.Builder checkInRecordBuilder = CheckInRecord.newBuilder();
                 CheckIn checkIn = checkIns.get(booking);
                 // To add to the list should be a DONE checkin, also match the airline (if specified) nad match the sector (if specified)
                 // Remember property A => B <=> !A or B

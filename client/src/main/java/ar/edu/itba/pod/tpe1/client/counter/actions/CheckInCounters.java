@@ -2,8 +2,9 @@ package ar.edu.itba.pod.tpe1.client.counter.actions;
 
 import ar.edu.itba.pod.tpe1.client.counter.CounterReservationAction;
 import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
-import counter.CounterReservationServiceGrpc;
-import counter.CounterReservationServiceOuterClass;
+import ar.edu.itba.pod.tpe1.protos.CounterReservation.BasicResponse;
+import ar.edu.itba.pod.tpe1.protos.CounterReservation.CheckInCounterRequest;
+import ar.edu.itba.pod.tpe1.protos.CounterReservation.CounterReservationServiceGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.StatusRuntimeException;
 
@@ -26,13 +27,13 @@ public final class CheckInCounters extends CounterReservationAction {
         int fromVal = Integer.parseInt(getArguments().get(COUNTER_FROM.getArgument()));
         String airlineName = getArguments().get(AIRLINE.getArgument());
 
-        CounterReservationServiceOuterClass.CheckInCounterRequest request = CounterReservationServiceOuterClass.CheckInCounterRequest.newBuilder()
+        CheckInCounterRequest request = CheckInCounterRequest.newBuilder()
                 .setSectorName(sectorName)
                 .setFromVal(fromVal)
                 .setAirlineName(airlineName)
                 .build();
         try {
-            CounterReservationServiceOuterClass.BasicResponse response = blockingStub.checkInCounters(request);
+            BasicResponse response = blockingStub.checkInCounters(request);
             System.out.println(response.getMessage());
         } catch (StatusRuntimeException e) {
             System.err.println("RPC failed: " + e.getStatus());

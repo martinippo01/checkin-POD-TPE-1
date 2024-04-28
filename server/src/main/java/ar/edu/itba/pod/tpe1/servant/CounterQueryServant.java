@@ -1,8 +1,7 @@
 package ar.edu.itba.pod.tpe1.servant;
 
-import airport.CounterServiceGrpc;
-import airport.CounterServiceOuterClass;
 import ar.edu.itba.pod.tpe1.data.Airport;
+import ar.edu.itba.pod.tpe1.protos.CounterService.*;
 import io.grpc.Status;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
@@ -16,12 +15,12 @@ public class CounterQueryServant extends CounterServiceGrpc.CounterServiceImplBa
     private static final Logger logger = LoggerFactory.getLogger(CounterQueryServant.class);
 
     @Override
-    public void queryCounters(CounterServiceOuterClass.QueryCountersRequest req, StreamObserver<CounterServiceOuterClass.QueryCountersResponse> responseObserver) {
+    public void queryCounters(QueryCountersRequest req, StreamObserver<QueryCountersResponse> responseObserver) {
         try {
             logger.info("Querying counters by sector: {}", req.getSector());
-            List<CounterServiceOuterClass.CounterInfo> results = airport.queryCountersBySector(req.getSector());
+            List<CounterInfo> results = airport.queryCountersBySector(req.getSector());
 
-            CounterServiceOuterClass.QueryCountersResponse.Builder responseBuilder = CounterServiceOuterClass.QueryCountersResponse
+            QueryCountersResponse.Builder responseBuilder = QueryCountersResponse
                     .newBuilder()
                     .addAllCounters(results);
 
@@ -40,21 +39,21 @@ public class CounterQueryServant extends CounterServiceGrpc.CounterServiceImplBa
     }
 
     @Override
-    public void queryCheckIns(CounterServiceOuterClass.QueryCheckInsRequest req, StreamObserver<CounterServiceOuterClass.QueryCheckInsResponse> responseObserver) {
+    public void queryCheckIns(QueryCheckInsRequest req, StreamObserver<QueryCheckInsResponse> responseObserver) {
         try {
             logger.info("Querying check-ins by sector: {} and airline: {}", req.getSector(), req.getAirline());
-            List<CounterServiceOuterClass.CheckInRecord> results = airport.queryCheckIns(req.getSector(), req.getAirline());
-            CounterServiceOuterClass.QueryCheckInsResponse.Builder responseBuilder
-                    = CounterServiceOuterClass.QueryCheckInsResponse
+            List<CheckInRecord> results = airport.queryCheckIns(req.getSector(), req.getAirline());
+            QueryCheckInsResponse.Builder responseBuilder
+                    = QueryCheckInsResponse
                     .newBuilder()
                     .addAllCheckIns(results);
 
             responseObserver.onNext(responseBuilder.build());
             responseObserver.onCompleted();
-        } catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             logger.error("IllegalArgumentException querying check-ins by sector: {} and airline: {}", req.getSector(), req.getAirline());
             responseObserver.onError(io.grpc.Status.NOT_FOUND.withDescription(e.getMessage()).asRuntimeException());
-        }   catch (Exception e) {
+        } catch (Exception e) {
             logger.error("Unexpected Exception querying check-ins by sector: {} and airline: {}", req.getSector(), req.getAirline());
             responseObserver.onError(io.grpc.Status.INTERNAL.withDescription(e.getMessage()).asRuntimeException());
         }

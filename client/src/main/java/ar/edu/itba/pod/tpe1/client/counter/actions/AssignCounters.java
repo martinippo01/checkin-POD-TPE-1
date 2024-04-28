@@ -1,10 +1,10 @@
 package ar.edu.itba.pod.tpe1.client.counter.actions;
 
-import airport.CounterServiceGrpc;
 import ar.edu.itba.pod.tpe1.client.counter.CounterReservationAction;
 import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
-import counter.CounterReservationServiceGrpc;
-import counter.CounterReservationServiceOuterClass;
+import ar.edu.itba.pod.tpe1.protos.CounterReservation.AssignCounterRequest;
+import ar.edu.itba.pod.tpe1.protos.CounterReservation.AssignCounterResponse;
+import ar.edu.itba.pod.tpe1.protos.CounterReservation.CounterReservationServiceGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -34,14 +34,14 @@ public final class AssignCounters extends CounterReservationAction {
         String airlineName = getArguments().get(AIRLINE.getArgument());
         int counterCount = Integer.parseInt(getArguments().get(COUNTER_COUNT.getArgument()));
 
-        CounterReservationServiceOuterClass.AssignCounterRequest request = CounterReservationServiceOuterClass.AssignCounterRequest.newBuilder()
+        AssignCounterRequest request = AssignCounterRequest.newBuilder()
                 .setSectorName(sectorName)
                 .addAllFlights(flights)
                 .setAirlineName(airlineName)
                 .setCounterCount(counterCount)
                 .build();
         try {
-            CounterReservationServiceOuterClass.AssignCounterResponse response = blockingStub.assignCounters(request);
+            AssignCounterResponse response = blockingStub.assignCounters(request);
             if (!(response.getIsPending())) {
                 String airlines = String.join("|", flights);
                 System.out.println(counterCount + " counters (" + response.getCounterFrom() + "-" + String.valueOf(response.getCounterFrom() + counterCount - 1) + ") in Sector C are now checking in passengers from " +

@@ -2,8 +2,9 @@ package ar.edu.itba.pod.tpe1.client.counter.actions;
 
 import ar.edu.itba.pod.tpe1.client.counter.CounterReservationAction;
 import ar.edu.itba.pod.tpe1.client.exceptions.ServerUnavailableException;
-import counter.CounterReservationServiceGrpc;
-import counter.CounterReservationServiceOuterClass;
+import ar.edu.itba.pod.tpe1.protos.CounterReservation.CounterReservationServiceGrpc;
+import ar.edu.itba.pod.tpe1.protos.CounterReservation.SectorRequest;
+import ar.edu.itba.pod.tpe1.protos.CounterReservation.SectorResponse;
 import io.grpc.ManagedChannel;
 import io.grpc.StatusRuntimeException;
 
@@ -20,9 +21,9 @@ public final class ListSectors extends CounterReservationAction {
     public void run(ManagedChannel channel) throws ServerUnavailableException {
         blockingStub = CounterReservationServiceGrpc.newBlockingStub(channel);
 
-        CounterReservationServiceOuterClass.SectorRequest request = CounterReservationServiceOuterClass.SectorRequest.newBuilder().build();
+        SectorRequest request = SectorRequest.newBuilder().build();
         try {
-            CounterReservationServiceOuterClass.SectorResponse response = blockingStub.listSectors(request);
+            SectorResponse response = blockingStub.listSectors(request);
             if (response.getSectorsList().isEmpty()) {
                 System.out.println("No sectors available at the airport.");
                 return;
