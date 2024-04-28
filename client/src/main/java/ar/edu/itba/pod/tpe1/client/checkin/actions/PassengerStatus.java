@@ -66,19 +66,21 @@ public final class PassengerStatus extends CheckInAction {
                     break;
                 default:
                     if (response.getStatus().equals(PASSENGER_STATUS_INVALID_BOOKING_CODE)) {
-                        System.out.println("Error: Invalid booking code.");
+                        System.err.println("Error: Invalid booking code.");
                     } else if (response.getStatus().equals(PASSENGER_STATUS_COUNTERS_NOT_ASSIGNED)) {
-                        System.out.println("Error: No counters assigned that handle passengers from the specified booking.");
+                        System.err.println("Error: No counters assigned that handle passengers from the specified booking.");
                     } else {
-                        System.out.println("Error: An unknown error occurred.");
+                        System.err.println("Error: An unknown error occurred.");
                     }
                     break;
             }
         } catch (StatusRuntimeException e) {
-            if (e.getStatus().equals(Status.INVALID_ARGUMENT)) {
+            if (e.getStatus().getCode() == Status.Code.INVALID_ARGUMENT) {
                 System.err.println(e.getMessage());
             } else if (e.getStatus().getCode() == Status.Code.UNAVAILABLE) {
                 throw new ServerUnavailableException();
+            } else {
+                System.err.println(e.getMessage());
             }
         }
     }

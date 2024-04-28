@@ -93,7 +93,7 @@ public abstract class Client implements Closeable {
             int timeout = 10;
             logger.debug("About to shutdown connection. This may take up to {} seconds", timeout);
             channel.shutdown().awaitTermination(timeout, TimeUnit.SECONDS);
-            logger.info("Channel shutdown successfully.");
+            logger.debug("Channel shutdown successfully.");
         } catch (InterruptedException e) {
             logger.error("Channel shutdown interrupted.");
             throw new IOException(e);
